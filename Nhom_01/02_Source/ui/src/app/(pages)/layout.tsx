@@ -20,6 +20,20 @@ export default function MainLayout({ children }: Readonly<{ children: React.Reac
     const { user, error, isLoading } = useUser();
     if (isLoading) return <Loading></Loading>;
     if (error) return <ErrorPage></ErrorPage>;
+
+    if (!user) {
+        return <div>Unauthorized</div>;
+    }
+    else {
+        console.log(user);
+        fetch("/api/token/api-server").then(async (res) => {
+            if (res.ok) {
+                const { accessToken } = await res.json();
+                console.log(accessToken);
+            }
+        });
+    }
+
     return (
         <>
             <SidebarProvider style={sidebarStyle}>
