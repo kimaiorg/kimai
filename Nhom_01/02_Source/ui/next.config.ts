@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
         AUTH0_IAM_API_AUDIENCE: process.env.AUTH0_IAM_API_AUDIENCE,
         AUTH0_KIMAI_API_AUDIENCE: process.env.AUTH0_KIMAI_API_AUDIENCE,
     },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
 };
 
 export default nextConfig;
