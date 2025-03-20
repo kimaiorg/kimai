@@ -1,16 +1,14 @@
-import { getSession, withApiAuthRequired } from '@auth0/nextjs-auth0';
+import { getSession } from '@auth0/nextjs-auth0';
 import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const GET = withApiAuthRequired(async (req: NextRequest) => {
+export const GET = async (req: NextRequest) => {
     // check if the user has the required roles
     const session = await getSession();
 
     if (!session || !session.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    console.log(session.user);
 
     try {
         const response = await axios.post<{
@@ -37,4 +35,4 @@ export const GET = withApiAuthRequired(async (req: NextRequest) => {
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: error.status || 500 });
     }
-});
+};

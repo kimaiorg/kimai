@@ -5,3 +5,9 @@ export const GET = handleAuth({
       authorizationParams: { audience: process.env.AUTH0_KIMAI_API_AUDIENCE },
     }),
   });
+
+export const POST = handleAuth({
+    login: handleLogin({
+      authorizationParams: { audience: process.env.AUTH0_KIMAI_API_AUDIENCE },
+    }),
+  });
