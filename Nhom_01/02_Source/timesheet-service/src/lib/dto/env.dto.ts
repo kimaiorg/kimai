@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from '@/dto';
+import { createZodDto } from '@/lib/dto';
 
 export const envDto = createZodDto(
   z.object({

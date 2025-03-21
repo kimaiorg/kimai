@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Module } from '@nestjs/common';
 import { ConfigModule as BaseConfigModule } from '@nestjs/config';
-import { envDto } from '@/dto/env.dto';
+import { envDto } from '@/lib/dto/env.dto';
 
 @Module({
   imports: [
