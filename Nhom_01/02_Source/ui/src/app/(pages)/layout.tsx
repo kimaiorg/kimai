@@ -5,11 +5,8 @@ import Loading from "@/app/loading";
 import Header from "@/components/shared/Header";
 import { MySidebar } from "@/components/shared/MySidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { useCachedUserInfo } from "@/lib/react-query/userCache";
-import { useAppDispatch } from "@/lib/redux-toolkit/hooks";
-import { updateUser } from "@/lib/redux-toolkit/slices/userSlice";
-import { CSSProperties, use, useEffect } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { CSSProperties } from "react";
 
 const sidebarStyle = {
     "--sidebar-width": "17rem",
@@ -23,8 +20,7 @@ export default function MainLayout({ children }: Readonly<{ children: React.Reac
 
     if (!user) {
         return <div>Unauthorized</div>;
-    }
-    else {
+    } else {
         console.log(user);
         fetch("/api/token/api-server").then(async (res) => {
             if (res.ok) {
@@ -37,7 +33,11 @@ export default function MainLayout({ children }: Readonly<{ children: React.Reac
     return (
         <>
             <SidebarProvider style={sidebarStyle}>
-                <MySidebar side="left" variant="floating" collapsible="offcanvas" />
+                <MySidebar
+                    side="left"
+                    variant="floating"
+                    collapsible="offcanvas"
+                />
                 <div className="my-section bg-gradient-to-r from-sky-50 to-fuchsia-50 dark:from-gray-950 dark:to-gray-950">
                     <Header></Header>
                     {children}

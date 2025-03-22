@@ -1,13 +1,14 @@
-import { getSession } from '@auth0/nextjs-auth0';
-import axios from 'axios';
-import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from "@auth0/nextjs-auth0";
+import axios from "axios";
+import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
     // check if the user has the required roles
     const session = await getSession();
+    console.log(req ? "" : "req is null");
 
     if (!session || !session.user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {

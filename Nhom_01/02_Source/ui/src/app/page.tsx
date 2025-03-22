@@ -2,10 +2,9 @@
 import { getUsersRoles } from "@/api/auth.api";
 import ErrorPage from "@/app/error";
 import { useAppDispatch } from "@/lib/redux-toolkit/hooks";
+import { updateRole } from "@/lib/redux-toolkit/slices/userSlice";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useRouter } from "next/navigation";
-import { updateRole } from "@/lib/redux-toolkit/slices/userSlice";
-import { useEffect } from "react";
 
 export default function Home() {
     const router = useRouter();
@@ -17,7 +16,12 @@ export default function Home() {
     }
 
     if (error) {
-        return <ErrorPage statusCode={401} message="Unauthorized" />;
+        return (
+            <ErrorPage
+                statusCode={401}
+                message="Unauthorized"
+            />
+        );
     }
 
     if (user) {

@@ -13,12 +13,11 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { Role, RoleType } from "@/type_schema/role";
+// import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { UserType } from "@/type_schema/user.schema";
-import { Role, RoleType } from "@/type_schema/role";
-import { UserProfile, useUser } from "@auth0/nextjs-auth0/client";
 
 const allowRole = (userRoles: RoleType[], roles: Role[] = []) => {
     if (userRoles.length == 0) return false;
@@ -49,7 +48,7 @@ export function NavMain({
     }[];
 }) {
     // const user = useAppSelector((state) => state.userState.user) as UserType;
-    const { user, error, isLoading } = useUser();
+    // const { user, error, isLoading } = useUser();
     const userRoles = useAppSelector((state) => state.userState.roles) as RoleType[];
     const currentPath = usePathname();
     const activeClassname = "!bg-violet-600 !text-white !hover:text-white";
@@ -108,7 +107,10 @@ export function NavMain({
                             </Collapsible>
                         ) : (
                             <SidebarMenuItem key={item.title}>
-                                <SidebarMenuButton asChild className={item.url == currentPath ? activeClassname : ""}>
+                                <SidebarMenuButton
+                                    asChild
+                                    className={item.url == currentPath ? activeClassname : ""}
+                                >
                                     <Link href={item.url}>
                                         {item.icon && <item.icon />}
                                         <span>{item.title}</span>

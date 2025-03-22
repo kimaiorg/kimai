@@ -5,7 +5,7 @@ type AccessTokenResponse = {
     access_token: string;
     expires_in: number;
     token_type: string;
-}
+};
 
 export type Role = {
     id: string;
@@ -33,7 +33,7 @@ export async function createAccessToken(audience: string): Promise<string> {
 
         return response.data.access_token;
     } catch (error) {
-        throw new Error("Failed to get Auth0 management token");
+        throw new Error("Failed to get Auth0 management token", { cause: error });
     }
 }
 
@@ -41,16 +41,13 @@ export async function createAccessToken(audience: string): Promise<string> {
 export async function getUsersRoles(userId: string): Promise<Role[]> {
     const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
 
-    const response = await fetch(
-        `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${userId}/roles`,
-        {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
+    const response = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${userId}/roles`, {
+        method: "GET",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
     if (!response.ok) {
         throw new Error("Failed to fetch user roles");
@@ -61,7 +58,10 @@ export async function getUsersRoles(userId: string): Promise<Role[]> {
 }
 
 // Check if the current user is an admin
-export async function isUserInRole(userId: string, role: 'superadmin' | 'admin' | 'teamlead' | 'employee'): Promise<boolean> {
+export async function isUserInRole(
+    userId: string,
+    role: "superadmin" | "admin" | "teamlead" | "employee"
+): Promise<boolean> {
     try {
         const roles = await getUsersRoles(userId);
         return roles.some((r) => r.name.toLowerCase() === role);

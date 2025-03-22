@@ -1,11 +1,7 @@
 "use client";
 
-import Loading from "@/app/loading";
 import ErrorPage from "@/app/error";
-import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { updateUser } from "@/lib/redux-toolkit/slices/userSlice";
-import { useCachedUserInfo } from "@/lib/react-query/userCache";
-import { UserType } from "@/type_schema/user.schema";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Role, RoleType } from "@/type_schema/role";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
@@ -33,17 +29,27 @@ export const AuthenticatedRoute = (Component: any, roles: Role[]) => {
         // if (!isLoading && currentUser) {
         // }
         // const user = useAppSelector((state) => state.userState.user) as UserType;
-        const { user, error, isLoading } = useUser();
+        const { user } = useUser();
 
         // && containsRole(user.role, roles)
+        const userRoles = useAppSelector((state) => state.userState.roles) as RoleType[];
         if (user) {
-            const userRoles = useAppSelector((state) => state.userState.roles) as RoleType[];
             if (containsRole(userRoles, roles)) {
                 return <Component {...props} />;
             }
-            return <ErrorPage statusCode={404} message="Page not found" />;
+            return (
+                <ErrorPage
+                    statusCode={404}
+                    message="Page not found"
+                />
+            );
         } else {
-            return <ErrorPage statusCode={404} message="Page not found" />;
+            return (
+                <ErrorPage
+                    statusCode={404}
+                    message="Page not found"
+                />
+            );
         }
     };
 };

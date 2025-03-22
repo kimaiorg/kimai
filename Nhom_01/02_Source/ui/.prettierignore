@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/test
+**/.next
+**/src/components/ui
+**/.git
+**/.svn
+**/.hg
+**/.husky
+**/coverage
