@@ -1,18 +1,16 @@
 model Project {
-    id             Int     @id @default(autoincrement())
+    id             Int       @id @default(autoincrement())
     name           String
     color          String?
-    description    String?
-    address        String
-    company_name   String
-    account_number String
-    vat_id         String
-    country        String
-    currency       String?
-    timezone       String?
-    email          String
-    phone          String
-    homepage       String?
+    project_number Int
+    order_number   Int?
+    order_date     DateTime?
+    start_date     DateTime?
+    end_date       DateTime?
+    budget         Float?
+
+    teams     Team[]     @relation("ProjectTeam")
+    customers Customer[] @relation("CustomerProject")
 
     created_at DateTime  @default(now())
     updated_at DateTime  @updatedAt
