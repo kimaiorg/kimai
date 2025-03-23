@@ -49,9 +49,9 @@ export class CreateProjectSwagger {
   })
   teams?: number[];
 
-  @ApiPropertyOptional({
-    example: [101, 102],
-    description: 'IDs of the customers related to the project',
+  @ApiProperty({
+    example: 101,
+    description: 'ID of the customer',
   })
-  customers?: number[];
+  customer: number;
 }

@@ -26,7 +26,7 @@ export const createProjectSchema = z.object({
   budget: z.number().optional(),
 
   teams: z.array(z.number()).optional(),
-  customers: z.array(z.number()).optional(),
+  customer: z.number(),
 });
 
 export type CreateProjectDto = z.infer<typeof createProjectSchema>;

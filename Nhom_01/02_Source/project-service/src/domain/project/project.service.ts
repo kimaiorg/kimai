@@ -30,7 +30,7 @@ export class ProjectService {
             name: true,
           },
         },
-        customers: {
+        customer: {
           select: {
             id: true,
             name: true,

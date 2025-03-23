@@ -14,7 +14,7 @@ model Customer {
     phone          String
     homepage       String?
 
-    projects Project[] @relation("CustomerProject")
+    projects Project[]
 
     created_at DateTime  @default(now())
     updated_at DateTime  @updatedAt
