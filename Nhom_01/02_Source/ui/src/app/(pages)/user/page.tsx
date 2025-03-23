@@ -14,9 +14,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { Role, RoleType } from "@/type_schema/role";
+import { Role } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
 import { Plus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -29,14 +28,18 @@ function User() {
     const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
     const size = queryParams.get("size") ? Number(queryParams.get("size")) : 10;
     useEffect(() => {
+        const test = (a: any) => {
+            console.log(a);
+        };
+        test("test");
         const getAllUsers = async () => {
             const result = await callGettingUserListRequest(page, size);
-            if (result && !result.hasOwnProperty("errorCode")) {
+            if (result && !Object.prototype.hasOwnProperty.call(result, "errorCode")) {
                 setUsers(result as UserType[]);
             }
         };
         getAllUsers();
-    }, []);
+    }, [page, size]);
     return (
         <>
             <div className="m-3 space-y-3">
@@ -66,7 +69,10 @@ function User() {
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell className="font-medium">
                                     <div className="w-7 h-7 rounded-full overflow-hidden">
-                                        <DefaultAvatar name={userItem.username} size={30} />
+                                        <DefaultAvatar
+                                            name={userItem.username}
+                                            size={30}
+                                        />
                                     </div>
                                 </TableCell>
                                 <TableCell>{user.name}</TableCell>
@@ -89,33 +95,33 @@ function User() {
 }
 export default AuthenticatedRoute(User, [Role.SUPER_ADMIN]);
 
-function ViewGameModal({ children, addNewUser }: { children: React.ReactNode; addNewUser: (user: UserType) => void }) {
-    return (
-        <Dialog>
-            <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="border border-gray-300 bg-gray-50 dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw]">
-                <DialogHeader>
-                    <DialogTitle className="text-center text-2xl text-gradient">GAME INFO</DialogTitle>
-                </DialogHeader>
-                <div className="mt-0">
-                    <div className="grid grid-cols-1 gap-4">
-                        <div className="px-4 sm:px-8">
-                            <div className="flex flex-col w-full space-y-2">
-                                <div className="text-md sm:text-xl lg:text-xl font-thin">
-                                    <b className="font-semibold w-[9rem] inline-block">Name:</b>
-                                </div>
-                                <div className="text-md sm:text-xl lg:text-xl font-thin">
-                                    <b className="font-semibold w-[9rem] inline-block">Guide:</b>
-                                </div>
+// function ViewGameModal({ children, addNewUser }: { children: React.ReactNode; addNewUser: (user: UserType) => void }) {
+//     return (
+//         <Dialog>
+//             <DialogTrigger asChild>{children}</DialogTrigger>
+//             <DialogContent className="border border-gray-300 bg-gray-50 dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw]">
+//                 <DialogHeader>
+//                     <DialogTitle className="text-center text-2xl text-gradient">GAME INFO</DialogTitle>
+//                 </DialogHeader>
+//                 <div className="mt-0">
+//                     <div className="grid grid-cols-1 gap-4">
+//                         <div className="px-4 sm:px-8">
+//                             <div className="flex flex-col w-full space-y-2">
+//                                 <div className="text-md sm:text-xl lg:text-xl font-thin">
+//                                     <b className="font-semibold w-[9rem] inline-block">Name:</b>
+//                                 </div>
+//                                 <div className="text-md sm:text-xl lg:text-xl font-thin">
+//                                     <b className="font-semibold w-[9rem] inline-block">Guide:</b>
+//                                 </div>
 
-                                <div className="text-md sm:text-xl lg:text-xl font-thin">
-                                    <b className="font-semibold w-[9rem] inline-block">Game type:</b>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-}
+//                                 <div className="text-md sm:text-xl lg:text-xl font-thin">
+//                                     <b className="font-semibold w-[9rem] inline-block">Game type:</b>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </DialogContent>
+//         </Dialog>
+//     );
+// }

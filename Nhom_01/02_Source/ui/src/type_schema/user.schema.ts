@@ -58,8 +58,6 @@ export type UserInfoRequestDTO = {
     accessToken: string;
 };
 
-export type UserInfoResponseDTO = {};
-
 export type UserListType = {
     page: number;
     perPage: number;

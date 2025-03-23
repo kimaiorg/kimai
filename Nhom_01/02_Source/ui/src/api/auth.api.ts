@@ -1,7 +1,5 @@
-import { ErrorResponseType, PaginationV2Type, SuccessResponseType } from "@/type_schema/common";
-import { LoginRequestDTO, LoginResponseDTO, RegisterRequestDTO } from "@/type_schema/auth.schema";
-import axios from "axios";
 import { RoleType } from "@/type_schema/role";
+import axios from "axios";
 
 // Auth0 Management API: https://auth0.com/docs/api/management/v2
 
@@ -32,7 +30,7 @@ export async function createAccessToken(audience: string): Promise<string> {
 
         return response.data.access_token;
     } catch (error) {
-        throw new Error("Failed to get Auth0 management token");
+        throw new Error("Failed to get Auth0 management token", { cause: error });
     }
 }
 

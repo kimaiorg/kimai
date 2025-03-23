@@ -1,10 +1,10 @@
 "use client";
 import { Toaster } from "@/components/ui/sonner";
-import "./globals.css";
-import { CSSProperties, Suspense } from "react";
+import ReactQueryProvider from "@/lib/react-query/ReactQueryProvider";
 import ReduxStoreProvider from "@/lib/redux-toolkit/ReduxStoreProvider";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
-import ReactQueryProvider from "@/lib/react-query/ReactQueryProvider";
+import { Suspense } from "react";
+import "./globals.css";
 
 export default function RootLayout({
     children,
@@ -12,7 +12,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html
+            lang="en"
+            suppressHydrationWarning
+        >
             <body className={`antialiased`}>
                 <UserProvider>
                     <Suspense>

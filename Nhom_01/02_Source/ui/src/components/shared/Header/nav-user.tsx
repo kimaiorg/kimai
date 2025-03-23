@@ -1,6 +1,7 @@
 "use client";
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, UserRoundSearch } from "lucide-react";
+import DefaultAvatar from "@/components/shared/default-avatar";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,26 +11,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { toast } from "sonner";
-import { UserType } from "@/type_schema/user.schema";
-import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { defaultAvatar } from "@/lib/utils";
-import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import Loading from "@/app/loading";
-import ErrorPage from "@/app/error";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { callGettingUserInfoRequest } from "@/api/user.api";
-import DefaultAvatar from "@/components/shared/default-avatar";
+import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { Bell, LogOut, UserRoundSearch } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function NavUser() {
     // const [isLoadingUser, setIsLoadingUser] = useState(true);
     // const [user, setUser] = useState<UserType | null>(null);
     // const { isMobile } = useSidebar();
-    const { user, error, isLoading } = useUser();
+    const { user, isLoading } = useUser();
     const router = useRouter();
     // const userAuth = useAppSelector((state) => state.userState).user as UserType;
     // useLayoutEffect(() => {
@@ -77,7 +69,10 @@ export function NavUser() {
                         <div className="flex items-center gap-2 flex-row-reverse cursor-pointer">
                             <div className="h-8 w-8 rounded-full">
                                 {/* <img src={defaultAvatar} alt="Default Avatar" className="w-full h-full" /> */}
-                                <DefaultAvatar name={user!.name!} size={40} />
+                                <DefaultAvatar
+                                    name={user!.name!}
+                                    size={40}
+                                />
                             </div>
                             <div className="grid flex-1 text-end text-sm leading-tight">
                                 <span className="truncate font-semibold">{user!.name}</span>
@@ -85,11 +80,17 @@ export function NavUser() {
                             </div>
                         </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="min-w-56 rounded-lg" align="end">
+                    <DropdownMenuContent
+                        className="min-w-56 rounded-lg"
+                        align="end"
+                    >
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <div className="h-7 w-7 rounded-full">
-                                    <DefaultAvatar name={user!.name!} size={30} />
+                                    <DefaultAvatar
+                                        name={user!.name!}
+                                        size={30}
+                                    />
                                 </div>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-semibold">{user!.name || "Admin"}</span>
@@ -99,20 +100,29 @@ export function NavUser() {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/profile")}>
+                            <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => router.push("/profile")}
+                            >
                                 <UserRoundSearch />
                                 Profile
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/notification")}>
+                            <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => router.push("/notification")}
+                            >
                                 <Bell />
                                 Notifications
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                        <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={handleLogout}
+                        >
                             <LogOut />
                             Log out
                         </DropdownMenuItem>

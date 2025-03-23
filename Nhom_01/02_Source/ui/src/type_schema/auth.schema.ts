@@ -51,8 +51,6 @@ export const RegisterRequestSchema = z
 
 export type RegisterRequestDTO = z.infer<typeof RegisterRequestSchema>;
 
-export type RegisterResponseDTO = {};
-
 export const LoginRequestSchema = z
     .object({
         // email: z.string().email(),

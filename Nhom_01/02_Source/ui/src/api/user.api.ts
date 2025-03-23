@@ -1,8 +1,7 @@
-import { ErrorResponseType, PaginationV2Type, SuccessResponseType } from "@/type_schema/common";
-import { LoginRequestDTO, LoginResponseDTO, RegisterRequestDTO } from "@/type_schema/auth.schema";
-import { UserListType, UserType } from "@/type_schema/user.schema";
 import { myAxios } from "@/api/axios";
+import { ErrorResponseType, SuccessResponseType } from "@/type_schema/common";
 import { RoleType } from "@/type_schema/role";
+import { UserType } from "@/type_schema/user.schema";
 
 export const callGettingUserInfoRequest = async (): Promise<UserType | ErrorResponseType> => {
     try {
