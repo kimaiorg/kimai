@@ -14,6 +14,6 @@ export const createCustomerSchema = z.object({
   email: z.string().email(),
   phone: z.string().nonempty(),
   homepage: z.string().optional(),
-}).required();
+});
 
 export type CreateCustomerDto = z.infer<typeof createCustomerSchema>;

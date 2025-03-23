@@ -15,11 +15,14 @@ import {
   createTeamSchema,
 } from '@/api/team/dto/create-team.dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
+import { ApiBody } from '@nestjs/swagger';
+import { CreateTeamSwagger } from '@/api/team/swagger';
 
 @Controller('teams')
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
   @Post('')
+  @ApiBody({ type: CreateTeamSwagger })
   @Permissions(['create:teams'])
   @UsePipes(new ZodValidationPipe(createTeamSchema))
   async createTeam(@Body() dto: CreateTeamDto): Promise<Team | null> {

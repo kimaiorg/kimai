@@ -15,11 +15,14 @@ import {
   createCustomerSchema,
 } from '@/api/customer/dto/create-customer.dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
+import { ApiBody } from '@nestjs/swagger';
+import { CreateCustomerSwagger } from '@/api/customer/swagger';
 
 @Controller('customers')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
   @Post('')
+  @ApiBody({ type: CreateCustomerSwagger })
   @Permissions(['create:customers'])
   @UsePipes(new ZodValidationPipe(createCustomerSchema))
   async createCustomer(

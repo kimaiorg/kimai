@@ -16,11 +16,14 @@ import {
 } from '@/api/project/dto/create-project.dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ProjectEntity } from '@/libs/entities';
+import { ApiBody } from '@nestjs/swagger';
+import { CreateProjectSwagger } from '@/api/project/swagger';
 
 @Controller('projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
   @Post('')
+  @ApiBody({ type: CreateProjectSwagger })
   @Permissions(['create:projects'])
   @UsePipes(new ZodValidationPipe(createProjectSchema))
   async createProject(
