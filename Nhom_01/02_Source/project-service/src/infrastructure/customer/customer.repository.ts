@@ -1,15 +1,15 @@
 import { BaseRepository } from '@/libs/database/repositories/base.repository';
 import { PrismaClient } from '@/libs/database/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { IExampleRepository } from '@/domain/example/example.repository.interface';
-import { Example } from '@prisma/client';
+import { ICustomerRepository } from '@/domain/customer/customer.repository.interface';
+import { Customer } from '@prisma/client';
 
 @Injectable()
-export class ExampleRepository
-  extends BaseRepository<Example>
-  implements IExampleRepository
+export class CustomerRepository
+  extends BaseRepository<Customer>
+  implements ICustomerRepository
 {
   constructor(protected readonly prismaClient: PrismaClient) {
-    super(prismaClient, 'example');
+    super(prismaClient, 'customer');
   }
 }

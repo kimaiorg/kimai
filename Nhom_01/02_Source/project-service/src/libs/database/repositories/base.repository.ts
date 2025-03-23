@@ -16,14 +16,14 @@ export class BaseRepository<T> implements BaseRepositoryInterface<T> {
     private readonly tableName: string,
   ) {}
 
-  async create(entity: T, options?: CreateOptions): Promise<T> {
+  async create(entity: any, options?: CreateOptions): Promise<T> {
     return await this.prismaClient[this.tableName].create({
       data: entity,
       ...options,
     });
   }
 
-  async createMany(entities: T[], options?: CreateOptions): Promise<T[]> {
+  async createMany(entities: any[], options?: CreateOptions): Promise<T[]> {
     return await Promise.all(
       entities.map((entity) => this.create(entity, options)),
     );

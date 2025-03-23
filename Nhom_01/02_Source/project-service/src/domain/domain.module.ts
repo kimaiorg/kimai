@@ -1,8 +1,8 @@
-import { ExampleModule } from '@/domain/example/example.module';
+import { CustomerModule } from '@/domain/customer/customer.module';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [ExampleModule],
-  exports: [ExampleModule],
+  imports: [CustomerModule],
+  exports: [CustomerModule],
 })
 export class DomainModule {}
