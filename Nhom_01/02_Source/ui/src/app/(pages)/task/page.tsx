@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthenticatedRoute } from "@/components/shared/authenticatedRoutes";
+import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Role } from "@/type_schema/role";
 
 function Task() {

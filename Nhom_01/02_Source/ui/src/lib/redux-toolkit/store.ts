@@ -1,5 +1,5 @@
+import userReducer from "@/lib/redux-toolkit/slices/user-slice";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import userReducer from "@/lib/redux-toolkit/slices/userSlice";
 
 /**
  * @description Create a Redux store with persisted state using Redux Toolkit and Redux Persist

@@ -1,12 +1,15 @@
 "use client";
 
+import { getUserRolePermissions } from "@/api/auth.api";
 import ErrorPage from "@/app/error";
 import Loading from "@/app/loading";
 import Header from "@/components/shared/Header";
-import { MySidebar } from "@/components/shared/MySidebar";
+import { MySidebar } from "@/components/shared/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { useAppDispatch } from "@/lib/redux-toolkit/hooks";
+import { updatePrivilege } from "@/lib/redux-toolkit/slices/user-slice";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { CSSProperties } from "react";
+import { CSSProperties, useState } from "react";
 
 const sidebarStyle = {
     "--sidebar-width": "17rem",
@@ -15,19 +18,46 @@ const sidebarStyle = {
 
 export default function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     const { user, error, isLoading } = useUser();
-    if (isLoading) return <Loading></Loading>;
-    if (error) return <ErrorPage></ErrorPage>;
+    const dispatch = useAppDispatch();
+    const [isFetchingRole, setIsFetchingRole] = useState(true);
+    if (isLoading) return <Loading />;
+    if (error)
+        return (
+            <ErrorPage
+                statusCode={401}
+                message="Unauthorized"
+            />
+        );
 
     if (!user) {
         return <div>Unauthorized</div>;
     } else {
-        console.log(user);
-        fetch("/api/token/api-server").then(async (res) => {
-            if (res.ok) {
-                const { accessToken } = await res.json();
-                console.log(accessToken);
+        const fetchUserRolePermissions = async () => {
+            const rolePermissions = await getUserRolePermissions(user!.sub!);
+            if (!rolePermissions) {
+                window.location.href = "/api/auth/login";
             }
-        });
+            dispatch(updatePrivilege(rolePermissions));
+            setIsFetchingRole(false);
+        };
+        try {
+            fetchUserRolePermissions();
+        } catch (error) {
+            console.log(error);
+            setIsFetchingRole(false);
+            window.location.href = "/api/auth/login";
+        }
+        // console.log(user);
+        // fetch("/api/token/api-server").then(async (res) => {
+        //     if (res.ok) {
+        //         const { accessToken } = await res.json();
+        //         console.log(accessToken);
+        //     }
+        // });
+    }
+
+    if (isFetchingRole) {
+        return <Loading />;
     }
 
     return (

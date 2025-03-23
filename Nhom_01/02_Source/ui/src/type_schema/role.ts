@@ -2,20 +2,30 @@ export enum Role {
     SUPER_ADMIN = "superadmin",
     ADMIN = "admin",
     TEAM_LEAD = "teamlead",
-    EMPLOYEE = "employee",
+    EMPLOYEE = "employee"
 }
 
 // export type RoleType = keyof typeof Role;
 
 export type PermissionType = {
-    id: string;
-    name: string;
+    permission_name: string;
     description: string;
-    createdAt: string;
+    resource_server_identifier: string;
+    resource_server_name: string;
 };
 
 export type RoleType = {
     id: string;
     name: string;
     description: string;
+};
+
+export type RolePermissionType = {
+    role: RoleType;
+    permissions: PermissionType[];
+};
+
+export type RoleUserType = {
+    role: RoleType;
+    userCount: number;
 };

@@ -18,27 +18,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function NavUser() {
-    // const [isLoadingUser, setIsLoadingUser] = useState(true);
-    // const [user, setUser] = useState<UserType | null>(null);
-    // const { isMobile } = useSidebar();
     const { user, isLoading } = useUser();
     const router = useRouter();
-    // const userAuth = useAppSelector((state) => state.userState).user as UserType;
-    // useLayoutEffect(() => {
-    //     if (!userAuth) router.push("/login");
-    // }, [userAuth]);
-    // useEffect(() => {
-    //     const getUserInfo = async () => {
-    //         const response = await callGettingUserInfoRequest();
-    //         if (response.hasOwnProperty("errorCode")) {
-    //             setIsLoadingUser(false);
-    //             return;
-    //         }
-    //         setUser(response as UserType);
-    //         setIsLoadingUser(false);
-    //     };
-    //     getUserInfo();
-    // }, []);
     const handleLogout = () => {
         toast("Logout", {
             description: "You are logging out",
@@ -62,7 +43,7 @@ export function NavUser() {
         );
     }
     return (
-        <SidebarMenu className="w-1/4">
+        <SidebarMenu>
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
