@@ -17,9 +17,6 @@ export class ProjectRepository
 
   async createProject(dto: CreateProjectDto): Promise<ProjectEntity> {
     const teams = dto.teams ? dto.teams.map((teamId) => ({ id: teamId })) : [];
-    const customers = dto.customers
-      ? dto.customers.map((customerId) => ({ id: customerId }))
-      : [];
 
     return (await this.prismaClient.project.create({
       data: {
@@ -34,9 +31,7 @@ export class ProjectRepository
         teams: {
           connect: teams,
         },
-        customers: {
-          connect: customers,
-        },
+        customer_id: dto.customer,
       },
       select: {
         id: true,
@@ -54,7 +49,7 @@ export class ProjectRepository
             name: true,
           },
         },
-        customers: {
+        customer: {
           select: {
             id: true,
             name: true,
