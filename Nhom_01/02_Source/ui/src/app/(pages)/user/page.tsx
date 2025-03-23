@@ -28,9 +28,13 @@ function User() {
     const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
     const size = queryParams.get("size") ? Number(queryParams.get("size")) : 10;
     useEffect(() => {
+        const test = (a: any) => {
+            console.log(a);
+        };
+        test("test");
         const getAllUsers = async () => {
             const result = await callGettingUserListRequest(page, size);
-            if (result && !result.hasOwnProperty("errorCode")) {
+            if (result && !Object.prototype.hasOwnProperty.call(result, "errorCode")) {
                 setUsers(result as UserType[]);
             }
         };

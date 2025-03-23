@@ -7,10 +7,10 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "format": "npx prettier . --write \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml,json}\"",
-        "check-format": "npx prettier . --check \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml,json}\"",
+        "format": "npx prettier . --write \"**/*.{ts,tsx,js,jsx,css,yaml,yml,json}\"",
+        "check-format": "npx prettier . --check \"**/*.{ts,tsx,js,jsx,css,yaml,yml,json}\"",
         "prepare": "cd ../../.. && husky Nhom_01/02_Source/ui/.husky",
-        "lint-staged": "lint-staged"
+        "precommit": "npx lint-staged"
     },
     "dependencies": {
         "@auth0/nextjs-auth0": "^3.5.0",
@@ -54,12 +54,5 @@
         "prettier": "3.5.3",
         "tailwindcss": "^4",
         "typescript": "^5"
-    },
-    "lint-staged": {
-        "**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml,json}": [
-            "npm run format",
-            "npm run lint --no-warn-ignored",
-            "git add ."
-        ]
     }
 }

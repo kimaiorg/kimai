@@ -1,2 +1,2 @@
 cd Nhom_01/02_Source/ui
-npm run lint-staged
+npm run precommit

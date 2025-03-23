@@ -21,9 +21,12 @@ const compat = new FlatCompat({
 
 export default defineConfig([
     eslintConfigPrettier,
+    // ...compat.config({
+    //     extends: ["eslint:recommended", "next"],
+    // }),
     {
         extends: compat.extends("next/core-web-vitals", "next/typescript"),
-        files: ["**/*.{js,mjs,cjs,jsx,tsx,ts,mts,cts,xml,yml,yaml,json}"],
+        files: ["**/*.{js,mjs,cjs,jsx,tsx,ts,mts,cts,xml,yml,yaml}"],
         plugins: {
             "@stylistic": stylistic,
         },
@@ -110,7 +113,8 @@ export default defineConfig([
             ],
 
             // Type checking
-            "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-require-imports": "error",
         },
 
         languageOptions: {
