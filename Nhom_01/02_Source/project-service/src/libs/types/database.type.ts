@@ -3,12 +3,12 @@ export interface CreateOptions {
 }
 
 export interface GetOptions<T> {
-  select?: Record<string, boolean>;
+  select?: Record<string, any>;
   where?: Partial<T>;
 }
 
 export interface UpdateOptions<T> {
-  select?: Record<string, boolean>;
+  select?: Record<string, any>;
   where: Partial<T>;
   data: Partial<T>;
 }
