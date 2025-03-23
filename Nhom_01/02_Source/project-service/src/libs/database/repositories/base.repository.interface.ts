@@ -2,7 +2,7 @@ import {
   CreateOptions,
   GetOptions,
   UpdateOptions,
-} from '@/lib/types/database.type';
+} from '@/libs/types/database.type';
 
 export interface BaseRepositoryInterface<T> {
   create(entity: T, options?: CreateOptions): Promise<T>;

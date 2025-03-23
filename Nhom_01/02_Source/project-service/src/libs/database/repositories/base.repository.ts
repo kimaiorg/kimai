@@ -3,12 +3,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { BaseRepositoryInterface } from './base.repository.interface';
-import { PrismaClient } from '@/lib/database/prisma.service';
+import { PrismaClient } from '@/libs/database/prisma.service';
 import {
   CreateOptions,
   GetOptions,
   UpdateOptions,
-} from '@/lib/types/database.type';
+} from '@/libs/types/database.type';
 
 export class BaseRepository<T> implements BaseRepositoryInterface<T> {
   constructor(
