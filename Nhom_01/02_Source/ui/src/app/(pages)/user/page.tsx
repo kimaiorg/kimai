@@ -1,7 +1,7 @@
 "use client";
 
 import { callGettingUserListRequest } from "@/api/user.api";
-import { AuthenticatedRoute } from "@/components/shared/authenticatedRoutes";
+import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import DefaultAvatar from "@/components/shared/default-avatar";
 import { Button } from "@/components/ui/button";
 import {

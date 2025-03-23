@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthenticatedRoute } from "@/components/shared/authenticatedRoutes";
+import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 
 function Absence() {
     return <div>This is my Absence page</div>;

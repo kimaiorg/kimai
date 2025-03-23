@@ -14,20 +14,30 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { Role, RoleType } from "@/type_schema/role";
+import { Role, RolePermissionType, RoleType } from "@/type_schema/role";
 // import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const allowRole = (userRoles: RoleType[], roles: Role[] = []) => {
-    if (userRoles.length == 0) return false;
+const allowRole = (role: RoleType, roles: Role[] = []) => {
+    if (!role) return false;
     if (roles.length == 0) return true;
     return (
         roles.filter((r) => {
-            return userRoles.filter((role) => role.name.toLowerCase() === r.toString().toLowerCase()).length > 0;
+            return role.name.toLowerCase() === r.toString().toLowerCase();
         }).length > 0
     );
 };
+
+// const allowRoles = (userRoles: RoleType[], roles: Role[] = []) => {
+//     if (userRoles.length == 0) return false;
+//     if (roles.length == 0) return true;
+//     return (
+//         roles.filter((r) => {
+//             return userRoles.filter((role) => role.name.toLowerCase() === r.toString().toLowerCase()).length > 0;
+//         }).length > 0
+//     );
+// };
 
 export function NavMain({
     items,
@@ -47,9 +57,7 @@ export function NavMain({
         }[];
     }[];
 }) {
-    // const user = useAppSelector((state) => state.userState.user) as UserType;
-    // const { user, error, isLoading } = useUser();
-    const userRoles = useAppSelector((state) => state.userState.roles) as RoleType[];
+    const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
     const currentPath = usePathname();
     const activeClassname = "!bg-violet-600 !text-white !hover:text-white";
     return (
@@ -58,7 +66,7 @@ export function NavMain({
             <SidebarMenu>
                 {items.map(
                     (item) =>
-                        allowRole(userRoles, item.allowRoles) &&
+                        allowRole(userRolePermissions.role, item.allowRoles) &&
                         (item.items ? (
                             <Collapsible
                                 key={item.title}
@@ -81,7 +89,7 @@ export function NavMain({
                                         <SidebarMenuSub>
                                             {item.items?.map(
                                                 (subItem) =>
-                                                    allowRole(userRoles!, subItem.allowRoles) && (
+                                                    allowRole(userRolePermissions.role!, subItem.allowRoles) && (
                                                         <SidebarMenuSubItem key={subItem.title}>
                                                             <SidebarMenuSubButton
                                                                 asChild
