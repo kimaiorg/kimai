@@ -1,17 +1,17 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
-    DropdownMenuSeparator
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Project } from "@/type_schema/project";
 import { MoreHorizontal } from "lucide-react";
 import { ProjectPagination } from "./project-pagination";
-import { Project } from "@/type_schema/project";
 
 interface ProjectListProps {
     projects: Project[];
