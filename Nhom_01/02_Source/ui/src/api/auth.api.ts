@@ -12,9 +12,7 @@ type AccessTokenResponse = {
 // Create an access token for calling apis
 export async function createAccessToken(audience: string): Promise<string> {
     try {
-        // start
-        if (localStorage.getItem("token")) return localStorage.getItem("token")!;
-        // end
+        if (sessionStorage.getItem("token")) return sessionStorage.getItem("token")!;
         const issuerBaseURL = `${process.env.AUTH0_ISSUER_BASE_URL}/oauth/token`;
         const response = await axios.post<AccessTokenResponse>(
             issuerBaseURL,
@@ -30,9 +28,7 @@ export async function createAccessToken(audience: string): Promise<string> {
                 }
             }
         );
-        // start
-        localStorage.setItem("token", response.data.access_token);
-        // end
+        sessionStorage.setItem("token", response.data.access_token);
         return response.data.access_token;
     } catch (error) {
         throw new Error("Failed to get Auth0 management token", { cause: error });
@@ -41,6 +37,7 @@ export async function createAccessToken(audience: string): Promise<string> {
 
 export async function getAllSystemPermissions(): Promise<PermissionType[]> {
     const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
+    console.log(token);
 
     const BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
     const API_ID = process.env.AUTH0_KIMAI_API_ID;
@@ -69,7 +66,7 @@ export async function getAllSystemPermissions(): Promise<PermissionType[]> {
 export async function getUsersForEachRole(roles: RoleType[]): Promise<RoleUserType[]> {
     return roles.map((role, index) => ({
         role: role,
-        userCount: [1, 2, 4, 10][index]
+        userCount: [1, 10, 2, 4][index]
     }));
 
     // const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
@@ -156,6 +153,7 @@ export async function deletePermissionForRole(
 export async function getUserRolePermissions(userId: string): Promise<RolePermissionType> {
     const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
 
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const roleResponse = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${userId}/roles`, {
         method: "GET",
         headers: {
@@ -167,6 +165,7 @@ export async function getUserRolePermissions(userId: string): Promise<RolePermis
 
     const role = roleData[0];
 
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const permissionsResponse = await fetch(
         `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles/${role.id}/permissions`,
         {
@@ -184,7 +183,8 @@ export async function getUserRolePermissions(userId: string): Promise<RolePermis
 
 export async function getAllRolePermissions(): Promise<RolePermissionType[]> {
     const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
-    console.log(token);
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const systemRolesResponse = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles`, {
         method: "GET",
         headers: {
@@ -194,7 +194,6 @@ export async function getAllRolePermissions(): Promise<RolePermissionType[]> {
     });
     const systemRoles: RoleType[] = await systemRolesResponse.json();
     const roleIds: string[] = systemRoles.map((role) => role.id);
-    console.log(roleIds);
 
     const fetchPromises = roleIds.map((roleId) =>
         fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles/${roleId}/permissions`, {
@@ -224,4 +223,19 @@ export async function getAllRolePermissions(): Promise<RolePermissionType[]> {
     );
 
     return rolePermissions;
+}
+
+export async function getAllRoles(): Promise<RoleType[]> {
+    const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
+
+    const systemRolesResponse = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles`, {
+        method: "GET",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`
+        }
+    });
+    const systemRoles: RoleType[] = await systemRolesResponse.json();
+
+    return systemRoles;
 }

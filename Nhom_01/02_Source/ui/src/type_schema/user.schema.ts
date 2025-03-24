@@ -10,8 +10,15 @@ export const UserSchema = z.object({
     status: z.boolean()
 });
 
-export type UserType = z.TypeOf<typeof UserSchema> & {
-    createdAt: string;
+export type UserType = {
+    created_at: string;
+    user_id: string;
+    email: string;
+    picture: string;
+    name: string;
+    nickname: string;
+    email_verified: boolean;
+    updated_at: string;
 };
 
 export type UserQuickInfoType = {
@@ -37,9 +44,6 @@ export const CreateUserRequestSchema = z
             })
             .regex(/\w+\s\w+/, { message: "Full name must be at least first name and last name" }),
         email: z.string().email(),
-        phone: z.string().regex(/^\d{10}$/, { message: "Phone number is invalid" }),
-        // username: z.string().min(6).max(30),
-        roleId: z.string().regex(/^\d+$/, { message: "Invalid role" }),
         password: z
             .string({
                 required_error: "Invalid password"
@@ -49,9 +53,29 @@ export const CreateUserRequestSchema = z
             })
             .max(30, {
                 message: "Password must not exceed 30 characters"
+            }),
+        repassword: z
+            .string({
+                required_error: "Invalid password"
             })
+            .min(6, {
+                message: "Password must be at least 6 characters"
+            })
+            .max(30, {
+                message: "Password must not exceed 30 characters"
+            }),
+        roleId: z.string()
     })
-    .strict();
+    .strict()
+    .superRefine(({ repassword, password }, ctx) => {
+        if (repassword !== password) {
+            ctx.addIssue({
+                code: "custom",
+                message: "Password and confirm password does not match",
+                path: ["repassword"]
+            });
+        }
+    });
 export type CreateUserRequestDTO = z.infer<typeof CreateUserRequestSchema>;
 
 export type UserInfoRequestDTO = {
@@ -59,10 +83,9 @@ export type UserInfoRequestDTO = {
 };
 
 export type UserListType = {
-    page: number;
-    perPage: number;
+    start: number;
+    limit: number;
+    length: number;
     total: number;
-    totalPage: number;
-    data: UserType[];
-    validationErrors: any;
+    users: UserType[];
 };
