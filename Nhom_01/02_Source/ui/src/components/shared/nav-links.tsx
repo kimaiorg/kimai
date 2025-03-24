@@ -21,7 +21,7 @@ import {
     UserRound,
     Users,
     UsersRound,
-    Wrench,
+    Wrench
 } from "lucide-react";
 
 export const timesheetNavMain = [
@@ -30,7 +30,7 @@ export const timesheetNavMain = [
         url: "/dashboard",
         icon: Home,
         isActive: false,
-        allowRoles: [],
+        allowRoles: []
     },
     {
         title: "Time tracking",
@@ -44,23 +44,23 @@ export const timesheetNavMain = [
                 url: "/timesheet",
                 icon: AlarmClockPlus,
                 isActive: false,
-                allowRoles: [],
+                allowRoles: []
             },
             {
                 title: "Calendar",
                 url: "/calendar",
                 icon: Calendar,
                 isActive: false,
-                allowRoles: [],
+                allowRoles: []
             },
             {
                 title: "Export",
                 url: "/export",
                 icon: ClipboardPlus,
                 isActive: false,
-                allowRoles: [],
-            },
-        ],
+                allowRoles: []
+            }
+        ]
     },
     {
         title: "Employment contract",
@@ -74,23 +74,23 @@ export const timesheetNavMain = [
                 url: "/working-time",
                 icon: Calculator,
                 isActive: false,
-                allowRoles: [],
+                allowRoles: []
             },
             {
                 title: "Absence",
                 url: "/absence",
                 icon: PersonStanding,
                 isActive: false,
-                allowRoles: [],
-            },
-        ],
+                allowRoles: []
+            }
+        ]
     },
     {
         title: "Reporting",
         url: "/reporting",
         icon: FileChartColumnIncreasing,
         isActive: false,
-        allowRoles: [],
+        allowRoles: []
     },
     {
         title: "Invoices",
@@ -104,23 +104,23 @@ export const timesheetNavMain = [
                 url: "/invoice",
                 icon: FilePlus,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
             },
             {
                 title: "Invoice history",
                 url: "/invoice-history",
                 icon: Menu,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN],
-            },
-        ],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
+            }
+        ]
     },
     {
         title: "Tasks",
         url: "/task",
         icon: ListTodo,
         isActive: false,
-        allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
+        allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
     },
     {
         title: "Exspenses",
@@ -134,16 +134,16 @@ export const timesheetNavMain = [
                 url: "/expense",
                 icon: FileText,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
             },
             {
                 title: "Categories",
                 url: "/category",
                 icon: Menu,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
-            },
-        ],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
+            }
+        ]
     },
     {
         title: "Administration",
@@ -157,30 +157,30 @@ export const timesheetNavMain = [
                 url: "/customer",
                 icon: UserRound,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
             },
             {
                 title: "Projects",
                 url: "/project",
                 icon: Boxes,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
             },
             {
                 title: "Activities",
                 url: "/activity",
                 icon: ListTodo,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
             },
             {
                 title: "Tags",
                 url: "/tag",
                 icon: Tag,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
-            },
-        ],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
+            }
+        ]
     },
     {
         title: "System",
@@ -194,29 +194,29 @@ export const timesheetNavMain = [
                 url: "/user",
                 icon: UsersRound,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN],
+                allowRoles: [Role.SUPER_ADMIN]
             },
             {
                 title: "Roles",
                 url: "/role",
                 icon: SquareUserRound,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN],
+                allowRoles: [Role.SUPER_ADMIN]
             },
             {
                 title: "Teams",
                 url: "/team",
                 icon: Users,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN],
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
             },
             {
                 title: "Settings",
                 url: "/setting",
                 icon: Wrench,
                 isActive: false,
-                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN],
-            },
-        ],
-    },
+                allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
+            }
+        ]
+    }
 ];

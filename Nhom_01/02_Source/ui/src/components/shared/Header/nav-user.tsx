@@ -9,7 +9,7 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useUser } from "@auth0/nextjs-auth0/client";
@@ -24,7 +24,7 @@ export function NavUser() {
         toast("Logout", {
             description: "You are logging out",
             className: "bg-sky-500 text-white",
-            duration: 3000,
+            duration: 3000
         });
         window.location.href = "/api/auth/logout";
     };

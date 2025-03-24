@@ -9,7 +9,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
  */
 
 const rootReducer = combineReducers({
-    userState: userReducer,
+    userState: userReducer
 });
 
 export const makeStore = () => {
@@ -19,9 +19,9 @@ export const makeStore = () => {
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
                 serializableCheck: {
-                    ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
-                },
-            }),
+                    ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"]
+                }
+            })
     });
 };
 

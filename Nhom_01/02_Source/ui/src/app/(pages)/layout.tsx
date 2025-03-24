@@ -13,7 +13,7 @@ import { CSSProperties, useState } from "react";
 
 const sidebarStyle = {
     "--sidebar-width": "17rem",
-    "--sidebar-width-mobile": "17rem",
+    "--sidebar-width-mobile": "17rem"
 } as CSSProperties;
 
 export default function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,
     recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all,
+    allConfig: js.configs.all
 });
 
 export default defineConfig([
@@ -28,7 +28,7 @@ export default defineConfig([
         extends: compat.extends("next/core-web-vitals", "next/typescript"),
         files: ["**/*.{js,mjs,cjs,jsx,tsx,ts,mts,cts,xml,yml,yaml}"],
         plugins: {
-            "@stylistic": stylistic,
+            "@stylistic": stylistic
         },
         rules: {
             "react/react-in-jsx-scope": "off",
@@ -47,16 +47,16 @@ export default defineConfig([
                 "error",
                 {
                     closingSlash: "never",
-                    beforeSelfClosing: "always",
-                },
+                    beforeSelfClosing: "always"
+                }
             ], // Disallow multiple spaces between inline JSX props.
             "@stylistic/key-spacing": [
                 "error",
                 {
                     beforeColon: false,
                     afterColon: true,
-                    mode: "strict",
-                },
+                    mode: "strict"
+                }
             ], // Requires spaces between keys and values in object literal properties.
             "@stylistic/keyword-spacing": "error", // Requires spaces around keywords.
             "@stylistic/no-mixed-spaces-and-tabs": "error", //  Disallows mixed spaces and tabs for indentation.
@@ -67,8 +67,8 @@ export default defineConfig([
                 "always",
                 {
                     arraysInObjects: true,
-                    objectsInObjects: true,
-                },
+                    objectsInObjects: true
+                }
             ], // Enforce consistent spacing inside object literals.
             "@stylistic/space-before-blocks": "error", // Require space before blocks.
             "@stylistic/no-multiple-empty-lines": ["error", { max: 1 }],
@@ -89,10 +89,10 @@ export default defineConfig([
                         ["&", "|", "^", "~", "<<", ">>", ">>>"],
                         ["==", "!=", "===", "!==", ">", ">=", "<", "<="],
                         ["&&", "||"],
-                        ["in", "instanceof"],
+                        ["in", "instanceof"]
                     ],
-                    allowSamePrecedence: true,
-                },
+                    allowSamePrecedence: true
+                }
             ], // Disallow mixed binary operators in an expression], use parentheses for readability.
 
             // Miscs
@@ -108,22 +108,22 @@ export default defineConfig([
                     ignoreStrings: true,
                     ignoreTemplateLiterals: true,
                     ignoreUrls: true,
-                    ignoreRegExpLiterals: true,
-                },
+                    ignoreRegExpLiterals: true
+                }
             ],
 
             // Type checking
             "@typescript-eslint/no-explicit-any": "warn",
             "@typescript-eslint/no-require-imports": "warn",
             "@typescript-eslint/no-unused-vars": "warn",
-            "react-hooks/exhaustive-deps": "off",
+            "react-hooks/exhaustive-deps": "off"
         },
 
         languageOptions: {
             globals: {
-                ...globals.browser,
-            },
-        },
+                ...globals.browser
+            }
+        }
     },
-    globalIgnores(["node_modules", "dist", "build", "public", "src/components/ui"]),
+    globalIgnores(["node_modules", "dist", "build", "public", "src/components/ui"])
 ]);

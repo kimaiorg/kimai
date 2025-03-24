@@ -22,12 +22,12 @@ export const GET = async (req: NextRequest) => {
                 grant_type: "client_credentials",
                 client_id: process.env.AUTH0_CLIENT_ID!,
                 client_secret: process.env.AUTH0_CLIENT_SECRET!,
-                audience: process.env.AUTH0_IAM_API_AUDIENCE!,
+                audience: process.env.AUTH0_IAM_API_AUDIENCE!
             }),
             {
                 headers: {
-                    "content-type": "application/x-www-form-urlencoded",
-                },
+                    "content-type": "application/x-www-form-urlencoded"
+                }
             }
         );
 

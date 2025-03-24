@@ -5,37 +5,37 @@ export const RegisterRequestSchema = z
     .object({
         name: z
             .string({
-                required_error: "Invalid full name",
+                required_error: "Invalid full name"
             })
             .trim()
             .min(2, {
-                message: "Full name is invalid",
+                message: "Full name is invalid"
             })
             .max(70, {
-                message: "Full name must not exceed 70 characters",
+                message: "Full name must not exceed 70 characters"
             })
             .regex(/\w+\s\w+/, { message: "Full name must be at least first name and last name" }),
         email: z.string().email(),
         password: z
             .string({
-                required_error: "Invalid password",
+                required_error: "Invalid password"
             })
             .min(6, {
-                message: "Password must be at least 6 characters",
+                message: "Password must be at least 6 characters"
             })
             .max(30, {
-                message: "Password must not exceed 30 characters",
+                message: "Password must not exceed 30 characters"
             }),
         repassword: z
             .string({
-                required_error: "Invalid password",
+                required_error: "Invalid password"
             })
             .min(6, {
-                message: "Password must be at least 6 characters",
+                message: "Password must be at least 6 characters"
             })
             .max(30, {
-                message: "Password must not exceed 30 characters",
-            }),
+                message: "Password must not exceed 30 characters"
+            })
         // isBrand: z.boolean().default(false),
     })
     .strict()
@@ -44,7 +44,7 @@ export const RegisterRequestSchema = z
             ctx.addIssue({
                 code: "custom",
                 message: "Password and confirm password does not match",
-                path: ["repassword"],
+                path: ["repassword"]
             });
         }
     });
@@ -57,14 +57,14 @@ export const LoginRequestSchema = z
         username: z.string().min(4).max(256),
         password: z
             .string({
-                required_error: "Invalid password",
+                required_error: "Invalid password"
             })
             .min(6, {
-                message: "Password must be at least 6 characters",
+                message: "Password must be at least 6 characters"
             })
             .max(30, {
-                message: "Password must not exceed 30 characters",
-            }),
+                message: "Password must not exceed 30 characters"
+            })
     })
     .strict();
 

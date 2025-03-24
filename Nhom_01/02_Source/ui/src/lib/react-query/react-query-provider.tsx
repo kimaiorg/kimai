@@ -11,17 +11,17 @@ const ReactQueryProvider = ({ children }: { children: React.ReactNode }) => {
                 defaultOptions: {
                     queries: {
                         // gcTime: 10 * 60 * 1000, // Data will be garbage collected after 10 minutes of being unused
-                        gcTime: Infinity,
-                    },
+                        gcTime: Infinity
+                    }
                 },
                 queryCache: new QueryCache({
                     onError: (error) => {
                         toast("Error", {
                             description: error?.message || "Unexpected error! Please try again.",
-                            className: "bg-red-500 text-white",
+                            className: "bg-red-500 text-white"
                         });
-                    },
-                }),
+                    }
+                })
             })
     );
 

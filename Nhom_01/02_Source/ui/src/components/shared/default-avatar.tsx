@@ -16,7 +16,7 @@ const DefaultAvatar: React.FC<{
         "bg-orange-500",
         "bg-pink-500",
         "bg-purple-500",
-        "bg-gray-500",
+        "bg-gray-500"
     ];
     const initial = name.charAt(0).toUpperCase();
     const backgroundColor = isUser ? "bg-sky-500" : colors[index % 9];
@@ -25,7 +25,7 @@ const DefaultAvatar: React.FC<{
         <div
             className={`flex items-center justify-center text-white font-semibold uppercase rounded-full ${backgroundColor}  w-full h-full`}
             style={{
-                fontSize: `${textSize}px`,
+                fontSize: `${textSize}px`
             }}
         >
             {initial}

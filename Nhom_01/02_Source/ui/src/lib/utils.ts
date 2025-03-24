@@ -40,7 +40,7 @@ export const handleErrorForm = ({ error, setError }: { error: EntityError; setEr
     error.payload.errors.forEach((item) => {
         setError(item.field, {
             type: "server",
-            message: item.message,
+            message: item.message
         });
     });
 };

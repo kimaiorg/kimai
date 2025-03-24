@@ -11,7 +11,7 @@ import {
     SidebarMenuItem,
     SidebarMenuSub,
     SidebarMenuSubButton,
-    SidebarMenuSubItem,
+    SidebarMenuSubItem
 } from "@/components/ui/sidebar";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Role, RolePermissionType, RoleType } from "@/type_schema/role";
@@ -40,7 +40,7 @@ const allowRole = (role: RoleType, roles: Role[] = []) => {
 // };
 
 export function NavMain({
-    items,
+    items
 }: {
     items: {
         title: string;

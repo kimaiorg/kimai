@@ -11,8 +11,8 @@ const userSlice: Slice<any> = createSlice({
         user: null,
         privilege: {
             role: null,
-            permissions: [],
-        },
+            permissions: []
+        }
     },
     reducers: {
         updateUser(state, action) {
@@ -20,8 +20,8 @@ const userSlice: Slice<any> = createSlice({
         },
         updatePrivilege(state, action) {
             state.privilege = action.payload as RolePermissionType;
-        },
-    },
+        }
+    }
 });
 export const { updateUser, updatePrivilege } = userSlice.actions;
 export default userSlice.reducer;

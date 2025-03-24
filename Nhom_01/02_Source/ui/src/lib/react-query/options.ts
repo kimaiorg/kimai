@@ -7,5 +7,5 @@ export const commonOptions = {
     retry: 2, // Retry 2 times before displaying an error
     retryDelay: 1000, // Wait 1 second between retries
     placeholderData: keepPreviousData,
-    manual: true,
+    manual: true
 };

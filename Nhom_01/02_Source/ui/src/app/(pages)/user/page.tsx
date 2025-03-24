@@ -12,7 +12,7 @@ import {
     TableFooter,
     TableHead,
     TableHeader,
-    TableRow,
+    TableRow
 } from "@/components/ui/table";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Role } from "@/type_schema/role";

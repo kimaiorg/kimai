@@ -4,7 +4,7 @@ export const BASE_API = process.env.NEXT_PUBLIC_BASE_URL!;
 
 const myAxios = axios.create({
     baseURL: BASE_API,
-    validateStatus: () => true,
+    validateStatus: () => true
 });
 // Add a request interceptor
 myAxios.interceptors.request.use((config) => config);

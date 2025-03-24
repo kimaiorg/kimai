@@ -10,6 +10,6 @@ export function useCachedUserInfo() {
             return callGettingUserInfoRequest();
         },
         throwOnError: true,
-        ...commonOptions,
+        ...commonOptions
     });
 }

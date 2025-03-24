@@ -12,10 +12,10 @@ export const callGettingUserInfoRequest = async (): Promise<UserType | ErrorResp
                 message: "Unauthorized",
                 // timestamp: new Date().toISOString(),
                 // path: "/user/info",
-                errorCode: "not-authorized",
+                errorCode: "not-authorized"
             };
         const response = await myAxios.get(`/user/info`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
         });
         console.log(response);
         if (response.status == 401) {
@@ -44,7 +44,7 @@ function fakeUser(): UserType {
         name: localStorage.getItem("name") || "Super Admin",
         status: true,
         createdAt: new Date().toISOString(),
-        id: "1",
+        id: "1"
     };
 }
 
@@ -57,10 +57,10 @@ export const callGettingUserProfileRequest = async (userId: string): Promise<Use
                 message: "Unauthorized",
                 // timestamp: new Date().toISOString(),
                 // path: "/user/info",
-                errorCode: "not-authorized",
+                errorCode: "not-authorized"
             };
         const response = await myAxios.get(`/user/info/${userId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
         });
         console.log(response);
         if (response.status == 401) {
@@ -90,10 +90,10 @@ export const callGettingRoleAndPermissionRequest = async (): Promise<RoleType[] 
                 message: "Unauthorized",
                 // timestamp: new Date().toISOString(),
                 // path: "/user/info",
-                errorCode: "not-authorized",
+                errorCode: "not-authorized"
             };
         const response = await myAxios.get(`/role/all`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
         });
         console.log(response);
         if (response.status == 401) {
@@ -128,7 +128,7 @@ export const callGettingUserListRequest = async (
                 role: "admin",
                 name: "John Cena",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "2",
@@ -137,7 +137,7 @@ export const callGettingUserListRequest = async (
                 role: "employee",
                 name: "Jane Collow",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "3",
@@ -146,7 +146,7 @@ export const callGettingUserListRequest = async (
                 role: "teamlead",
                 name: "Mercy Doe",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "4",
@@ -155,7 +155,7 @@ export const callGettingUserListRequest = async (
                 role: "admin",
                 name: "Sally Doe",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "5",
@@ -164,7 +164,7 @@ export const callGettingUserListRequest = async (
                 role: "employee",
                 name: "King Jack",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "6",
@@ -173,7 +173,7 @@ export const callGettingUserListRequest = async (
                 role: "teamlead",
                 name: "Jack Doe",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "7",
@@ -182,7 +182,7 @@ export const callGettingUserListRequest = async (
                 role: "admin",
                 name: "Harry Potter",
                 status: true,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString()
             },
             {
                 id: "8",
@@ -191,8 +191,8 @@ export const callGettingUserListRequest = async (
                 role: "employee",
                 name: "Donald Trump",
                 status: true,
-                createdAt: new Date().toISOString(),
-            },
+                createdAt: new Date().toISOString()
+            }
         ];
         if (!localStorage.getItem("accessToken"))
             return {
@@ -200,10 +200,10 @@ export const callGettingUserListRequest = async (
                 message: "Unauthorized",
                 // timestamp: new Date().toISOString(),
                 // path: "/user/info",
-                errorCode: "not-authorized",
+                errorCode: "not-authorized"
             };
         const response = await myAxios.get(`/user/all?page=${page}&size=${size}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
         });
         console.log(response);
         if (response.status == 401) {
