@@ -1,239 +1,74 @@
-import { myAxios } from "@/api/axios";
-import { ErrorResponseType, SuccessResponseType } from "@/type_schema/common";
-import { RoleType } from "@/type_schema/role";
-import { UserType } from "@/type_schema/user.schema";
+import { createAccessToken } from "@/api/auth.api";
+import mockUser from "@/lib/mock-users.json";
+import { CreateUserRequestDTO, UserListType } from "@/type_schema/user.schema";
 
-export const callGettingUserInfoRequest = async (): Promise<UserType | ErrorResponseType> => {
-    try {
-        return fakeUser();
-        if (!localStorage.getItem("accessToken"))
-            return {
-                statusCode: 401,
-                message: "Unauthorized",
-                // timestamp: new Date().toISOString(),
-                // path: "/user/info",
-                errorCode: "not-authorized",
-            };
-        const response = await myAxios.get(`/user/info`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-        });
-        console.log(response);
-        if (response.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            return response.data as ErrorResponseType;
-        } else if (response.status != 200) {
-            return response.data as ErrorResponseType;
-        }
-        const result = response.data as SuccessResponseType<UserType, null>;
-        return result.data;
-    } catch (error: any) {
-        if (error.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-        }
-        return error.response.data as ErrorResponseType;
-    }
-};
-
-function fakeUser(): UserType {
-    return {
-        username: localStorage.getItem("username") || "admin",
-        email: localStorage.getItem("email") || "admin@gmail.com",
-        role: localStorage.getItem("role") || "admin",
-        name: localStorage.getItem("name") || "Super Admin",
-        status: true,
-        createdAt: new Date().toISOString(),
-        id: "1",
+export async function getAllUsers2(page: number, perPage: number): Promise<UserListType> {
+    const total = mockUser.length;
+    const users = mockUser.slice((page - 1) * perPage, page * perPage);
+    const data: UserListType = {
+        start: (page - 1) * perPage,
+        limit: perPage,
+        length: users.length,
+        total: total,
+        users: users
     };
+    return data;
 }
 
-export const callGettingUserProfileRequest = async (userId: string): Promise<UserType | ErrorResponseType> => {
-    try {
-        console.log("call getting user info");
-        if (!localStorage.getItem("accessToken"))
-            return {
-                statusCode: 401,
-                message: "Unauthorized",
-                // timestamp: new Date().toISOString(),
-                // path: "/user/info",
-                errorCode: "not-authorized",
-            };
-        const response = await myAxios.get(`/user/info/${userId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-        });
-        console.log(response);
-        if (response.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            return response.data as ErrorResponseType;
-        } else if (response.status != 200) {
-            return response.data as ErrorResponseType;
-        }
-        const result = response.data as SuccessResponseType<UserType, null>;
-        return result.data;
-    } catch (error: any) {
-        if (error.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-        }
-        return error.response.data as ErrorResponseType;
-    }
-};
+export async function getAllUsers(page: number, perPage: number): Promise<UserListType> {
+    const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
 
-export const callGettingRoleAndPermissionRequest = async (): Promise<RoleType[] | ErrorResponseType> => {
-    try {
-        console.log("call getting all roles and permissions");
-        if (!localStorage.getItem("accessToken"))
-            return {
-                statusCode: 401,
-                message: "Unauthorized",
-                // timestamp: new Date().toISOString(),
-                // path: "/user/info",
-                errorCode: "not-authorized",
-            };
-        const response = await myAxios.get(`/role/all`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-        });
-        console.log(response);
-        if (response.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            return response.data as ErrorResponseType;
-        } else if (response.status != 200) {
-            return response.data as ErrorResponseType;
+    const BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
+    const response = await fetch(`${BASE_URL}/api/v2/users?page=${page - 1}&per_page=${perPage}&include_totals=true`, {
+        method: "GET",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`
         }
-        const result = response.data as SuccessResponseType<RoleType[], null>;
-        return result.data;
-    } catch (error: any) {
-        if (error.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-        }
-        return error.response.data as ErrorResponseType;
-    }
-};
+    });
+    const data = await response.json();
+    console.log(data);
+    return data;
+}
 
-export const callGettingUserListRequest = async (
-    page: number,
-    size: number
-): Promise<UserType[] | ErrorResponseType> => {
-    try {
-        console.log("call getting all user");
-        return [
-            {
-                id: "1",
-                username: "john",
-                email: "john_cena@gmail",
-                role: "admin",
-                name: "John Cena",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "2",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "employee",
-                name: "Jane Collow",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "3",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "teamlead",
-                name: "Mercy Doe",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "4",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "admin",
-                name: "Sally Doe",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "5",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "employee",
-                name: "King Jack",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "6",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "teamlead",
-                name: "Jack Doe",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "7",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "admin",
-                name: "Harry Potter",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: "8",
-                username: "jane",
-                email: "jane_doe@gmail",
-                role: "employee",
-                name: "Donald Trump",
-                status: true,
-                createdAt: new Date().toISOString(),
-            },
-        ];
-        if (!localStorage.getItem("accessToken"))
-            return {
-                statusCode: 401,
-                message: "Unauthorized",
-                // timestamp: new Date().toISOString(),
-                // path: "/user/info",
-                errorCode: "not-authorized",
-            };
-        const response = await myAxios.get(`/user/all?page=${page}&size=${size}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-        });
-        console.log(response);
-        if (response.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            return response.data as ErrorResponseType;
-        } else if (response.status != 200) {
-            return response.data as ErrorResponseType;
-        }
-        const result = response.data as SuccessResponseType<UserType[], null>;
-        return result.data;
-    } catch (error: any) {
-        if (error.status == 401) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-        }
-        return error.response.data as ErrorResponseType;
-    }
-};
+export async function addNewUser(request: CreateUserRequestDTO): Promise<number> {
+    const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
 
-// export const callActivateAccountRequest = async (
-//     token: string
-// ): Promise<SuccessResponseType<LoginResponseDTO, null> | ErrorResponseType> => {
-//     try {
-//         const response = await myAxios.get(`/auth/activate?token=${token}`);
-//         console.log(response);
-//         if (response.status !== 200) return response.data as ErrorResponseType;
-//         const result = response.data as SuccessResponseType<LoginResponseDTO, null>;
-//         return result;
-//     } catch (error: any) {
-//         return error.response.data as ErrorResponseType;
-//     }
-// };
+    const BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
+    const payload = {
+        connection: "Username-Password-Authentication",
+        email: request.email,
+        password: request.password,
+        name: request.name
+    };
+    const userResponse = await fetch(`${BASE_URL}/api/v2/users`, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+    if (userResponse.status != 201) {
+        return userResponse.status;
+    }
+    const data = await userResponse.json();
+    const userId = data.user_id;
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const rolePayload = { roles: [request.roleId] };
+    const roleResponse = await fetch(`${BASE_URL}/api/v2/users/${userId}/roles`, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(rolePayload)
+    });
+    if (roleResponse.status != 204) {
+        return roleResponse.status;
+    }
+    return 201;
+}
