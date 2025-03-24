@@ -1,127 +1,120 @@
 "use client";
 
-import { callGettingUserListRequest } from "@/api/user.api";
+import { getAllUsers } from "@/api/user.api";
+import AddUserModal from "@/app/(pages)/user/add-user-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import DefaultAvatar from "@/components/shared/default-avatar";
 import { Button } from "@/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow
-} from "@/components/ui/table";
-import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Role } from "@/type_schema/role";
-import { UserType } from "@/type_schema/user.schema";
-import { Plus } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { UserListType } from "@/type_schema/user.schema";
+import { Plus, SquarePen } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function User() {
     const queryParams = useSearchParams();
-    const user = useAppSelector((state) => state.userState.user) as UserType;
-    const [users, setUsers] = useState<UserType[]>([]);
+    const pathname = usePathname();
+    const { replace } = useRouter();
     const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
-    const size = queryParams.get("size") ? Number(queryParams.get("size")) : 10;
+    const [userList, setUserList] = useState<UserListType>({
+        start: 1,
+        limit: 10,
+        length: 0,
+        total: 0,
+        users: []
+    });
+
+    const fetchUser = async (page: number, size: number = 10) => {
+        const result = await getAllUsers(page, size);
+        setUserList(result);
+    };
+
+    const goToPage = (page: number) => {
+        fetchUser(page);
+        const params = new URLSearchParams(queryParams);
+        params.set("page", page.toString());
+        const newUrl = `${pathname}?${params.toString()}`;
+        replace(newUrl);
+    };
+
+    const handleReloadUser = () => {
+        fetchUser(1);
+        const params = new URLSearchParams(queryParams);
+        params.set("page", "1");
+        const newUrl = `${pathname}?${params.toString()}`;
+        replace(newUrl);
+    };
+
     useEffect(() => {
-        const test = (a: any) => {
-            console.log(a);
+        const getUsers = async () => {
+            await fetchUser(page);
         };
-        test("test");
-        const getAllUsers = async () => {
-            const result = await callGettingUserListRequest(page, size);
-            if (result && !Object.prototype.hasOwnProperty.call(result, "errorCode")) {
-                setUsers(result as UserType[]);
-            }
-        };
-        getAllUsers();
-    }, [page, size]);
+        getUsers();
+    }, []);
+
     return (
         <>
             <div className="m-3 space-y-3">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-semibold">User</h1>
                     <div className="flex items-center space-x-2">
-                        <Button className="btn btn-primary">
-                            Create User <Plus />
-                        </Button>
+                        <AddUserModal fetchUsers={handleReloadUser}>
+                            <Button className="btn btn-primary cursor-pointer">
+                                Create User <Plus />
+                            </Button>
+                        </AddUserModal>
                     </div>
                 </div>
                 <Table className="bg-white rounded-lg shadow-md">
-                    <TableCaption>A list of your recent invoices.</TableCaption>
+                    <TableCaption>
+                        <PaginationWithLinks
+                            page={page}
+                            pageSize={userList.limit}
+                            totalCount={userList.total}
+                            callback={goToPage}
+                        />
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[100px]">No.</TableHead>
                             <TableHead>Avatar</TableHead>
                             <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
+                            <TableHead>Created At</TableHead>
+                            <TableHead>Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {users.map((userItem, index) => (
+                        {userList.users.map((userItem, index) => (
                             <TableRow key={index}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell className="font-medium">
                                     <div className="w-7 h-7 rounded-full overflow-hidden">
                                         <DefaultAvatar
-                                            name={userItem.username}
+                                            name={userItem.name}
                                             size={30}
                                         />
                                     </div>
                                 </TableCell>
-                                <TableCell>{user.name}</TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.role}</TableCell>
-                                <TableCell className="text-right">s</TableCell>
+                                <TableCell>{userItem.name}</TableCell>
+                                <TableCell>{userItem.email}</TableCell>
+                                <TableCell>{userItem.created_at}</TableCell>
+                                <TableCell
+                                    className="cursor-pointer"
+                                    onClick={() => {
+                                        alert("This feature is coming soon");
+                                    }}
+                                >
+                                    <SquarePen />
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
-                    <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={3}>Total</TableCell>
-                            <TableCell className="text-right">$2,500.00</TableCell>
-                        </TableRow>
-                    </TableFooter>
                 </Table>
             </div>
         </>
     );
 }
 export default AuthenticatedRoute(User, [Role.SUPER_ADMIN]);
-
-// function ViewGameModal({ children, addNewUser }: { children: React.ReactNode; addNewUser: (user: UserType) => void }) {
-//     return (
-//         <Dialog>
-//             <DialogTrigger asChild>{children}</DialogTrigger>
-//             <DialogContent className="border border-gray-300 bg-gray-50 dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw]">
-//                 <DialogHeader>
-//                     <DialogTitle className="text-center text-2xl text-gradient">GAME INFO</DialogTitle>
-//                 </DialogHeader>
-//                 <div className="mt-0">
-//                     <div className="grid grid-cols-1 gap-4">
-//                         <div className="px-4 sm:px-8">
-//                             <div className="flex flex-col w-full space-y-2">
-//                                 <div className="text-md sm:text-xl lg:text-xl font-thin">
-//                                     <b className="font-semibold w-[9rem] inline-block">Name:</b>
-//                                 </div>
-//                                 <div className="text-md sm:text-xl lg:text-xl font-thin">
-//                                     <b className="font-semibold w-[9rem] inline-block">Guide:</b>
-//                                 </div>
-
-//                                 <div className="text-md sm:text-xl lg:text-xl font-thin">
-//                                     <b className="font-semibold w-[9rem] inline-block">Game type:</b>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </DialogContent>
-//         </Dialog>
-//     );
-// }

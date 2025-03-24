@@ -24,11 +24,15 @@ function RolePage() {
     useEffect(() => {
         const fetchRolePermissions = async () => {
             const result = await getAllRolePermissions();
-            const permissions = await getAllSystemPermissions();
-            const roleUserList = await getUsersForEachRole(result.map((rp) => rp.role));
             setRolePermissions(result);
-            setAllSystemPermissions(permissions);
-            setRoleUsers(roleUserList);
+            setTimeout(async () => {
+                const permissions = await getAllSystemPermissions();
+                setAllSystemPermissions(permissions);
+            }, 500);
+            setTimeout(async () => {
+                const roleUserList = await getUsersForEachRole(result.map((rp) => rp.role));
+                setRoleUsers(roleUserList);
+            }, 1000);
         };
         if (!fetchRolePermissionsRef.current) {
             fetchRolePermissions();

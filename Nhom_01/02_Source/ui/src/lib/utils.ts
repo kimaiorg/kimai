@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { UseFormSetError } from "react-hook-form";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -43,4 +44,30 @@ export const handleErrorForm = ({ error, setError }: { error: EntityError; setEr
             message: item.message
         });
     });
+};
+
+export const handleErrorApi = ({
+    error,
+    setError,
+    duration
+}: {
+    error: any;
+    setError?: UseFormSetError<any>;
+    duration?: number;
+}) => {
+    // console.log(error);
+    if (error instanceof EntityError && setError) {
+        error.payload.errors.forEach((item) => {
+            setError(item.field, {
+                type: "server",
+                message: item.message
+            });
+        });
+    } else {
+        toast("Error", {
+            description: error?.payload?.message || "Unexpected error! Please try again.",
+            className: "!bg-red-500 !text-white",
+            duration: duration || 2000
+        });
+    }
 };
