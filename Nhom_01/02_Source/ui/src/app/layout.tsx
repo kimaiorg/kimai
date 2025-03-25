@@ -8,34 +8,34 @@ import { Suspense } from "react";
 import "./globals.css";
 
 export default function RootLayout({
-    children
+  children
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <html
-            lang="en"
-            suppressHydrationWarning
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+    >
+      <body className={`antialiased`}>
+        <DarkModeThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
         >
-            <body className={`antialiased`}>
-                <DarkModeThemeProvider
-                    attribute="class"
-                    defaultTheme="light"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <UserProvider>
-                        <Suspense>
-                            <ReactQueryProvider>
-                                <ReduxStoreProvider>
-                                    <main className="w-full custom-bg-dashboard">{children}</main>
-                                </ReduxStoreProvider>
-                            </ReactQueryProvider>
-                        </Suspense>
-                    </UserProvider>
-                    <Toaster />
-                </DarkModeThemeProvider>
-            </body>
-        </html>
-    );
+          <UserProvider>
+            <Suspense>
+              <ReactQueryProvider>
+                <ReduxStoreProvider>
+                  <main className="w-full custom-bg-dashboard">{children}</main>
+                </ReduxStoreProvider>
+              </ReactQueryProvider>
+            </Suspense>
+          </UserProvider>
+          <Toaster />
+        </DarkModeThemeProvider>
+      </body>
+    </html>
+  );
 }

@@ -9,20 +9,20 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
  */
 
 const rootReducer = combineReducers({
-    userState: userReducer
+  userState: userReducer
 });
 
 export const makeStore = () => {
-    return configureStore({
-        reducer: rootReducer,
-        devTools: process.env.NEXT_PUBLIC_NODE_ENV !== "production",
-        middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware({
-                serializableCheck: {
-                    ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"]
-                }
-            })
-    });
+  return configureStore({
+    reducer: rootReducer,
+    devTools: process.env.NEXT_PUBLIC_NODE_ENV !== "production",
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"]
+        }
+      })
+  });
 };
 
 export type AppStore = ReturnType<typeof makeStore>;

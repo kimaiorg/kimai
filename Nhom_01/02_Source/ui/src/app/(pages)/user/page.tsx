@@ -14,107 +14,107 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function User() {
-    const queryParams = useSearchParams();
-    const pathname = usePathname();
-    const { replace } = useRouter();
-    const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
-    const [userList, setUserList] = useState<UserListType>({
-        start: 1,
-        limit: 10,
-        length: 0,
-        total: 0,
-        users: []
-    });
+  const queryParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
+  const [userList, setUserList] = useState<UserListType>({
+    start: 1,
+    limit: 10,
+    length: 0,
+    total: 0,
+    users: []
+  });
 
-    const fetchUser = async (page: number, size: number = 10) => {
-        const result = await getAllUsers(page, size);
-        setUserList(result);
+  const fetchUser = async (page: number, size: number = 10) => {
+    const result = await getAllUsers(page, size);
+    setUserList(result);
+  };
+
+  const goToPage = (page: number) => {
+    fetchUser(page);
+    const params = new URLSearchParams(queryParams);
+    params.set("page", page.toString());
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleReloadUser = () => {
+    fetchUser(1);
+    const params = new URLSearchParams(queryParams);
+    params.set("page", "1");
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  useEffect(() => {
+    const getUsers = async () => {
+      await fetchUser(page);
     };
+    getUsers();
+  }, []);
 
-    const goToPage = (page: number) => {
-        fetchUser(page);
-        const params = new URLSearchParams(queryParams);
-        params.set("page", page.toString());
-        const newUrl = `${pathname}?${params.toString()}`;
-        replace(newUrl);
-    };
-
-    const handleReloadUser = () => {
-        fetchUser(1);
-        const params = new URLSearchParams(queryParams);
-        params.set("page", "1");
-        const newUrl = `${pathname}?${params.toString()}`;
-        replace(newUrl);
-    };
-
-    useEffect(() => {
-        const getUsers = async () => {
-            await fetchUser(page);
-        };
-        getUsers();
-    }, []);
-
-    return (
-        <>
-            <div className="m-3 space-y-3">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold">User</h1>
-                    <div className="flex items-center space-x-2">
-                        <AddUserModal fetchUsers={handleReloadUser}>
-                            <Button className="btn btn-primary cursor-pointer">
-                                Create User <Plus />
-                            </Button>
-                        </AddUserModal>
-                    </div>
-                </div>
-                <Table className="bg-white rounded-lg shadow-md">
-                    <TableCaption>
-                        <PaginationWithLinks
-                            page={page}
-                            pageSize={userList.limit}
-                            totalCount={userList.total}
-                            callback={goToPage}
-                        />
-                    </TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">No.</TableHead>
-                            <TableHead>Avatar</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead>Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {userList.users.map((userItem, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell className="font-medium">
-                                    <div className="w-7 h-7 rounded-full overflow-hidden">
-                                        <DefaultAvatar
-                                            name={userItem.name}
-                                            size={30}
-                                        />
-                                    </div>
-                                </TableCell>
-                                <TableCell>{userItem.name}</TableCell>
-                                <TableCell>{userItem.email}</TableCell>
-                                <TableCell>{userItem.created_at}</TableCell>
-                                <TableCell
-                                    className="cursor-pointer"
-                                    onClick={() => {
-                                        alert("This feature is coming soon");
-                                    }}
-                                >
-                                    <SquarePen />
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-        </>
-    );
+  return (
+    <>
+      <div className="m-3 space-y-3">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold">User</h1>
+          <div className="flex items-center space-x-2">
+            <AddUserModal fetchUsers={handleReloadUser}>
+              <Button className="btn btn-primary cursor-pointer">
+                Create User <Plus />
+              </Button>
+            </AddUserModal>
+          </div>
+        </div>
+        <Table className="bg-white rounded-lg shadow-md">
+          <TableCaption>
+            <PaginationWithLinks
+              page={page}
+              pageSize={userList.limit}
+              totalCount={userList.total}
+              callback={goToPage}
+            />
+          </TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">No.</TableHead>
+              <TableHead>Avatar</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Created At</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {userList.users.map((userItem, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="w-7 h-7 rounded-full overflow-hidden">
+                    <DefaultAvatar
+                      name={userItem.name}
+                      size={30}
+                    />
+                  </div>
+                </TableCell>
+                <TableCell>{userItem.name}</TableCell>
+                <TableCell>{userItem.email}</TableCell>
+                <TableCell>{userItem.created_at}</TableCell>
+                <TableCell
+                  className="cursor-pointer"
+                  onClick={() => {
+                    alert("This feature is coming soon");
+                  }}
+                >
+                  <SquarePen />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  );
 }
 export default AuthenticatedRoute(User, [Role.SUPER_ADMIN]);
