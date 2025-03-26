@@ -16,14 +16,14 @@ import {
 } from '@/api/activity/dto/create-activity.dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
-import { CreateTeamSwagger } from '@/api/team/swagger';
+import { CreateActivitySwagger } from '@/api/activity/swagger';
 
 @Controller('activities')
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
   @Post('')
-  // @ApiBody({ type: CreateTeamSwagger })
-  @Permissions(['create:teams'])
+  @ApiBody({ type: CreateActivitySwagger })
+  @Permissions(['create:activities'])
   @UsePipes(new ZodValidationPipe(createActivitySchema))
   async createActivity(
     @Body() dto: CreateActivityDto,
@@ -32,7 +32,7 @@ export class ActivityController {
   }
 
   @Get(':id')
-  @Permissions(['read:teams'])
+  @Permissions(['read:activities'])
   async getActivity(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Activity | null> {
@@ -40,7 +40,7 @@ export class ActivityController {
   }
 
   @Get('')
-  @Permissions(['read:teams'])
+  @Permissions(['read:activities'])
   async listTeams(): Promise<Activity[] | null> {
     return await this.activityService.listActivities();
   }
