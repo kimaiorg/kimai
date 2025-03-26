@@ -1,0 +1,22 @@
+model Activity {
+  id              Int     @id @default(autoincrement())
+  name            String
+  color           String?
+  description     String?
+  activity_number Int?
+  budget          Float?
+
+  project_id Int
+  project    Project @relation(fields: [project_id], references: [id])
+
+  team_id Int
+  team    Team @relation(fields: [team_id], references: [id])
+
+  tasks Task[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("activities")
+}

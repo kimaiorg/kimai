@@ -11,5 +11,5 @@ export class ProjectEntity {
   end_date: Date;
   budget: number;
   teams: Team[];
-  customers: Customer[];
+  customer: Customer;
 }

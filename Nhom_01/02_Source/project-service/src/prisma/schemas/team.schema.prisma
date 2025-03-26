@@ -1,14 +1,15 @@
 model Team {
-    id    Int      @id @default(autoincrement())
-    name  String
-    color String?
-    users String[]
+  id    Int      @id @default(autoincrement())
+  name  String
+  color String?
+  users String[]
 
-    projects Project[] @relation("ProjectTeam")
+  projects   Project[]  @relation("ProjectTeam")
+  activities Activity[]
 
-    created_at DateTime  @default(now())
-    updated_at DateTime  @updatedAt
-    deleted_at DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
 
-    @@map("teams")
+  @@map("teams")
 }
