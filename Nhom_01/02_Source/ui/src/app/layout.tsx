@@ -28,7 +28,7 @@ export default function RootLayout({
             <Suspense>
               <ReactQueryProvider>
                 <ReduxStoreProvider>
-                  <main className="w-full custom-bg-dashboard">{children}</main>
+                  <main>{children}</main>
                 </ReduxStoreProvider>
               </ReactQueryProvider>
             </Suspense>

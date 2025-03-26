@@ -12,14 +12,15 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from "@/components/ui/chart";
+import { useTranslation } from "@/lib/i18n";
 const chartData = [
+  { date: "24-03", hour: 8 },
   { date: "25-03", hour: 9 },
   { date: "26-03", hour: 8 },
   { date: "27-03", hour: 7 },
-  { date: "28-03", hour: 8 },
+  { date: "28-03", hour: 1.5 },
   { date: "29-03", hour: 0 },
-  { date: "30-03", hour: 0 },
-  { date: "31-03", hour: 0 }
+  { date: "30-03", hour: 0 }
 ];
 
 const chartConfig = {
@@ -29,19 +30,24 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function TimesheetChart() {
+export function TimesheetBarChart() {
+  const { t } = useTranslation();
   return (
-    <Card className="w-[90%] mx-auto">
+    <Card className="mx-auto bg-white dark:bg-slate-900">
       <CardHeader>
-        <CardTitle>My Timesheet</CardTitle>
+        <CardTitle>{t("page.dashboard.timesheet")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
             data={chartData}
+            defaultShowTooltip
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid
+              vertical={true}
+              horizontal={true}
+            />
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -51,8 +57,8 @@ export function TimesheetChart() {
             <YAxis
               tickLine={true}
               axisLine={true}
-              tickMargin={8}
-              tickCount={3}
+              tickCount={20}
+              label={t("page.dashboard.chart.hours")}
             />
             <CartesianGrid
               vertical={true}
@@ -68,8 +74,9 @@ export function TimesheetChart() {
             />
             <Bar
               dataKey="hour"
-              fill="var(--chart-1)"
+              fill="var(--chart-2 )"
               radius={8}
+              barSize={36}
             />
           </BarChart>
         </ChartContainer>

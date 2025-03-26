@@ -9,7 +9,7 @@ export default function LocaleRootPage() {
   // Redirect to dashboard
   useEffect(() => {
     router.push("/dashboard");
-  }, [router]);
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

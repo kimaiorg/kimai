@@ -10,6 +10,7 @@ import { Plus, Search, Filter, FileDown, Upload } from "lucide-react";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Role } from "@/type_schema/role";
 import { CustomerService } from "@/services/customer.service";
+import Loading from "@/app/loading";
 
 function CustomerPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -79,6 +80,10 @@ function CustomerPage() {
     }
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="container mx-auto py-6 px-8">
       <div className="flex justify-between items-center mb-6">
@@ -121,21 +126,13 @@ function CustomerPage() {
         </div>
       </div>
 
-      {/* Loading state */}
-      {isLoading ? (
-        <div className="flex justify-center items-center py-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      ) : (
-        /* Customer list */
-        <CustomerList
-          customers={filteredCustomers}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          itemsPerPage={itemsPerPage}
-        />
-      )}
+      <CustomerList
+        customers={filteredCustomers}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        itemsPerPage={itemsPerPage}
+      />
 
       {/* Create customer dialog */}
       <CustomerCreateDialog

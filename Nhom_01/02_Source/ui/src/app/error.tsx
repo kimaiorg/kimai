@@ -19,7 +19,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ statusCode, message }) => {
           {statusCode && [401].includes(statusCode) ? (
             <Button
               className="px-6 py-3 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition"
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/api/auth/login")}
             >
               Back
             </Button>

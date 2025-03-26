@@ -45,5 +45,18 @@ export const vi = {
     warning: "Cảnh báo",
     info: "Thông tin",
     welcome: "Chào mừng bạn đến với hệ thống quản lý thời gian Kimai"
+  },
+  page: {
+    dashboard: {
+      title: "Bảng điều khiển của tôi",
+      timesheet: "Biểu đồ chấm công",
+      today: "Hôm nay",
+      thisWeek: "Tuần này",
+      thisMonth: "Tháng này",
+      thisYear: "Năm này",
+      chart: {
+        hours: "Số giờ làm việc"
+      }
+    }
   }
 };
