@@ -1,0 +1,16 @@
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  deadline    DateTime?
+  description String
+  user_id     String
+
+  activity_id Int
+  activity    Activity @relation(fields: [activity_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("tasks")
+}
