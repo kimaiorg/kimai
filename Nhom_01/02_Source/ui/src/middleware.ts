@@ -21,13 +21,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Skip Auth0 callback routes to prevent redirect loops
+  if (pathname.includes("/api/auth/callback")) {
+    return NextResponse.next();
+  }
+
   // Check if the pathname already starts with a locale
   const pathnameHasLocale = locales.some((locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`);
 
   if (pathnameHasLocale) {
     // For paths that already have a locale, we'll let them pass through
-    // This allows non-fully-implemented pages to still be accessed with a language prefix
-    // Components that are translated will show in the correct language
     return NextResponse.next();
   }
 

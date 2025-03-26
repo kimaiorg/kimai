@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
   typescript: {
     // Temporarily ignore TypeScript errors during build
     ignoreBuildErrors: true
+  },
+  // Ensure trailing slashes are consistent
+  trailingSlash: false,
+  // Increase serverless function timeout for Auth0 callbacks
+  serverRuntimeConfig: {
+    timeout: 60
   }
 };
 
