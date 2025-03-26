@@ -116,7 +116,8 @@ export default defineConfig([
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
-      "react-hooks/exhaustive-deps": "off"
+      "react-hooks/exhaustive-deps": "off",
+      "@next/next/no-img-element": "off"
     },
 
     languageOptions: {

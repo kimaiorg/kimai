@@ -124,7 +124,7 @@ function RolePage() {
           {roleUsers.map((roleUser, index) => (
             <div
               key={index}
-              className="p-4 border rounded-lg shadow-sm bg-white"
+              className="p-4 border rounded-lg shadow-sm bg-white dark:bg-slate-800"
             >
               <h2 className="text-lg font-semibold">{roleUser.role.name}</h2>
               <p>Quantity: {roleUser.userCount}</p>
@@ -132,7 +132,7 @@ function RolePage() {
           ))}
         </div>
 
-        <table className="min-w-full bg-white border rounded-lg shadow-sm table-layout">
+        <table className="min-w-full bg-white dark:bg-slate-800 border rounded-lg shadow-sm table-layout">
           <thead>
             <tr>
               <th className="py-2 px-4 w-[40%]">Name</th>
@@ -160,7 +160,7 @@ function RolePage() {
                     >
                       <span
                         className={`inline-block px-2 py-1 rounded-full ${
-                          isAllowed ? "bg-green-500 text-white" : "bg-gray-200"
+                          isAllowed ? "bg-lime-500 text-white" : "bg-gray-200 dark:bg-slate-900"
                         } ${canUpdate ? "cursor-pointer" : "cursor-not-allowed"}`}
                         onClick={() => updatePermissionForRole(rolePermission, allSystemPermission, isAllowed)}
                       >

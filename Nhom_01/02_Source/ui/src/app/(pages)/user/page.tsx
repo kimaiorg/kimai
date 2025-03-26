@@ -67,7 +67,7 @@ function User() {
             </AddUserModal>
           </div>
         </div>
-        <Table className="bg-white rounded-lg shadow-md">
+        <Table className="bg-white dark:bg-slate-800 rounded-lg shadow-md">
           <TableCaption>
             <PaginationWithLinks
               page={page}
