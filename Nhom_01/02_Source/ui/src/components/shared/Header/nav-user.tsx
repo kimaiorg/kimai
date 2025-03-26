@@ -16,6 +16,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { Bell, LogOut, UserRoundSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function NavUser() {
   const { user, isLoading } = useUser();
@@ -34,81 +35,87 @@ export function NavUser() {
   }
   if (!isLoading && !user) {
     return (
-      <Button
-        className="px-6 py-3 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition"
-        onClick={() => (window.location.href = "/api/auth/login")}
-      >
-        Login
-      </Button>
+      <div className="flex items-center gap-3">
+        <LanguageSwitcher />
+        <Button
+          className="px-6 py-3 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition"
+          onClick={() => (window.location.href = "/api/auth/login")}
+        >
+          Login
+        </Button>
+      </div>
     );
   }
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 flex-row-reverse cursor-pointer">
-              <div className="h-8 w-8 rounded-full">
-                {/* <img src={defaultAvatar} alt="Default Avatar" className="w-full h-full" /> */}
-                <DefaultAvatar
-                  name={user!.name!}
-                  size={40}
-                />
-              </div>
-              <div className="grid flex-1 text-end text-sm leading-tight">
-                <span className="truncate font-semibold">{user!.name}</span>
-                {/* <span className="truncate text-xs">{user!.email}</span> */}
-              </div>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="min-w-56 rounded-lg"
-            align="end"
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <div className="h-7 w-7 rounded-full">
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex items-center gap-2 flex-row-reverse cursor-pointer">
+                <div className="h-8 w-8 rounded-full">
+                  {/* <img src={defaultAvatar} alt="Default Avatar" className="w-full h-full" /> */}
                   <DefaultAvatar
                     name={user!.name!}
-                    size={30}
+                    size={40}
                   />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user!.name || "Admin"}</span>
-                  <span className="truncate text-xs">{user!.email}</span>
+                <div className="grid flex-1 text-end text-sm leading-tight">
+                  <span className="truncate font-semibold">{user!.name}</span>
+                  {/* <span className="truncate text-xs">{user!.email}</span> */}
                 </div>
               </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => router.push("/profile")}
-              >
-                <UserRoundSearch />
-                Profile
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => router.push("/notification")}
-              >
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={handleLogout}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="min-w-56 rounded-lg"
+              align="end"
             >
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <div className="h-7 w-7 rounded-full">
+                    <DefaultAvatar
+                      name={user!.name!}
+                      size={30}
+                    />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user!.name || "Admin"}</span>
+                    <span className="truncate text-xs">{user!.email}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                >
+                  <UserRoundSearch />
+                  Profile
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => router.push("/notification")}
+                >
+                  <Bell />
+                  Notifications
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleLogout}
+              >
+                <LogOut />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </SidebarMenuItem>
     </SidebarMenu>
   );

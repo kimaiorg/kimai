@@ -27,6 +27,7 @@ import {
 export const timesheetNavMain = [
   {
     title: "Dashboard",
+    translationKey: "sidebar.dashboard",
     url: "/dashboard",
     icon: Home,
     isActive: false,
@@ -34,6 +35,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Time tracking",
+    translationKey: "sidebar.timesheet",
     url: "/timesheet",
     icon: AlarmClockPlus,
     isActive: false,
@@ -41,6 +43,7 @@ export const timesheetNavMain = [
     items: [
       {
         title: "My times",
+        translationKey: "sidebar.timesheet",
         url: "/timesheet",
         icon: AlarmClockPlus,
         isActive: false,
@@ -48,6 +51,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Calendar",
+        translationKey: "sidebar.calendar",
         url: "/calendar",
         icon: Calendar,
         isActive: false,
@@ -55,6 +59,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Export",
+        translationKey: "sidebar.export",
         url: "/export",
         icon: ClipboardPlus,
         isActive: false,
@@ -64,6 +69,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Employment contract",
+    translationKey: "sidebar.workingTime",
     url: "/working-time",
     icon: Scale,
     isActive: false,
@@ -71,6 +77,7 @@ export const timesheetNavMain = [
     items: [
       {
         title: "Working time",
+        translationKey: "sidebar.workingTime",
         url: "/working-time",
         icon: Calculator,
         isActive: false,
@@ -78,6 +85,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Absence",
+        translationKey: "sidebar.absence",
         url: "/absence",
         icon: PersonStanding,
         isActive: false,
@@ -87,6 +95,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Reporting",
+    translationKey: "sidebar.reporting",
     url: "/reporting",
     icon: FileChartColumnIncreasing,
     isActive: false,
@@ -94,6 +103,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Invoices",
+    translationKey: "sidebar.invoice",
     url: "/invoice",
     icon: ClipboardPaste,
     isActive: true,
@@ -101,6 +111,7 @@ export const timesheetNavMain = [
     items: [
       {
         title: "Create invoice",
+        translationKey: "sidebar.createInvoice",
         url: "/invoice",
         icon: FilePlus,
         isActive: false,
@@ -108,6 +119,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Invoice history",
+        translationKey: "sidebar.invoiceHistory",
         url: "/invoice-history",
         icon: Menu,
         isActive: false,
@@ -117,6 +129,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Tasks",
+    translationKey: "sidebar.task",
     url: "/task",
     icon: ListTodo,
     isActive: false,
@@ -124,6 +137,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Exspenses",
+    translationKey: "sidebar.expense",
     url: "/expense",
     icon: FileText,
     isActive: false,
@@ -131,6 +145,7 @@ export const timesheetNavMain = [
     items: [
       {
         title: "Expenses",
+        translationKey: "sidebar.expense",
         url: "/expense",
         icon: FileText,
         isActive: false,
@@ -138,6 +153,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Categories",
+        translationKey: "sidebar.category",
         url: "/category",
         icon: Menu,
         isActive: false,
@@ -147,6 +163,7 @@ export const timesheetNavMain = [
   },
   {
     title: "Administration",
+    translationKey: "sidebar.administration",
     url: "/customer",
     icon: PackageOpen,
     isActive: false,
@@ -154,6 +171,7 @@ export const timesheetNavMain = [
     items: [
       {
         title: "Customer",
+        translationKey: "sidebar.customer",
         url: "/customer",
         icon: UserRound,
         isActive: false,
@@ -161,6 +179,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Projects",
+        translationKey: "sidebar.project",
         url: "/project",
         icon: Boxes,
         isActive: false,
@@ -168,6 +187,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Activities",
+        translationKey: "sidebar.activity",
         url: "/activity",
         icon: ListTodo,
         isActive: false,
@@ -175,6 +195,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Tags",
+        translationKey: "sidebar.tag",
         url: "/tag",
         icon: Tag,
         isActive: false,
@@ -184,6 +205,7 @@ export const timesheetNavMain = [
   },
   {
     title: "System",
+    translationKey: "sidebar.system",
     url: "/user",
     icon: Settings,
     isActive: true,
@@ -191,6 +213,7 @@ export const timesheetNavMain = [
     items: [
       {
         title: "Users",
+        translationKey: "sidebar.user",
         url: "/user",
         icon: UsersRound,
         isActive: false,
@@ -198,6 +221,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Roles",
+        translationKey: "sidebar.role",
         url: "/role",
         icon: SquareUserRound,
         isActive: false,
@@ -205,6 +229,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Teams",
+        translationKey: "sidebar.team",
         url: "/team",
         icon: Users,
         isActive: false,
@@ -212,6 +237,7 @@ export const timesheetNavMain = [
       },
       {
         title: "Settings",
+        translationKey: "sidebar.setting",
         url: "/setting",
         icon: Wrench,
         isActive: false,
