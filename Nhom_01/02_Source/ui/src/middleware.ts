@@ -26,6 +26,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Handle post-logout redirects
+  // Check if this is a redirect after logout (Auth0 redirects to / after logout)
+  const isPostLogout = request.cookies.get("appSession") === undefined && pathname === "/";
+  if (isPostLogout) {
+    // Redirect directly to Auth0 login page instead of localized login
+    return NextResponse.redirect(new URL(`/api/auth/login`, request.url));
+  }
+
   // Check if the pathname already starts with a locale
   const pathnameHasLocale = locales.some((locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`);
 
