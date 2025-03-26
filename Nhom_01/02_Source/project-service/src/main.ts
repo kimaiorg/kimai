@@ -21,11 +21,16 @@ async function bootstrap() {
     .setTitle('KIMAI')
     .setDescription('API Documentation')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT', // Optional
+      in: 'header',
+    })
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, documentFactory);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(ENV.app_port ?? 3000);
 }
