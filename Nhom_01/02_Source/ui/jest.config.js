@@ -16,7 +16,9 @@ const customJestConfig = {
     "!src/**/_*.{js,jsx,ts,tsx}",
     "!src/**/*.stories.{js,jsx,ts,tsx}"
   ],
-  testMatch: ["<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}", "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"]
+  testMatch: ["<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}", "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"],
+  // Exclude utility files from test runs
+  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.next/", "<rootDir>/src/__tests__/utils/"]
 };
 
 module.exports = createJestConfig(customJestConfig);
