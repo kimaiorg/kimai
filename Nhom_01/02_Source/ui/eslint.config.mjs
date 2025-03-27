@@ -126,5 +126,15 @@ export default defineConfig([
       }
     }
   },
+  // Add specific configuration for Cypress files
+  {
+    files: ["**/cypress/**/*.{ts,tsx,d.ts}"],
+    rules: {
+      "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unused-vars": "off"
+    }
+  },
   globalIgnores(["node_modules", "dist", "build", "public", "src/components/ui"])
 ]);
+

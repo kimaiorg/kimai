@@ -10,7 +10,16 @@
     "format": "npx prettier . --write \"**/*.{ts,tsx,js,jsx,css,yaml,yml,json}\"",
     "check-format": "npx prettier . --check \"**/*.{ts,tsx,js,jsx,css,yaml,yml,json}\"",
     "prepare": "cd ../../.. && husky Nhom_01/02_Source/ui/.husky",
-    "precommit": "npx lint-staged"
+    "precommit": "npx lint-staged",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "analyze": "ANALYZE=true next build",
+    "cypress": "cypress open",
+    "cypress:headless": "cypress run",
+    "cypress:login": "cypress run --spec \"cypress/e2e/auth/login.cy.ts\"",
+    "e2e": "start-server-and-test dev http://localhost:3000 cypress",
+    "e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
@@ -46,16 +55,30 @@
   "devDependencies": {
     "@stylistic/eslint-plugin": "^4.2.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/cypress": "^10.0.3",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^15.0.7",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/cypress": "^0.1.6",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/testing-library__jest-dom": "^5.14.9",
+    "cypress": "^14.2.1",
     "eslint": "^9.23.0",
     "eslint-config-next": "^15.2.3",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-jest": "^28.11.0",
     "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^12.3.2",
+    "next-bundle-analyzer": "^0.6.8",
     "prettier": "3.5.3",
     "tailwindcss": "^4",
+    "ts-jest": "^29.3.0",
     "typescript": "^5"
   }
 }
