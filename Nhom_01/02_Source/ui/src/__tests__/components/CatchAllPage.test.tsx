@@ -5,6 +5,16 @@ import { notFound } from "next/navigation";
 import "@testing-library/jest-dom";
 import { expectAny } from "../utils/testUtils";
 
+// Mock next/navigation first before using mockNotFound
+jest.mock("next/navigation", () => {
+  return {
+    notFound: jest.fn()
+  };
+});
+
+// Get the mocked function after mocking
+const mockNotFound = jest.mocked(notFound);
+
 // Mock dynamic import
 jest.mock("next/dynamic", () => ({
   __esModule: true,
@@ -15,12 +25,6 @@ jest.mock("next/dynamic", () => ({
     DynamicComponent.displayName = "DynamicComponent";
     return DynamicComponent;
   }
-}));
-
-// Mock next/navigation
-const mockNotFound = jest.fn();
-jest.mock("next/navigation", () => ({
-  notFound: mockNotFound
 }));
 
 describe("CatchAllPage Component", () => {

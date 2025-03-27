@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+import "cypress";
 
 declare namespace Cypress {
   interface Chainable<Subject = any> {
