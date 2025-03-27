@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
+import Loading from "@/app/loading";
 
 interface PageProps {
   params: {
@@ -28,7 +29,7 @@ export default function CatchAllPage({ params }: PageProps) {
           return () => notFound();
         }),
       {
-        loading: () => <div>Loading...</div>,
+        loading: () => <Loading />,
         ssr: true
       }
     );

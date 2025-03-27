@@ -192,39 +192,24 @@
 
 /* HTML: <div class="loader"></div> */
 .loader {
-  width: 300px;
-  aspect-ratio: 1;
-  padding: 10px;
-  box-sizing: border-box;
-  display: grid;
-  background: #fff;
-  filter: blur(3px) contrast(7) hue-rotate(290deg);
-  mix-blend-mode: darken;
-}
-.loader:before {
-  content: "";
-  margin: auto;
-  width: 50px;
-  height: 50px;
+  --d: 3rem;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  color: #ff0000;
-  background: currentColor;
+  color: #00aa25;
   box-shadow:
-    -50px 0,
-    50px 0,
-    0 50px,
-    0 -50px;
-  animation: l6 1s infinite alternate;
+    calc(1 * var(--d)) calc(0 * var(--d)) 0 0,
+    calc(0.707 * var(--d)) calc(0.707 * var(--d)) 0 1px,
+    calc(0 * var(--d)) calc(1 * var(--d)) 0 2px,
+    calc(-0.707 * var(--d)) calc(0.707 * var(--d)) 0 3px,
+    calc(-1 * var(--d)) calc(0 * var(--d)) 0 4px,
+    calc(-0.707 * var(--d)) calc(-0.707 * var(--d)) 0 5px,
+    calc(0 * var(--d)) calc(-1 * var(--d)) 0 6px;
+  animation: l27 1.2s infinite steps(8);
 }
-@keyframes l6 {
-  90%,
+@keyframes l27 {
   100% {
-    box-shadow:
-      -10px 0,
-      10px 0,
-      0 10px,
-      0 -10px;
-    transform: rotate(180deg);
+    transform: rotate(1turn);
   }
 }
 

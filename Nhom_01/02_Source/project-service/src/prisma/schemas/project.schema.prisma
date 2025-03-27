@@ -1,21 +1,23 @@
 model Project {
-    id             Int       @id @default(autoincrement())
-    name           String
-    color          String?
-    project_number Int
-    order_number   Int?
-    order_date     DateTime?
-    start_date     DateTime?
-    end_date       DateTime?
-    budget         Float?
+  id             Int       @id @default(autoincrement())
+  name           String
+  color          String?
+  project_number Int
+  order_number   Int?
+  order_date     DateTime?
+  start_date     DateTime?
+  end_date       DateTime?
+  budget         Float?
 
-    teams       Team[]   @relation("ProjectTeam")
-    customer    Customer @relation(fields: [customer_id], references: [id])
-    customer_id Int
+  teams       Team[]   @relation("ProjectTeam")
+  customer    Customer @relation(fields: [customer_id], references: [id])
+  customer_id Int
 
-    created_at DateTime  @default(now())
-    updated_at DateTime  @updatedAt
-    deleted_at DateTime?
+  activity Activity[]
 
-    @@map("projects")
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("projects")
 }

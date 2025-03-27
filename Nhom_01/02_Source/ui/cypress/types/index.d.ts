@@ -15,13 +15,34 @@ declare namespace Cypress {
     getByTestId(testId: string): Chainable<JQuery<HTMLElement>>;
   }
 
-  // Extend Record<string, any> to avoid empty interface error
-  interface PluginEvents extends Record<string, any> {
-    // Define plugin events here
+  interface PluginEvents {
+    // Authentication events
+    auth: {
+      login(credentials: { email: string; password: string }): void;
+      logout(): void;
+    };
+    // Test events
+    test: {
+      beforeTest(testInfo: { name: string; title: string }): void;
+      afterTest(results: { passed: boolean; error?: Error }): void;
+    };
   }
 
-  // Extend Record<string, any> to avoid empty interface error
-  interface PluginConfigOptions extends Record<string, any> {
-    // Define plugin config options here
+  interface PluginConfigOptions {
+    // Basic configuration
+    baseUrl: string;
+    env: {
+      environment: "development" | "staging" | "production";
+      apiUrl: string;
+      credentials?: {
+        username: string;
+        password: string;
+      };
+    };
+    // Test configuration
+    retries: {
+      runMode: number;
+      openMode: number;
+    };
   }
 }

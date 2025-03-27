@@ -6,12 +6,6 @@
     "allowSyntheticDefaultImports": true,
     "types": ["jest", "node", "@testing-library/jest-dom", "cypress", "@testing-library/cypress"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.js",
-    "src/**/*.jsx",
-    "jest.setup.js"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", "jest.setup.js"],
   "exclude": ["node_modules"]
 }

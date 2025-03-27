@@ -41,7 +41,7 @@ describe("CatchAllPage Component", () => {
     // Check if the component is rendered
     const element = screen.getByText("Dynamic Component");
     expectAny(element).toBeInTheDocument();
-    
+
     // Check if notFound was not called
     expectAny(mockNotFound).not.toHaveBeenCalled();
   });

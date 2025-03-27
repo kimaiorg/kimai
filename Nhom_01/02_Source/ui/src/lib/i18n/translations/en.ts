@@ -45,5 +45,18 @@ export const en = {
     warning: "Warning",
     info: "Information",
     welcome: "Welcome to Kimai time tracking system"
+  },
+  page: {
+    dashboard: {
+      title: "My dashboard",
+      timesheet: "My timesheet chart",
+      today: "Today",
+      thisWeek: "This week",
+      thisMonth: "This month",
+      thisYear: "This year",
+      chart: {
+        hours: "Hours"
+      }
+    }
   }
 };

@@ -4,5 +4,11 @@
   "name": "Admin User",
   "picture": "https://via.placeholder.com/150",
   "roles": ["ROLE_ADMIN"],
-  "permissions": ["view_all_timesheets", "create_all_timesheets", "edit_all_timesheets", "manage_users", "manage_projects"]
+  "permissions": [
+    "view_all_timesheets",
+    "create_all_timesheets",
+    "edit_all_timesheets",
+    "manage_users",
+    "manage_projects"
+  ]
 }

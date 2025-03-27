@@ -87,7 +87,7 @@ export function CustomerList({ customers, currentPage, totalPages, onPageChange,
 
   return (
     <div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white dark:bg-slate-900">
         <Table>
           <TableHeader>
             <TableRow>

@@ -26,7 +26,7 @@ function User() {
     users: []
   });
 
-  const fetchUser = async (page: number, size: number = 10) => {
+  const fetchUser = async (page: number, size: number = 2) => {
     const result = await getAllUsers(page, size);
     setUserList(result);
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import ErrorPage from "@/app/error";
+import Loading from "@/app/loading";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Role, RolePermissionType, RoleType } from "@/type_schema/role";
 import { useUser } from "@auth0/nextjs-auth0/client";
@@ -31,7 +32,7 @@ export const AuthenticatedRoute = (Component: any, roles: Role[]) => {
     const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
 
     if (isLoading) {
-      return <p>Loading...</p>;
+      return <Loading />;
     }
     if (error) {
       return (

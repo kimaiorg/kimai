@@ -7,6 +7,7 @@ import {
   getAllSystemPermissions,
   getUsersForEachRole
 } from "@/api/auth.api";
+import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 // import { allSystemPermissions } from "@/lib/constants";
 import { PermissionType, Role, RolePermissionType, RoleUserType } from "@/type_schema/role";
@@ -115,7 +116,7 @@ function RolePage() {
     );
   };
 
-  if (rolePermissions.length == 0 || allSystemPermissions.length == 0) return <div>Loading...</div>;
+  if (rolePermissions.length == 0 || allSystemPermissions.length == 0) return <Loading />;
 
   return (
     <>

@@ -137,4 +137,3 @@ export default defineConfig([
   },
   globalIgnores(["node_modules", "dist", "build", "public", "src/components/ui"])
 ]);
-

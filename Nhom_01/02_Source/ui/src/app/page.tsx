@@ -1,5 +1,6 @@
 "use client";
 import ErrorPage from "@/app/error";
+import Loading from "@/app/loading";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -19,7 +20,7 @@ export default function Home() {
   }, [user, error, isLoading, router]);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Loading />;
   }
 
   if (error) {

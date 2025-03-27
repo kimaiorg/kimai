@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Fetches user role and permissions from the API
@@ -14,8 +14,8 @@ export async function getUserRolePermissions(userId: string, useFallback = false
     if (useFallback) {
       // Return default permissions if fallback is enabled
       return {
-        role: 'user',
-        permissions: ['view_timesheet']
+        role: "user",
+        permissions: ["view_timesheet"]
       };
     }
     throw error;
