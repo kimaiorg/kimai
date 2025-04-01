@@ -62,4 +62,10 @@ export class BaseRepository<T> implements BaseRepositoryInterface<T> {
       },
     });
   }
+
+  async count(options?: GetOptions<T>): Promise<number | null> {
+    return await this.prismaClient[this.tableName].count({
+      ...options,
+    });
+  }
 }
