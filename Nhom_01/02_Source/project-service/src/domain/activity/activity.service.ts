@@ -3,6 +3,9 @@ import { ActivityRepository } from '@/infrastructure/activity/activity.repositor
 import { ProjectRepository } from '@/infrastructure/project/project.repository';
 import { Activity } from '@prisma/client';
 import { CreateActivityDto } from '@/api/activity/dto/create-activity.dto';
+import { UpdateActivityDto } from '@/api/activity/dto/update-activity.dto';
+import { ListActivityDto } from '@/api/activity/dto';
+import { PaginationResponse } from '@/libs/response/pagination';
 
 @Injectable()
 export class ActivityService {
@@ -41,7 +44,48 @@ export class ActivityService {
     return await this.activityRepository.findById(id);
   }
 
-  async listActivities(): Promise<Activity[] | null> {
-    return await this.activityRepository.findAll();
+  async listActivities(
+    dto: ListActivityDto,
+  ): Promise<PaginationResponse<Activity>> {
+    const count = await this.activityRepository.count({
+      where: {
+        project_id: dto.project_id,
+        team_id: dto.team_id,
+      },
+    }) as number;
+
+    const data = await this.activityRepository.findAll({
+      where: {
+        project_id: dto.project_id,
+        team_id: dto.team_id,
+      },
+      skip: (dto.page - 1) * dto.limit,
+      take: dto.limit,
+      orderBy: {
+        [dto.sortBy]: dto.sortOrder,
+      },
+    });
+
+    return {
+      data,
+      metadata: {
+        total: count || 0,
+        totalPages: Math.ceil(count / dto.limit) || 0,
+        page: dto.page,
+        limit: dto.limit,
+      },
+    };
+  }
+
+  async updateAcitivty(
+    id: number,
+    dto: UpdateActivityDto,
+  ): Promise<Activity | null> {
+    return await this.activityRepository.update({
+      where: {
+        id: id,
+      },
+      data: dto,
+    });
   }
 }

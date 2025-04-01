@@ -5,6 +5,9 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
+  Query,
+  Req,
   UsePipes,
 } from '@nestjs/common';
 import { Activity } from '@prisma/client';
@@ -13,10 +16,15 @@ import { ActivityService } from '@/domain/activity/activity.service';
 import {
   createActivitySchema,
   CreateActivityDto,
-} from '@/api/activity/dto/create-activity.dto';
+  updateActivitySchema,
+  UpdateActivityDto,
+  listActivitySchema,
+  ListActivityDto,
+} from '@/api/activity/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateActivitySwagger } from '@/api/activity/swagger';
+import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('activities')
 export class ActivityController {
@@ -40,8 +48,21 @@ export class ActivityController {
   }
 
   @Get('')
+  @UsePipes(new ZodValidationPipe(listActivitySchema))
   @Permissions(['read:activities'])
-  async listTeams(): Promise<Activity[] | null> {
-    return await this.activityService.listActivities();
+  async listActivities(
+    @Query() dto: ListActivityDto,
+  ): Promise<PaginationResponse<Activity>> {
+    return await this.activityService.listActivities(dto);
+  }
+
+  @Put(':id')
+  @Permissions(['update:activities'])
+  @UsePipes(new ZodValidationPipe(updateActivitySchema))
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateActivityDto,
+  ): Promise<Activity | null> {
+    return await this.activityService.updateAcitivty(id, dto);
   }
 }

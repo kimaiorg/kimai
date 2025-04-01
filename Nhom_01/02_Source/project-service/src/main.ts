@@ -21,12 +21,6 @@ async function bootstrap() {
     .setTitle('KIMAI')
     .setDescription('API Documentation')
     .setVersion('1.0')
-    .addBearerAuth({
-      type: 'http',
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-      in: 'header',
-    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

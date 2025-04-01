@@ -12,10 +12,24 @@ export class TeamService {
   }
 
   async getTeam(id: number): Promise<Team | null> {
-    return await this.teamRepository.findById(id);
+    return await this.teamRepository.findById(id, {
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        users: true,
+      },
+    });
   }
 
   async listTeams(): Promise<Team[] | null> {
-    return await this.teamRepository.findAll();
+    return await this.teamRepository.findAll({
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        users: true,
+      },
+    });
   }
 }

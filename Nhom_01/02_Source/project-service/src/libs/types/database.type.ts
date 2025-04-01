@@ -5,6 +5,9 @@ export interface CreateOptions {
 export interface GetOptions<T> {
   select?: Record<string, any>;
   where?: Partial<T>;
+  orderBy?: Record<string, any>;
+  skip?: number;
+  take?: number;
 }
 
 export interface UpdateOptions<T> {
