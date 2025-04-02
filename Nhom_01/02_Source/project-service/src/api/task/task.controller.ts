@@ -5,18 +5,24 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   UsePipes,
 } from '@nestjs/common';
 import { Task } from '@prisma/client';
 import { Permissions } from '@/libs/decorators';
 import { TaskService } from '@/domain/task/task.service';
-import {
-  createTaskSchema,
-  CreateTaskDto,
-} from '@/api/task/dto/create-task.dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateTaskSwagger } from '@/api/task/swagger';
+import {
+  ListTaskDto,
+  listTaskSchema,
+  createTaskSchema,
+  CreateTaskDto,
+  updateTaskSchema,
+  UpdateTaskDto,
+} from '@/api/task/dto';
+import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('tasks')
 export class TaskController {
@@ -39,7 +45,18 @@ export class TaskController {
 
   @Get('')
   @Permissions(['read:tasks'])
-  async listTeams(): Promise<Task[] | null> {
-    return await this.taskService.listTasks();
+  @UsePipes(new ZodValidationPipe(listTaskSchema))
+  async listTeams(dto: ListTaskDto): Promise<PaginationResponse<Task>> {
+    return await this.taskService.listTasks(dto);
+  }
+
+  @Put(':id')
+  @Permissions(['update:tasks'])
+  @UsePipes(new ZodValidationPipe(updateTaskSchema))
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateTaskDto,
+  ): Promise<Task | null> {
+    return await this.taskService.updateTask(id, dto);
   }
 }
