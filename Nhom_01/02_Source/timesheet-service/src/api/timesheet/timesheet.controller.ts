@@ -23,11 +23,17 @@ import {
 } from '@/api/timesheet/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { PaginationResponse } from '@/libs/response/pagination';
+import {
+  StartTimesheetSwagger,
+  EndTimesheetSwagger,
+} from '@/api/timesheet/swagger';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('timesheets')
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}
   @Post('start')
+  @ApiBody({ type: StartTimesheetSwagger })
   @UsePipes(new ZodValidationPipe(startTimesheetSchema))
   async startTimesheet(
     @Body() dto: StartTimesheetDto,
@@ -36,6 +42,7 @@ export class TimesheetController {
   }
 
   @Post('end')
+  @ApiBody({ type: EndTimesheetSwagger })
   @UsePipes(new ZodValidationPipe(endTimesheetSchema))
   async endTimesheet(@Body() dto: EndTimesheetDto): Promise<Timesheet | null> {
     return await this.timesheetService.endTimesheet(dto);
