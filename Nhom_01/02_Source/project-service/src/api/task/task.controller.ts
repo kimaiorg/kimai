@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 import { Task } from '@prisma/client';
@@ -46,7 +47,9 @@ export class TaskController {
   @Get('')
   @Permissions(['read:tasks'])
   @UsePipes(new ZodValidationPipe(listTaskSchema))
-  async listTeams(dto: ListTaskDto): Promise<PaginationResponse<Task>> {
+  async listTeams(
+    @Query() dto: ListTaskDto,
+  ): Promise<PaginationResponse<Task>> {
     return await this.taskService.listTasks(dto);
   }
 
