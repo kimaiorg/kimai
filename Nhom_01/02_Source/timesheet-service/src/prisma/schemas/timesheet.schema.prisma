@@ -1,0 +1,16 @@
+model Timesheet {
+  id          Int     @id @default(autoincrement())
+  description String?
+
+  start_time DateTime  @default(now())
+  end_time   DateTime?
+  duration   Int?
+
+  user_id String
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("timesheets")
+}
