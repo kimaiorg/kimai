@@ -2,6 +2,7 @@ model Team {
   id    Int      @id @default(autoincrement())
   name  String
   color String?
+  lead  String?
   users String[]
 
   projects   Project[]  @relation("ProjectTeam")

@@ -20,6 +20,7 @@ export class TeamService {
         id: true,
         name: true,
         color: true,
+        lead: true,
         users: true,
       },
     });
@@ -33,6 +34,7 @@ export class TeamService {
         id: true,
         name: true,
         color: true,
+        lead: true,
         users: true,
       },
       skip: (dto.page - 1) * dto.limit,
