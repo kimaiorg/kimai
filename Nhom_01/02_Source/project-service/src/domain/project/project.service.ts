@@ -3,6 +3,9 @@ import { ProjectRepository } from '@/infrastructure/project/project.repository';
 import { Project } from '@prisma/client';
 import { CreateProjectDto } from '@/api/project/dto/create-project.dto';
 import { ProjectEntity } from '@/libs/entities';
+import { PaginationResponse } from '@/libs/response/pagination';
+import { ListProjectDto } from '@/api/project/dto/list-project.dto';
+import { UpdateProjectDto } from '@/api/project/dto/update-project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -41,8 +44,16 @@ export class ProjectService {
     });
   }
 
-  async listProjects(): Promise<Project[] | null> {
-    return await this.projectRepository.findAll({
+  async listProjects(
+    dto: ListProjectDto,
+  ): Promise<PaginationResponse<Project>> {
+    const count = (await this.projectRepository.count({
+      where: {
+        customer_id: dto.customer_id,
+      },
+    })) as number;
+
+    const data = await this.projectRepository.findAll({
       select: {
         id: true,
         name: true,
@@ -67,6 +78,36 @@ export class ProjectService {
           },
         },
       },
+      where: {
+        customer_id: dto.customer_id,
+      },
+      skip: (dto.page - 1) * dto.limit,
+      take: dto.limit,
+      orderBy: {
+        [dto.sortBy]: dto.sortOrder,
+      },
+    });
+
+    return {
+      data,
+      metadata: {
+        total: count || 0,
+        totalPages: Math.ceil(count / dto.limit) || 0,
+        page: dto.page,
+        limit: dto.limit,
+      },
+    };
+  }
+
+  async updateProject(
+    id: number,
+    dto: UpdateProjectDto,
+  ): Promise<Project | null> {
+    return await this.projectRepository.update({
+      where: {
+        id: id,
+      },
+      data: dto,
     });
   }
 }
