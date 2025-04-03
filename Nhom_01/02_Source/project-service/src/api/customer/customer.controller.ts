@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 import { Customer } from '@prisma/client';
@@ -14,14 +15,15 @@ import { CustomerService } from '@/domain/customer/customer.service';
 import {
   CreateCustomerDto,
   createCustomerSchema,
-} from '@/api/customer/dto/create-customer.dto';
+  UpdateCustomerDto,
+  updateCustomerSchema,
+  listCustomerSchema,
+  ListCustomerDto,
+} from '@/api/customer/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateCustomerSwagger } from '@/api/customer/swagger';
-import {
-  UpdateCustomerDto,
-  updateCustomerSchema,
-} from '@/api/customer/dto/update-customer.dto';
+import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('customers')
 export class CustomerController {
@@ -46,8 +48,11 @@ export class CustomerController {
 
   @Get('')
   @Permissions(['read:customers'])
-  async listCustomers(): Promise<Customer[] | null> {
-    return await this.customerService.listCustomers();
+  @UsePipes(new ZodValidationPipe(listCustomerSchema))
+  async listCustomers(
+    @Query() dto: ListCustomerDto,
+  ): Promise<PaginationResponse<Customer>> {
+    return await this.customerService.listCustomers(dto);
   }
 
   @Put(':id')

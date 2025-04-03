@@ -5,6 +5,8 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 import { Team } from '@prisma/client';
@@ -13,10 +15,15 @@ import { TeamService } from '@/domain/team/team.service';
 import {
   CreateTeamDto,
   createTeamSchema,
-} from '@/api/team/dto/create-team.dto';
+  ListTeamDto,
+  listTeamSchema,
+  updateTeamSchema,
+  UpdateTeamDto,
+} from '@/api/team/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateTeamSwagger } from '@/api/team/swagger';
+import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('teams')
 export class TeamController {
@@ -37,7 +44,20 @@ export class TeamController {
 
   @Get('')
   @Permissions(['read:teams'])
-  async listTeams(): Promise<Team[] | null> {
-    return await this.teamService.listTeams();
+  @UsePipes(new ZodValidationPipe(listTeamSchema))
+  async listTeams(
+    @Query() dto: ListTeamDto,
+  ): Promise<PaginationResponse<Team>> {
+    return await this.teamService.listTeams(dto);
+  }
+
+  @Put(':id')
+  @Permissions(['update:teams'])
+  @UsePipes(new ZodValidationPipe(updateTeamSchema))
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateTeamDto,
+  ): Promise<Team | null> {
+    return await this.teamService.updateTeam(id, dto);
   }
 }

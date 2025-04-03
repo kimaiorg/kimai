@@ -5,6 +5,8 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 import { Project } from '@prisma/client';
@@ -13,11 +15,16 @@ import { ProjectService } from '@/domain/project/project.service';
 import {
   CreateProjectDto,
   createProjectSchema,
-} from '@/api/project/dto/create-project.dto';
+  updateProjectSchema,
+  UpdateProjectDto,
+  listProjectSchema,
+  ListProjectDto,
+} from '@/api/project/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ProjectEntity } from '@/libs/entities';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateProjectSwagger } from '@/api/project/swagger';
+import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('projects')
 export class ProjectController {
@@ -42,7 +49,20 @@ export class ProjectController {
 
   @Get('')
   @Permissions(['read:projects'])
-  async listProjects(): Promise<Project[] | null> {
-    return await this.projectService.listProjects();
+  @UsePipes(new ZodValidationPipe(listProjectSchema))
+  async listProjects(
+    @Query() dto: ListProjectDto,
+  ): Promise<PaginationResponse<Project>> {
+    return await this.projectService.listProjects(dto);
+  }
+
+  @Put(':id')
+  @Permissions(['update:projects'])
+  @UsePipes(new ZodValidationPipe(listProjectSchema))
+  async updateProjects(
+    @Param('id') id: number,
+    @Body() dto: UpdateProjectDto,
+  ): Promise<Project | null> {
+    return await this.projectService.updateProject(id, dto);
   }
 }
