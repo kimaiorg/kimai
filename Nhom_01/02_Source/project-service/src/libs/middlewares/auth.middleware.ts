@@ -8,7 +8,6 @@ import * as jwt from 'jsonwebtoken';
 export class AuthMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log('AuthMiddleware', req.headers?.authorization);
       const token = req.headers?.authorization?.split(' ')[1];
       if (!token) {
         return res.status(401).json({
