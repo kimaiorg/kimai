@@ -57,6 +57,10 @@ export const en = {
       chart: {
         hours: "Hours"
       }
+    },
+    reporting: {
+      title: "Reporting",
+      description: "View and Analyze your time tracking data"
     }
   }
 };

@@ -57,6 +57,10 @@ export const vi = {
       chart: {
         hours: "Số giờ làm việc"
       }
+    },
+    reporting: {
+      title: "Báo cáo",
+      description: "Xem và phân tích dữ liệu chấm công của bạn"
     }
   }
 };
