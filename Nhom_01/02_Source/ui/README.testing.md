@@ -10,7 +10,7 @@
 ### Chạy Tất Cả Tests
 
 ```bash
-npm test
+npm run test
 ```
 
 ### Chạy Tests ở Chế Độ Watch

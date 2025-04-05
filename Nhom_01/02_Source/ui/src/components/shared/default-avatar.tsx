@@ -6,7 +6,8 @@ const DefaultAvatar: React.FC<{
   textSize?: number;
   index?: number;
   isUser?: boolean;
-}> = ({ name, size = 60, textSize = size / 2, index = 0, isUser = false }) => {
+  className?: string;
+}> = ({ name, size = 60, textSize = size / 2, index = 0, isUser = false, className = "" }) => {
   const colors = [
     "bg-green-500",
     "bg-red-500",
@@ -23,7 +24,7 @@ const DefaultAvatar: React.FC<{
 
   return (
     <div
-      className={`flex items-center justify-center text-white font-semibold uppercase rounded-full ${backgroundColor}  w-full h-full`}
+      className={`flex items-center justify-center text-white font-semibold uppercase rounded-full ${backgroundColor}  w-full h-full ${className}`}
       style={{
         fontSize: `${textSize}px`
       }}

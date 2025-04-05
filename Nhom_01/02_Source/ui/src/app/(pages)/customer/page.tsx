@@ -1,83 +1,87 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CustomerList } from "./components/customer-list";
-import { CustomerCreateDialog } from "./components/customer-create-dialog";
-import { Customer } from "@/type_schema/customer";
-import { Plus, Search, Filter, FileDown, Upload } from "lucide-react";
-import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
-import { Role } from "@/type_schema/role";
-import { CustomerService } from "@/services/customer.service";
+import { getAllCustomers } from "@/api/customer.api";
 import Loading from "@/app/loading";
+import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { Pagination } from "@/type_schema/common";
+import { CustomerType } from "@/type_schema/customer";
+import { Role } from "@/type_schema/role";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@radix-ui/react-dropdown-menu";
+import { FileDown, Filter, MoreHorizontal, Plus, Search, Upload } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CustomerCreateDialog } from "./customer-create-dialog";
 
 function CustomerPage() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const queryParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
+  const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
+  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
+  const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const [customerList, setCustomerList] = useState<Pagination<CustomerType>>({
+    metadata: {
+      page: 1,
+      limit: 5,
+      totalPages: 1,
+      total: 0
+    },
+    data: []
+  });
   const [isLoading, setIsLoading] = useState(true);
-  const itemsPerPage = 10;
+
+  const handleFetchCustomers = async (
+    page: number,
+    size: number,
+    keyword: string,
+    sortBy: string,
+    sortOrder: string
+  ) => {
+    try {
+      setSortBy(sortBy);
+      setSortOrder(sortOrder);
+      const data = await getAllCustomers(page, size, keyword, sortBy, sortOrder);
+      setCustomerList(data);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
 
   // Fetch customers on component mount
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setIsLoading(true);
-        const data = await CustomerService.getCustomers();
-        setCustomers(data);
-        setFilteredCustomers(data);
-      } catch (error) {
-        console.error("Error fetching customers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCustomers();
+    setIsLoading(true);
+    handleFetchCustomers(page, limit, keyword, sortBy, sortOrder);
+    setIsLoading(false);
   }, []);
 
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const updateQueryParams = (param: string, value: string) => {
+    const params = new URLSearchParams(queryParams);
+    params.set(param, value);
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
+    const keyword = e.target.value.toLowerCase();
+    setKeyword(keyword);
+    updateQueryParams("keyword", keyword);
   };
 
-  // Filter customers based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredCustomers(customers);
-    } else {
-      const filtered = customers.filter(
-        (customer) =>
-          customer.name.toLowerCase().includes(searchQuery) ||
-          (customer.company_name && customer.company_name.toLowerCase().includes(searchQuery)) ||
-          (customer.country && customer.country.toLowerCase().includes(searchQuery)) ||
-          (customer.email && customer.email.toLowerCase().includes(searchQuery))
-      );
-      setFilteredCustomers(filtered);
-    }
-    setCurrentPage(1); // Reset to first page when search changes
-  }, [searchQuery, customers]);
-
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Handle customer creation
-  const handleCreateCustomer = async (customerData: any) => {
-    try {
-      const newCustomer = await CustomerService.createCustomer(customerData);
-      setCustomers([...customers, newCustomer]);
-    } catch (error) {
-      console.error("Error creating customer:", error);
-    }
+  const goToPage = (page: number) => {
+    handleFetchCustomers(page, limit, keyword, sortBy, sortOrder);
+    updateQueryParams("page", page.toString());
   };
 
   if (isLoading) {
@@ -85,7 +89,7 @@ function CustomerPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 px-8">
+    <>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Customers</h1>
         <div className="flex items-center space-x-2">
@@ -94,8 +98,8 @@ function CustomerPage() {
             <Input
               type="search"
               placeholder="Search..."
-              className="pl-8 w-[200px]"
-              value={searchQuery}
+              className="pl-8 w-[200px] bg-white dark:bg-slate-700 border border-gray-200"
+              value={keyword}
               onChange={handleSearchChange}
             />
           </div>
@@ -105,12 +109,11 @@ function CustomerPage() {
           >
             <Filter className="h-4 w-4" />
           </Button>
-          <Button
-            onClick={() => setCreateDialogOpen(true)}
-            className="flex items-center"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Create
-          </Button>
+          <CustomerCreateDialog fetchCustomers={() => handleFetchCustomers(1, limit, keyword, sortBy, sortOrder)}>
+            <Button className="flex items-center justify-center gap-2 cursor-pointer">
+              Create <Plus />
+            </Button>
+          </CustomerCreateDialog>
           <Button
             variant="outline"
             size="icon"
@@ -126,21 +129,78 @@ function CustomerPage() {
         </div>
       </div>
 
-      <CustomerList
-        customers={filteredCustomers}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        itemsPerPage={itemsPerPage}
+      <div className="rounded-md border bg-white dark:bg-slate-900 my-5">
+        <table className="w-full border-collapse border border-gray-200">
+          <thead className="bg-gray-100 dark:bg-slate-700">
+            <tr>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">ID</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Country</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Email</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {customerList.data.length === 0 && (
+              <tr className="h-48 text-center">
+                <td
+                  colSpan={6}
+                  className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
+                >
+                  No customers found.
+                </td>
+              </tr>
+            )}
+            {customerList.data.map((customer) => (
+              <tr
+                key={customer.id}
+                className={`border-t dark:border-slate-700`}
+              >
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.id}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="flex items-center">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: customer.color || "#FF5733" }}
+                    ></div>
+                    <span className="ml-2">{customer.name}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.country}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.email}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.phone}</td>
+                <td className="px-4 py-2 text-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 p-0"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Show</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <PaginationWithLinks
+        page={customerList.metadata.page}
+        pageSize={customerList.metadata.limit}
+        totalCount={customerList.metadata.total}
+        callback={goToPage}
       />
-
-      {/* Create customer dialog */}
-      <CustomerCreateDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onCreateCustomer={handleCreateCustomer}
-      />
-    </div>
+    </>
   );
 }
 

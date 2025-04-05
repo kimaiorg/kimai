@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="min-w-32"
+        className="min-w-32 border border-gray-200 mt-2"
       >
         <DropdownMenuItem
           className="cursor-pointer flex items-center gap-2"

@@ -35,9 +35,20 @@ export async function createAccessToken(audience: string): Promise<string> {
   }
 }
 
+export async function getManagementAccessToken(): Promise<string> {
+  try {
+    if (sessionStorage.getItem("backend-at-token")) return sessionStorage.getItem("backend-at-token")!;
+    const response = await axios.get<{ accessToken: string }>("/api/token/api-server");
+
+    sessionStorage.setItem("backend-at-token", response.data.accessToken);
+    return response.data.accessToken;
+  } catch (error) {
+    throw new Error("Failed to get Auth0 management token", { cause: error });
+  }
+}
+
 export async function getAllSystemPermissions(): Promise<PermissionType[]> {
   const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
-  console.log(token);
 
   const BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
   const API_ID = process.env.AUTH0_KIMAI_API_ID;

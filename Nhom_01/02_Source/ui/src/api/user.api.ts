@@ -15,11 +15,16 @@ export async function getAllUsers2(page: number, perPage: number): Promise<UserL
   return data;
 }
 
-export async function getAllUsers(page: number, perPage: number): Promise<UserListType> {
+export async function getAllUsers(page?: number, perPage?: number): Promise<UserListType> {
   const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
 
+  const params = new URLSearchParams();
+  params.set("include_totals", "true");
+  if (page) params.set("page", (page - 1).toString());
+  if (perPage) params.set("per_page", perPage.toString());
+
   const BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
-  const response = await fetch(`${BASE_URL}/api/v2/users?page=${page - 1}&per_page=${perPage}&include_totals=true`, {
+  const response = await fetch(`${BASE_URL}/api/v2/users?${params.toString()}`, {
     method: "GET",
     headers: {
       Accept: "application/json",

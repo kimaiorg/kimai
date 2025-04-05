@@ -120,7 +120,17 @@ function RolePage() {
 
   return (
     <>
-      <div className="p-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Role and Permissions</h1>
+        <div className="flex items-center space-x-2">
+          {/* <AddUserModal fetchUsers={handleReloadUser}>
+            <Button className="btn btn-primary cursor-pointer">
+              Create User <Plus />
+            </Button>
+          </AddUserModal> */}
+        </div>
+      </div>
+      <div className="pt-2">
         <div className="grid grid-cols-2 gap-4 lg:gap-2 mb-8 ">
           {roleUsers.map((roleUser, index) => (
             <div

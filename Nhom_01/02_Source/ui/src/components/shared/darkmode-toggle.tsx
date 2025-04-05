@@ -21,7 +21,7 @@ export function DarkModeToggle() {
     // Toggle theme without DropdownMenu
     <Button
       variant="outline"
-      className="rounded-full"
+      className="rounded-full border border-gray-200 cursor-pointer"
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >

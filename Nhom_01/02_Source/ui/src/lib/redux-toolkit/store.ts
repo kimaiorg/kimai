@@ -1,4 +1,5 @@
 import userReducer from "@/lib/redux-toolkit/slices/user-slice";
+import userListReducer from "@/lib/redux-toolkit/slices/list-user-slice";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 /**
@@ -9,7 +10,8 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
  */
 
 const rootReducer = combineReducers({
-  userState: userReducer
+  userState: userReducer,
+  userListState: userListReducer
 });
 
 export const makeStore = () => {

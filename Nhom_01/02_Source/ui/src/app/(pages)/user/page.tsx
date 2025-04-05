@@ -56,7 +56,7 @@ function User() {
 
   return (
     <>
-      <div className="m-3 space-y-3">
+      <div className="space-y-3">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">User</h1>
           <div className="flex items-center space-x-2">
@@ -76,7 +76,7 @@ function User() {
               callback={goToPage}
             />
           </TableCaption>
-          <TableHeader>
+          <TableHeader className="bg-gray-100 dark:bg-slate-900">
             <TableRow>
               <TableHead className="w-[100px]">No.</TableHead>
               <TableHead>Avatar</TableHead>

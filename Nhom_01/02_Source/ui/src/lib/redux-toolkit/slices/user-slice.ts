@@ -1,4 +1,3 @@
-// todoSlice.js
 import { RolePermissionType } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
 import { createSlice, Slice } from "@reduxjs/toolkit";

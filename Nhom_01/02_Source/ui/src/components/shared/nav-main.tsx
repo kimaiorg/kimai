@@ -77,14 +77,14 @@ export function NavMain({
               <Collapsible
                 key={item.title}
                 asChild
-                defaultOpen={item.items.filter((i) => i.url == currentPath).length > 0}
+                defaultOpen={item.items.filter((i) => currentPath.endsWith(i.url)).length > 0}
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
                       tooltip={item.translationKey ? t(item.translationKey) : item.title}
-                      isActive={item.items.filter((i) => i.url == currentPath).length > 0}
+                      isActive={item.items.filter((i) => currentPath.endsWith(i.url)).length > 0}
                     >
                       {item.icon && <item.icon />}
                       <span>{item.translationKey ? t(item.translationKey) : item.title}</span>
@@ -99,7 +99,7 @@ export function NavMain({
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton
                                 asChild
-                                className={subItem.url == currentPath ? activeClassname : ""}
+                                className={currentPath.endsWith(subItem.url) ? activeClassname : ""}
                               >
                                 <Link href={getLocalizedUrl(subItem.url)}>
                                   <span>{subItem.icon && <subItem.icon className="h-4 w-4" />}</span>
@@ -117,7 +117,7 @@ export function NavMain({
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  className={item.url == currentPath ? activeClassname : ""}
+                  className={currentPath.endsWith(item.url) ? activeClassname : ""}
                 >
                   <Link href={getLocalizedUrl(item.url)}>
                     {item.icon && <item.icon />}

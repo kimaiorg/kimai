@@ -68,7 +68,7 @@ export function NavUser() {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="min-w-56 rounded-lg"
+              className="min-w-56 rounded-lg border border-gray-200"
               align="end"
             >
               <DropdownMenuLabel className="p-0 font-normal">

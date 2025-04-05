@@ -1,9 +1,7 @@
 import axios from "axios";
 
-export const BASE_API = process.env.NEXT_PUBLIC_BASE_URL!;
-
 const myAxios = axios.create({
-  baseURL: BASE_API,
+  baseURL: process.env.BACKEND_URL,
   validateStatus: () => true
 });
 // Add a request interceptor
