@@ -7,7 +7,6 @@ import { PaginationResponse } from '@/libs/response/pagination';
 import { ListProjectDto } from '@/api/project/dto/list-project.dto';
 import { UpdateProjectDto } from '@/api/project/dto/update-project.dto';
 import { buildListQuery } from './builder';
-import { create } from 'domain';
 
 @Injectable()
 export class ProjectService {
