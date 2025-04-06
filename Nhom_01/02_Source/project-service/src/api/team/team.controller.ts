@@ -60,7 +60,7 @@ export class TeamController {
   @ApiBody({ type: UpdateTeamSwagger, required: false })
   @Permissions(['update:teams'])
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body(new ZodValidationPipe(updateTeamSchema)) dto: UpdateTeamDto,
   ): Promise<Team | null> {
     return await this.teamService.updateTeam(id, dto);
