@@ -155,7 +155,7 @@ export class ListProjectSwaggerDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    example: 'created_at',
+    example: 'created_at | name | budget',
     enum: ['created_at', 'name', 'budget'],
     description: 'Field to sort by',
     default: 'created_at',

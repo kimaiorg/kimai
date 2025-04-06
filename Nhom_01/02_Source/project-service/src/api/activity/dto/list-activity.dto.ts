@@ -2,8 +2,8 @@ import { paginationSchema } from '@/libs/dto/pagination.dto';
 import { z } from 'zod';
 
 export const listActivitySchema = paginationSchema.extend({
-  project_id: z.number().optional(),
-  team_id: z.number().optional(),
+  project_id: z.coerce.number().optional(),
+  team_id: z.coerce.number().optional(),
   sort_by: z
     .enum(['created_at', 'name', 'budget'])
     .optional()

@@ -173,12 +173,12 @@ export class ListCustomersSwaggerDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    example: 'created_at',
+    example: 'created_at | name',
     enum: ['created_at', 'name'],
     description: 'Field to sort by',
     default: 'created_at',
   })
-  sort_by?: 'created_at' | 'name' | 'budget';
+  sort_by?: 'created_at' | 'name';
 
   @ApiPropertyOptional({
     example: 'desc',
