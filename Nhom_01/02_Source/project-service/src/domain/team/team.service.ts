@@ -17,12 +17,13 @@ export class TeamService {
 
   async getTeam(id: number): Promise<Team | null> {
     return await this.teamRepository.findById(id, {
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        lead: true,
-        users: true,
+      where: {
+        id: id,
+        deleted_at: null,
+      },
+      include: {
+        projects: true,
+        activities: true,
       },
     });
   }
@@ -32,12 +33,9 @@ export class TeamService {
     const count = (await this.teamRepository.count({ where })) as number;
 
     const data = await this.teamRepository.findAll({
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        lead: true,
-        users: true,
+      include: {
+        projects: true,
+        activities: true,
       },
       where,
       skip: (dto.page - 1) * dto.limit,
@@ -62,6 +60,7 @@ export class TeamService {
     return await this.teamRepository.update({
       where: {
         id: id,
+        deleted_at: null,
       },
       data: dto,
     });

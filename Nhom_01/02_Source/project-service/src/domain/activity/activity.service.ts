@@ -43,7 +43,17 @@ export class ActivityService {
   }
 
   async getActivity(id: number): Promise<Activity | null> {
-    return await this.activityRepository.findById(id);
+    return await this.activityRepository.findById(id, {
+      where: {
+        id: id,
+        deleted_at: null,
+      },
+      include: {
+        project: true,
+        team: true,
+        tasks: true,
+      },
+    });
   }
 
   async listActivities(
@@ -56,6 +66,11 @@ export class ActivityService {
 
     const data = await this.activityRepository.findAll({
       where,
+      include: {
+        project: true,
+        team: true,
+        tasks: true,
+      },
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
@@ -81,6 +96,7 @@ export class ActivityService {
     return await this.activityRepository.update({
       where: {
         id: id,
+        deleted_at: null,
       },
       data: dto,
     });

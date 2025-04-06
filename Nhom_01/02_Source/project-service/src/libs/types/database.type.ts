@@ -4,6 +4,7 @@ export interface CreateOptions {
 
 export interface GetOptions<T> {
   select?: Record<string, any>;
+  include?: Record<string, any>;
   where?: Partial<T> | any;
   orderBy?: Record<string, any>;
   skip?: number;

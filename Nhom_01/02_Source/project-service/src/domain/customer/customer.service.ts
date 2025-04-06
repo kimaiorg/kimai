@@ -16,7 +16,15 @@ export class CustomerService {
   }
 
   async getCustomer(id: number): Promise<Customer | null> {
-    return await this.customerRepository.findById(id);
+    return await this.customerRepository.findById(id, {
+      where: {
+        id: id,
+        deleted_at: null,
+      },
+      include: {
+        projects: true,
+      },
+    });
   }
 
   async listCustomers(
@@ -27,6 +35,9 @@ export class CustomerService {
 
     const data = await this.customerRepository.findAll({
       where,
+      include: {
+        projects: true,
+      },
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
@@ -51,6 +62,7 @@ export class CustomerService {
     return await this.customerRepository.update({
       where: {
         id: id,
+        deleted_at: null,
       },
       data: dto,
     });

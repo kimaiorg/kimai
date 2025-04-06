@@ -15,7 +15,15 @@ export class TaskService {
   }
 
   async getTask(id: number): Promise<Task | null> {
-    return await this.taskRepository.findById(id);
+    return await this.taskRepository.findById(id, {
+      where: {
+        id: id,
+        deleted_at: null,
+      },
+      include: {
+        activity: true,
+      },
+    });
   }
 
   async listTasks(dto: ListTaskDto): Promise<PaginationResponse<Task>> {
@@ -26,6 +34,9 @@ export class TaskService {
 
     const data = await this.taskRepository.findAll({
       where,
+      include: {
+        activity: true,
+      },
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
@@ -48,6 +59,7 @@ export class TaskService {
     return await this.taskRepository.update({
       where: {
         id: id,
+        deleted_at: null,
       },
       data: dto,
     });
