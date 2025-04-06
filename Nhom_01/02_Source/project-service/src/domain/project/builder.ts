@@ -2,7 +2,7 @@ import { ListProjectDto } from '@/api/project/dto';
 
 export const buildListQuery = (dto: ListProjectDto) => {
   const where: any = {
-    customer: dto.customer_id,
+    customer_id: dto.customer_id,
   };
 
   if (dto.keyword) {
