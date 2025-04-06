@@ -61,10 +61,9 @@ export class TaskController {
   @Put(':id')
   @ApiBody({ type: UpdateTaskSwagger, required: false })
   @Permissions(['update:tasks'])
-  @UsePipes(new ZodValidationPipe(updateTaskSchema))
   async update(
     @Param('id') id: number,
-    @Body() dto: UpdateTaskDto,
+    @Body(new ZodValidationPipe(updateTaskSchema)) dto: UpdateTaskDto,
   ): Promise<Task | null> {
     return await this.taskService.updateTask(id, dto);
   }

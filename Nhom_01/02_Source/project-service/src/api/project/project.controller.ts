@@ -64,10 +64,9 @@ export class ProjectController {
   @Put(':id')
   @ApiBody({ type: UpdateProjectSwagger, required: false })
   @Permissions(['update:projects'])
-  @UsePipes(new ZodValidationPipe(listProjectSchema))
   async updateProjects(
     @Param('id') id: number,
-    @Body() dto: UpdateProjectDto,
+    @Body(new ZodValidationPipe(updateProjectSchema)) dto: UpdateProjectDto,
   ): Promise<Project | null> {
     return await this.projectService.updateProject(id, dto);
   }
