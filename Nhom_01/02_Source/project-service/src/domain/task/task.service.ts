@@ -33,7 +33,7 @@ export class TaskService {
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
-        [dto.sortBy]: dto.sortOrder,
+        [dto.sort_by]: dto.sort_order,
       },
     });
 

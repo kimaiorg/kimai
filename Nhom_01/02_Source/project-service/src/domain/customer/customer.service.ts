@@ -5,6 +5,7 @@ import { CreateCustomerDto } from '@/api/customer/dto/create-customer.dto';
 import { UpdateCustomerDto } from '@/api/customer/dto/update-customer.dto';
 import { ListCustomerDto } from '@/api/customer/dto';
 import { PaginationResponse } from '@/libs/response/pagination';
+import { buildListQuery } from './builder';
 
 @Injectable()
 export class CustomerService {
@@ -21,13 +22,15 @@ export class CustomerService {
   async listCustomers(
     dto: ListCustomerDto,
   ): Promise<PaginationResponse<Customer>> {
-    const count = (await this.customerRepository.count({})) as number;
+    const where = buildListQuery(dto);
+    const count = (await this.customerRepository.count({ where })) as number;
 
     const data = await this.customerRepository.findAll({
+      where,
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
-        [dto.sortBy]: dto.sortOrder,
+        [dto.sort_by]: dto.sort_order,
       },
     });
 

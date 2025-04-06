@@ -6,6 +6,7 @@ import { ProjectEntity } from '@/libs/entities';
 import { PaginationResponse } from '@/libs/response/pagination';
 import { ListProjectDto } from '@/api/project/dto/list-project.dto';
 import { UpdateProjectDto } from '@/api/project/dto/update-project.dto';
+import { buildListQuery } from './builder';
 
 @Injectable()
 export class ProjectService {
@@ -47,10 +48,9 @@ export class ProjectService {
   async listProjects(
     dto: ListProjectDto,
   ): Promise<PaginationResponse<Project>> {
+    const where: any = buildListQuery(dto);
     const count = (await this.projectRepository.count({
-      where: {
-        customer_id: dto.customer_id,
-      },
+      where,
     })) as number;
 
     const data = await this.projectRepository.findAll({
@@ -78,13 +78,11 @@ export class ProjectService {
           },
         },
       },
-      where: {
-        customer_id: dto.customer_id,
-      },
+      where,
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
-        [dto.sortBy]: dto.sortOrder,
+        [dto.sort_by]: dto.sort_order,
       },
     });
 

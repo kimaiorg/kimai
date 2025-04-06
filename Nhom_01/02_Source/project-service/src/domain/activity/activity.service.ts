@@ -6,6 +6,8 @@ import { CreateActivityDto } from '@/api/activity/dto/create-activity.dto';
 import { UpdateActivityDto } from '@/api/activity/dto/update-activity.dto';
 import { ListActivityDto } from '@/api/activity/dto';
 import { PaginationResponse } from '@/libs/response/pagination';
+import { buildListQuery } from './builder';
+import { GetOptions } from '@/libs/types/database.type';
 
 @Injectable()
 export class ActivityService {
@@ -47,22 +49,17 @@ export class ActivityService {
   async listActivities(
     dto: ListActivityDto,
   ): Promise<PaginationResponse<Activity>> {
-    const count = await this.activityRepository.count({
-      where: {
-        project_id: dto.project_id,
-        team_id: dto.team_id,
-      },
-    }) as number;
+    const where = buildListQuery(dto);
+    const count = (await this.activityRepository.count({
+      where,
+    })) as number;
 
     const data = await this.activityRepository.findAll({
-      where: {
-        project_id: dto.project_id,
-        team_id: dto.team_id,
-      },
+      where,
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
-        [dto.sortBy]: dto.sortOrder,
+        [dto.sort_by]: dto.sort_order,
       },
     });
 

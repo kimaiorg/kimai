@@ -22,8 +22,12 @@ import {
 } from '@/api/project/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { ProjectEntity } from '@/libs/entities';
-import { ApiBody } from '@nestjs/swagger';
-import { CreateProjectSwagger } from '@/api/project/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  CreateProjectSwagger,
+  UpdateProjectSwagger,
+  ListProjectSwaggerDto,
+} from '@/api/project/swagger';
 import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('projects')
@@ -48,6 +52,7 @@ export class ProjectController {
   }
 
   @Get('')
+  @ApiQuery({ type: ListProjectSwaggerDto, required: false })
   @Permissions(['read:projects'])
   @UsePipes(new ZodValidationPipe(listProjectSchema))
   async listProjects(
@@ -57,6 +62,7 @@ export class ProjectController {
   }
 
   @Put(':id')
+  @ApiBody({ type: UpdateProjectSwagger, required: false })
   @Permissions(['update:projects'])
   @UsePipes(new ZodValidationPipe(listProjectSchema))
   async updateProjects(

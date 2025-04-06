@@ -21,8 +21,12 @@ import {
   ListCustomerDto,
 } from '@/api/customer/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
-import { ApiBody } from '@nestjs/swagger';
-import { CreateCustomerSwagger } from '@/api/customer/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  CreateCustomerSwagger,
+  UpdateCustomerSwagger,
+  ListCustomersSwaggerDto,
+} from '@/api/customer/swagger';
 import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('customers')
@@ -47,6 +51,7 @@ export class CustomerController {
   }
 
   @Get('')
+  @ApiQuery({ type: ListCustomersSwaggerDto, required: false })
   @Permissions(['read:customers'])
   @UsePipes(new ZodValidationPipe(listCustomerSchema))
   async listCustomers(
@@ -56,6 +61,7 @@ export class CustomerController {
   }
 
   @Put(':id')
+  @ApiBody({ type: UpdateCustomerSwagger, required: false })
   @Permissions(['update:customers'])
   @UsePipes(new ZodValidationPipe(updateCustomerSchema))
   async update(
