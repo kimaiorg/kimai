@@ -123,6 +123,12 @@ export class ListProjectSwaggerDto {
   customer_id?: number;
 
   @ApiPropertyOptional({
+    example: 2,
+    description: 'Filter activities by Team ID',
+  })
+  team_id?: number;
+
+  @ApiPropertyOptional({
     example: 'design',
     description: 'Search keyword to filter activities by name',
   })

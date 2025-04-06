@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const listProjectSchema = paginationSchema.extend({
   customer_id: z.coerce.number().optional(),
+  team_id: z.coerce.number().optional(),
   budget_from: z.coerce.number().optional(),
   budget_to: z.coerce.number().optional(),
   sort_by: z

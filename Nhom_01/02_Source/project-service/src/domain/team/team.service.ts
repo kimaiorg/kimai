@@ -5,6 +5,7 @@ import { CreateTeamDto } from '@/api/team/dto/create-team.dto';
 import { ListTeamDto } from '@/api/team/dto/list-team.dto';
 import { PaginationResponse } from '@/libs/response/pagination';
 import { UpdateTeamDto } from '@/api/team/dto/update-team.dto';
+import { buildListQuery } from './builder';
 
 @Injectable()
 export class TeamService {
@@ -27,7 +28,8 @@ export class TeamService {
   }
 
   async listTeams(dto: ListTeamDto): Promise<PaginationResponse<Team>> {
-    const count = (await this.teamRepository.count({})) as number;
+    const where = buildListQuery(dto);
+    const count = (await this.teamRepository.count({ where })) as number;
 
     const data = await this.teamRepository.findAll({
       select: {
@@ -37,6 +39,7 @@ export class TeamService {
         lead: true,
         users: true,
       },
+      where,
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
