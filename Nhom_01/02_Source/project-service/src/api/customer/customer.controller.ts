@@ -63,10 +63,9 @@ export class CustomerController {
   @Put(':id')
   @ApiBody({ type: UpdateCustomerSwagger, required: false })
   @Permissions(['update:customers'])
-  @UsePipes(new ZodValidationPipe(updateCustomerSchema))
   async update(
-    @Param('id') id: number,
-    @Body() dto: UpdateCustomerDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(updateCustomerSchema)) dto: UpdateCustomerDto,
   ): Promise<Customer | null> {
     return await this.customerService.updateCustomer(id, dto);
   }
