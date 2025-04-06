@@ -106,12 +106,12 @@ export class ListTaskSwaggerDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    example: 'created_at',
-    enum: ['created_at', 'name', 'budget'],
+    example: 'created_at | title',
+    enum: ['created_at', 'title'],
     description: 'Field to sort by',
     default: 'created_at',
   })
-  sort_by?: 'created_at' | 'name' | 'budget';
+  sort_by?: 'created_at' | 'title';
 
   @ApiPropertyOptional({
     example: 'desc',
