@@ -13,8 +13,12 @@ import { Task } from '@prisma/client';
 import { Permissions } from '@/libs/decorators';
 import { TaskService } from '@/domain/task/task.service';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
-import { ApiBody } from '@nestjs/swagger';
-import { CreateTaskSwagger } from '@/api/task/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  CreateTaskSwagger,
+  UpdateTaskSwagger,
+  ListTaskSwaggerDto,
+} from '@/api/task/swagger';
 import {
   ListTaskDto,
   listTaskSchema,
@@ -45,6 +49,7 @@ export class TaskController {
   }
 
   @Get('')
+  @ApiQuery({ type: ListTaskSwaggerDto, required: false })
   @Permissions(['read:tasks'])
   @UsePipes(new ZodValidationPipe(listTaskSchema))
   async listTeams(
@@ -54,6 +59,7 @@ export class TaskController {
   }
 
   @Put(':id')
+  @ApiBody({ type: UpdateTaskSwagger, required: false })
   @Permissions(['update:tasks'])
   @UsePipes(new ZodValidationPipe(updateTaskSchema))
   async update(
