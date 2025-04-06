@@ -7,6 +7,7 @@ import { PaginationResponse } from '@/libs/response/pagination';
 import { ListProjectDto } from '@/api/project/dto/list-project.dto';
 import { UpdateProjectDto } from '@/api/project/dto/update-project.dto';
 import { buildListQuery } from './builder';
+import { create } from 'domain';
 
 @Injectable()
 export class ProjectService {
@@ -18,29 +19,13 @@ export class ProjectService {
 
   async getProject(id: number): Promise<Project | null> {
     return await this.projectRepository.findById(id, {
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        project_number: true,
-        order_number: true,
-        order_date: true,
-        start_date: true,
-        end_date: true,
-        budget: true,
-        teams: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            company_name: true,
-          },
-        },
+      where: {
+        id: id,
+        deleted_at: null,
+      },
+      include: {
+        teams: true,
+        customer: true,
       },
     });
   }
@@ -54,29 +39,9 @@ export class ProjectService {
     })) as number;
 
     const data = await this.projectRepository.findAll({
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        project_number: true,
-        order_number: true,
-        order_date: true,
-        start_date: true,
-        end_date: true,
-        budget: true,
-        teams: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            company_name: true,
-          },
-        },
+      include: {
+        teams: true,
+        customer: true,
       },
       where,
       skip: (dto.page - 1) * dto.limit,
@@ -104,6 +69,7 @@ export class ProjectService {
     return await this.projectRepository.update({
       where: {
         id: id,
+        deleted_at: null,
       },
       data: dto,
     });
