@@ -65,7 +65,7 @@ export class ActivityController {
   @ApiBody({ type: UpdateActivitySwagger, required: false })
   @Permissions(['update:activities'])
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body(new ZodValidationPipe(updateActivitySchema)) dto: UpdateActivityDto,
   ): Promise<Activity | null> {
     return await this.activityService.updateAcitivty(id, dto);
