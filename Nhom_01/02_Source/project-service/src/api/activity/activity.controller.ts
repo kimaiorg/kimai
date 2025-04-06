@@ -22,8 +22,12 @@ import {
   ListActivityDto,
 } from '@/api/activity/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
-import { ApiBody } from '@nestjs/swagger';
-import { CreateActivitySwagger } from '@/api/activity/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  CreateActivitySwagger,
+  UpdateActivitySwagger,
+  ListActivitySwaggerDto,
+} from '@/api/activity/swagger';
 import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('activities')
@@ -48,6 +52,7 @@ export class ActivityController {
   }
 
   @Get('')
+  @ApiQuery({ type: ListActivitySwaggerDto, required: false })
   @UsePipes(new ZodValidationPipe(listActivitySchema))
   @Permissions(['read:activities'])
   async listActivities(
@@ -57,6 +62,7 @@ export class ActivityController {
   }
 
   @Put(':id')
+  @ApiBody({ type: UpdateActivitySwagger, required: false })
   @Permissions(['update:activities'])
   @UsePipes(new ZodValidationPipe(updateActivitySchema))
   async update(
