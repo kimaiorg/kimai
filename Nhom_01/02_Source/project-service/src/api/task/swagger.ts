@@ -80,10 +80,10 @@ export class ListTaskSwaggerDto {
   activity_id?: number;
 
   @ApiPropertyOptional({
-    example: 2,
+    example: 'user123',
     description: 'Filter activities by User ID',
   })
-  user_id?: number;
+  user_id?: string;
 
   @ApiPropertyOptional({
     example: 'design',

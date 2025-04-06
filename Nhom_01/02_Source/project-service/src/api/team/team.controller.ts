@@ -21,8 +21,12 @@ import {
   UpdateTeamDto,
 } from '@/api/team/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
-import { ApiBody } from '@nestjs/swagger';
-import { CreateTeamSwagger } from '@/api/team/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  CreateTeamSwagger,
+  UpdateTeamSwagger,
+  ListTeamSwaggerDto,
+} from '@/api/team/swagger';
 import { PaginationResponse } from '@/libs/response/pagination';
 
 @Controller('teams')
@@ -43,6 +47,7 @@ export class TeamController {
   }
 
   @Get('')
+  @ApiQuery({ type: ListTeamSwaggerDto, required: false })
   @Permissions(['read:teams'])
   @UsePipes(new ZodValidationPipe(listTeamSchema))
   async listTeams(
@@ -52,6 +57,7 @@ export class TeamController {
   }
 
   @Put(':id')
+  @ApiBody({ type: UpdateTeamSwagger, required: false })
   @Permissions(['update:teams'])
   @UsePipes(new ZodValidationPipe(updateTeamSchema))
   async update(
