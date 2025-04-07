@@ -5,9 +5,9 @@ import { ApiModule } from '@/api/api.module';
 import { DomainModule } from '@/domain/domain.module';
 import { InfrastructureModule } from '@/infrastructure/infrastructure.module';
 import { AuthMiddleware } from '@/libs/middlewares';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from '@/libs/guards/permission.guard';
-import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
+import { PermissionMiddleware } from '@/libs/middlewares/permission.middleware';
 
 @Module({
   imports: [
@@ -28,5 +28,6 @@ import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes('*');
+    consumer.apply(PermissionMiddleware).forRoutes('*');
   }
 }
