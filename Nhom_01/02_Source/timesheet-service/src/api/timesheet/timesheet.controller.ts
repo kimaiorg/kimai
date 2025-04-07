@@ -20,13 +20,12 @@ import {
   EndTimesheetDto,
   listTimesheetSchema,
   ListTimesheetDto,
+  ListTimesheetsMeDto,
+  listTimesheetsMeSchema,
 } from '@/api/timesheet/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { PaginationResponse } from '@/libs/response/pagination';
-import {
-  StartTimesheetSwagger,
-  EndTimesheetSwagger,
-} from '@/api/timesheet/swagger';
+import { StartTimesheetSwagger } from '@/api/timesheet/swagger';
 import { ApiBody } from '@nestjs/swagger';
 
 @Controller('timesheets')
@@ -36,24 +35,35 @@ export class TimesheetController {
   @ApiBody({ type: StartTimesheetSwagger })
   @UsePipes(new ZodValidationPipe(startTimesheetSchema))
   async startTimesheet(
+    @Req() req: Request,
     @Body() dto: StartTimesheetDto,
   ): Promise<Timesheet | null> {
-    return await this.timesheetService.startTimesheet(dto);
+    const userId = req['user'].sub;
+    return await this.timesheetService.startTimesheet(userId, dto);
   }
 
   @Post('end')
-  @ApiBody({ type: EndTimesheetSwagger })
-  @UsePipes(new ZodValidationPipe(endTimesheetSchema))
-  async endTimesheet(@Body() dto: EndTimesheetDto): Promise<Timesheet | null> {
-    return await this.timesheetService.endTimesheet(dto);
+  async endTimesheet(@Req() req: Request): Promise<Timesheet | null> {
+    const userId = req['user'].sub;
+    return await this.timesheetService.endTimesheet(userId);
   }
 
   @Get('')
   @Permissions(['read:timesheets'])
   @UsePipes(new ZodValidationPipe(listTimesheetSchema))
-  async listTimesheet(
+  async listTimesheets(
     @Query() dto: ListTimesheetDto,
   ): Promise<PaginationResponse<Timesheet>> {
     return await this.timesheetService.listTimesheets(dto);
+  }
+
+  @Get('me')
+  @UsePipes(new ZodValidationPipe(listTimesheetsMeSchema))
+  async listTimesheetsMe(
+    @Req() req: Request,
+    @Query() dto: ListTimesheetsMeDto,
+  ): Promise<PaginationResponse<Timesheet>> {
+    const userId = req['user'].sub;
+    return await this.timesheetService.listTimesheetsMe(userId, dto);
   }
 }
