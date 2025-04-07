@@ -35,7 +35,12 @@ export class TaskService {
     const data = await this.taskRepository.findAll({
       where,
       include: {
-        activity: true,
+        activity: {
+          include: {
+            project: true,
+            team: true,
+          },
+        },
       },
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
