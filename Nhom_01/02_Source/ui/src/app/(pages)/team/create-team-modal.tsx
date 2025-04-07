@@ -222,17 +222,18 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
                   {selectedUsers.length == 0 && <p className="text-center">Empty</p>}
                   <RadioGroup
                     onChange={toggleTeamLead}
-                    className="rounded cursor-pointer border border-gray-200"
+                    className="rounded cursor-pointer border !gap-1"
                   >
                     {selectedUsers.map((user, index) => (
                       <div
                         key={index}
-                        className={`flex items-center justify-between p-3 border rounded-lg border-gray-200 ${teamLead && user.user_id == teamLead ? "bg-blue-50 dark:bg-slate-700" : ""}`}
+                        className={`flex items-center justify-between py-1 px-3 border rounded-lg border-gray-200`}
                       >
                         <div className="flex items-center gap-3">
                           <RadioGroupItem
                             value={user.user_id}
                             id={user.user_id}
+                            className="border border-gray-200"
                           />
                           <div className={`flex items-center justify-center w-8 h-8 rounded`}>
                             <DefaultAvatar

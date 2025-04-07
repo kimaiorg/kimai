@@ -144,7 +144,7 @@ function Team() {
         </div>
       </div>
 
-      <Table className="bg-white dark:bg-slate-700 border border-gray-200 rounded-md">
+      <Table className="bg-white dark:bg-slate-700 border border-gray-200 rounded-md select-none">
         <TableCaption>
           <PaginationWithLinks
             page={teamList.metadata.page}
@@ -182,25 +182,27 @@ function Team() {
                   member={team.lead}
                   lead={team.lead}
                 >
-                  <div
-                    className={`flex items-center justify-center h-9 w-9 cursor-pointer hover:ring-indigo-600 hover:ring-2 rounded-full`}
-                  >
-                    {team.lead?.picture ? (
-                      <Image
-                        src={team.lead.picture}
-                        alt={team.lead.name}
-                        width={36}
-                        height={36}
-                        className="rounded-full"
-                        priority
-                      />
-                    ) : (
-                      <DefaultAvatar
-                        name={team.lead?.name || ""}
-                        size={35}
-                        className="border-gray-200"
-                      />
-                    )}
+                  <div className="relative h-10 w-10 cursor-pointer group">
+                    <div className="absolute inset-0 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 group-hover:shadow-[0_0_10px_rgba(139,92,246,0.6)] transition-shadow duration-300">
+                      <div className="bg-white rounded-full w-full h-full flex items-center justify-center">
+                        {team.lead?.picture ? (
+                          <Image
+                            src={team.lead.picture}
+                            alt={team.lead.name}
+                            width={36}
+                            height={36}
+                            className="rounded-full"
+                            priority
+                          />
+                        ) : (
+                          <DefaultAvatar
+                            name={team.lead?.name || ""}
+                            size={35}
+                            className="rounded-full"
+                          />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </MemberHoverCard>
               </TableCell>
@@ -262,7 +264,7 @@ function Team() {
                     </TeamViewDialog>
                     <TeamUpdateDialog
                       targetTeam={team}
-                      fetchTeams={() => handleFetchTeams(1, limit, keyword, sortBy, sortOrder)}
+                      refetchTeams={() => handleFetchTeams(1, limit, keyword, sortBy, sortOrder)}
                     >
                       <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
                         <SquarePen size={14} /> Edit

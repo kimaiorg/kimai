@@ -50,3 +50,8 @@ export type CreateTeamRequestDTO = z.infer<typeof CreateTeamRequestSchema> & {
   users: string[];
   lead: string;
 };
+
+export type UpdateTeamRequestDTO = z.infer<typeof CreateTeamRequestSchema> & {
+  users: string[];
+  lead: string;
+};
