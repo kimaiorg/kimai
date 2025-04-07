@@ -9,6 +9,7 @@ import {
   FileChartColumnIncreasing,
   FilePlus,
   FileText,
+  GitPullRequestCreateArrow,
   Home,
   ListTodo,
   Menu,
@@ -62,6 +63,14 @@ export const timesheetNavMain = [
         translationKey: "sidebar.export",
         url: "/export",
         icon: ClipboardPlus,
+        isActive: false,
+        allowRoles: []
+      },
+      {
+        title: "Request",
+        translationKey: "sidebar.request",
+        url: "/request",
+        icon: GitPullRequestCreateArrow,
         isActive: false,
         allowRoles: []
       }

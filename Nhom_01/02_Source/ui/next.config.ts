@@ -23,7 +23,16 @@ const nextConfig: NextConfig = {
     timeout: 60
   },
   images: {
-    domains: ["s.gravatar.com", "cdn.auth0.com"]
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "s.gravatar.com"
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.auth0.com"
+      }
+    ]
   }
 };
 

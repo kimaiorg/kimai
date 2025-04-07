@@ -22,7 +22,8 @@ export const vi = {
     setting: "Cài đặt",
     administration: "Quản trị",
     system: "Hệ thống",
-    createInvoice: "Tạo hóa đơn"
+    createInvoice: "Tạo hóa đơn",
+    request: "Yêu cầu"
   },
   common: {
     login: "Đăng nhập",

@@ -30,7 +30,6 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
     resolver: zodResolver(CreateTaskRequestSchema),
     defaultValues: {
       title: "Write unit test",
-      from: "2023-01-01",
       deadline: "2023-01-02",
       description: "VIP customer",
       activity_id: "",
@@ -142,7 +141,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   </FormItem>
                 )}
               /> */}
-              <FormField
+              {/* <FormField
                 control={createTaskForm.control}
                 name="from"
                 render={({ field }) => (
@@ -157,7 +156,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               <FormField
                 control={createTaskForm.control}
                 name="deadline"
@@ -266,7 +265,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
             <DialogFooter>
               <Button
                 type="submit"
-                className="bg-lime-500 hover:bg-lime-600 cursor-pointer"
+                className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
               >
                 Create
               </Button>

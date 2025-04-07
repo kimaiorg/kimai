@@ -22,7 +22,8 @@ export const en = {
     setting: "Setting",
     administration: "Administration",
     system: "System",
-    createInvoice: "Create Invoice"
+    createInvoice: "Create Invoice",
+    request: "Request"
   },
   common: {
     login: "Login",

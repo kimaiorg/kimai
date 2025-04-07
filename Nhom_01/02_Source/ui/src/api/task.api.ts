@@ -33,6 +33,19 @@ export async function getAllTasks(
   return data;
 }
 
+export async function getAllTasksByUserId(userId: string): Promise<TaskResponseType[]> {
+  const token = await getManagementAccessToken();
+  console.log(userId);
+  const response = await myAxios.get<Pagination<TaskResponseType>>(`/api/v1/tasks`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  });
+  const result = response.data;
+  return result.data;
+}
+
 export async function addNewTask(request: CreateTaskRequestDTO): Promise<number> {
   const token = await getManagementAccessToken();
   const payload = { ...request };
