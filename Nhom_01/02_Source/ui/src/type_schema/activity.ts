@@ -1,18 +1,60 @@
+import { CustomerProjectType } from "@/type_schema/project";
+import { TaskSimpleType } from "@/type_schema/task";
+import { TeamSimpleType, TeamType } from "@/type_schema/team";
 import { z } from "zod";
 
-export interface ActivityType {
-  activity_number: number;
-  budget: number;
-  color: string;
-  created_at: string;
-  deleted_at: null | string;
-  description: string;
+export type ActivitySimpleType = {
   id: number;
   name: string;
+  color: string;
+  description: string;
+  activity_number: number;
+  budget: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: null | string;
   project_id: number;
   team_id: number;
+};
+
+export type ActivityType = {
+  id: number;
+  name: string;
+  color: string;
+  description: string;
+  activity_number: number;
+  budget: number;
+  project_id: number;
+  created_at: string;
   updated_at: string;
-}
+  deleted_at: null | string;
+  project: CustomerProjectType;
+  team: TeamSimpleType;
+  tasks: TaskSimpleType[];
+};
+
+export const activityFilters = [
+  {
+    name: "activity_number",
+    label: "Activity Number",
+    type: "text"
+  },
+  {
+    name: "budget",
+    label: "Budget",
+    type: "number"
+  },
+  {
+    name: "name",
+    label: "Name",
+    type: "text"
+  },
+  {
+    name: "created_at",
+    label: "Created At",
+    type: "date"
+  }
+];
 
 export const CreateActivityRequestSchema = z.object({
   name: z
@@ -47,7 +89,18 @@ export const CreateActivityRequestSchema = z.object({
 });
 
 export type CreateActivityValidation = z.infer<typeof CreateActivityRequestSchema>;
+export type UpdateActivityValidation = z.infer<typeof CreateActivityRequestSchema>;
 export type CreateActivityRequestDTO = {
+  name: string;
+  color: string;
+  description?: string;
+  project_id: number;
+  team_id: number;
+  budget: number;
+  activity_number: number;
+};
+
+export type UpdateActivityRequestDTO = {
   name: string;
   color: string;
   description?: string;

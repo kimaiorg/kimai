@@ -17,9 +17,9 @@ export async function getAllProjects(
   if (perPage) params.append("limit", perPage.toString());
   if (keyword) params.append("keyword", keyword);
   if (sortBy) {
-    params.append("sortBy", sortBy);
+    params.append("sort_by", sortBy);
     const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sortOrder", order);
+    params.append("sort_order", order);
   }
   const response = await myAxios.get<Pagination<ProjectType>>(`/api/v1/projects?${params.toString()}`, {
     headers: {

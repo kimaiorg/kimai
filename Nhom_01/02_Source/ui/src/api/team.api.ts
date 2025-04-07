@@ -1,7 +1,7 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { myAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
-import { CreateTeamRequestDTO, TeamSimpleType, TeamType } from "@/type_schema/team";
+import { CreateTeamRequestDTO, TeamResponseType, TeamSimpleType, TeamType } from "@/type_schema/team";
 
 export async function getAllTeams(
   page?: number,
@@ -9,7 +9,7 @@ export async function getAllTeams(
   keyword?: string,
   sortBy?: string,
   sortOrder?: string
-): Promise<Pagination<TeamSimpleType>> {
+): Promise<Pagination<TeamResponseType>> {
   const token = await getManagementAccessToken();
 
   const params = new URLSearchParams();
@@ -17,12 +17,12 @@ export async function getAllTeams(
   if (limit) params.append("limit", limit.toString());
   if (keyword) params.append("keyword", keyword);
   if (sortBy) {
-    params.append("sortBy", sortBy);
+    params.append("sort_by", sortBy);
     const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sortOrder", order);
+    params.append("sort_order", order);
   }
 
-  const response = await myAxios.get<Pagination<TeamSimpleType>>(`/api/v1/teams?${params.toString()}`, {
+  const response = await myAxios.get<Pagination<TeamResponseType>>(`/api/v1/teams?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"

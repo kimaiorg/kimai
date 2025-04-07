@@ -1,16 +1,43 @@
+import { ActivityType } from "@/type_schema/activity";
+import { TeamSimpleType } from "@/type_schema/team";
+import { UserType } from "@/type_schema/user.schema";
 import { z } from "zod";
 
-export interface TaskType {
-  activity_id: number;
-  created_at: string;
-  deadline: string;
-  deleted_at: null | string;
-  description: string;
+export type TaskSimpleType = {
   id: number;
   title: string;
+  deadline: string;
+  activity_id: number;
+  created_at: string;
+  deleted_at: null | string;
+  description: string;
   updated_at: string;
   user_id: string;
-}
+};
+
+export type TaskResponseType = {
+  id: number;
+  title: string;
+  deadline: string;
+  created_at: string;
+  deleted_at: null | string;
+  description: string;
+  updated_at: string;
+  activity: ActivityType;
+  user_id: string;
+};
+
+export type TaskType = {
+  id: number;
+  title: string;
+  deadline: string;
+  created_at: string;
+  deleted_at: null | string;
+  description: string;
+  updated_at: string;
+  activity: ActivityType;
+  user: UserType;
+};
 
 export const CreateTaskRequestSchema = z
   .object({
@@ -25,7 +52,6 @@ export const CreateTaskRequestSchema = z
       .max(70, {
         message: "Title must not exceed 70 characters"
       }),
-    from: z.string(),
     deadline: z.string(),
     // timeEstimate: z.string(),
     description: z.string().optional(),
@@ -47,20 +73,28 @@ export const CreateTaskRequestSchema = z
   .strict()
   .refine(
     (data) => {
-      const fromDate = new Date(data.from).getTime();
+      const now = new Date().getTime();
       const deadlineDate = new Date(data.deadline).getTime();
-      return fromDate < deadlineDate;
+      return now < deadlineDate;
     },
     {
-      message: "Deadline must be after the start date",
+      message: "Deadline must be in the future",
       path: ["deadline"]
     }
   );
 
 export type CreateTaskValidation = z.infer<typeof CreateTaskRequestSchema>;
+export type UpdateTaskValidation = z.infer<typeof CreateTaskRequestSchema>;
 export type CreateTaskRequestDTO = {
   title: string;
-  from: string;
+  deadline: string;
+  description?: string;
+  activity_id: number;
+  user_id: string;
+};
+
+export type UpdateTaskRequestDTO = {
+  title: string;
   deadline: string;
   description?: string;
   activity_id: number;

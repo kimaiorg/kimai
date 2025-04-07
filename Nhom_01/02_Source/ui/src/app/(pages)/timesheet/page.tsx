@@ -100,16 +100,17 @@ function Timesheet() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [timesheets, setTimesheets] = useState<Timesheet[]>(mockTimesheets);
   const itemsPerPage = 5;
-  
+
   // Current user ID (would come from auth context in a real app)
   const currentUserId = "user123";
 
   // Filter timesheets based on search term
-  const filteredTimesheets = timesheets.filter((timesheet) => 
-    timesheet.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    timesheet.project?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    timesheet.activity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    timesheet.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTimesheets = timesheets.filter(
+    (timesheet) =>
+      timesheet.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      timesheet.project?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      timesheet.activity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      timesheet.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate total pages for pagination
@@ -127,7 +128,7 @@ function Timesheet() {
       description: timesheetData.description,
       start_time: timesheetData.start_time,
       end_time: timesheetData.end_time,
-      duration: timesheetData.end_time 
+      duration: timesheetData.end_time
         ? Math.floor((timesheetData.end_time.getTime() - timesheetData.start_time.getTime()) / 1000)
         : null,
       user_id: currentUserId,
@@ -147,9 +148,7 @@ function Timesheet() {
   // Handle starting a new timesheet
   const handleStartTimesheet = (userId: string) => {
     // Check if there's already a running timesheet
-    const hasRunningTimesheet = timesheets.some(
-      (timesheet) => timesheet.user_id === userId && !timesheet.end_time
-    );
+    const hasRunningTimesheet = timesheets.some((timesheet) => timesheet.user_id === userId && !timesheet.end_time);
 
     if (hasRunningTimesheet) {
       alert("You already have a running timesheet. Please stop it before starting a new one.");

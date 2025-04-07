@@ -1,7 +1,7 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { myAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
-import { CreateCustomerRequestDTO, CustomerType } from "@/type_schema/customer";
+import { CreateCustomerRequestDTO, CustomerType, UpdateCustomerRequestDTO } from "@/type_schema/customer";
 
 export async function getAllCustomers(
   page?: number,
@@ -16,9 +16,9 @@ export async function getAllCustomers(
   if (perPage) params.append("limit", perPage.toString());
   if (keyword) params.append("keyword", keyword);
   if (sortBy) {
-    params.append("sortBy", sortBy);
+    params.append("sort_by", sortBy);
     const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sortOrder", order);
+    params.append("sort_order", order);
   }
 
   const response = await myAxios.get<Pagination<CustomerType>>(`/api/v1/customers?${params.toString()}`, {
@@ -37,6 +37,21 @@ export async function addNewCustomer(request: CreateCustomerRequestDTO): Promise
   const payload = { ...request };
   try {
     const response = await myAxios.post(`/api/v1/customers`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.status;
+  } catch (error: any) {
+    return error.response.status;
+  }
+}
+
+export async function updateCustomer(request: UpdateCustomerRequestDTO, customerId: number): Promise<number> {
+  const token = await getManagementAccessToken();
+  const payload = { ...request };
+  try {
+    const response = await myAxios.put(`/api/v1/customers/${customerId}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

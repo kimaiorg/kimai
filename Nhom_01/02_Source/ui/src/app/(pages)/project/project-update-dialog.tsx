@@ -20,7 +20,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getUserById } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { handleErrorApi } from "@/lib/utils";
 import { CustomerType } from "@/type_schema/customer";
-import { CreateProjectRequestDTO, CreateProjectRequestSchema, CreateProjectValidation } from "@/type_schema/project";
+import {
+  CreateProjectRequestSchema,
+  ProjectType,
+  UpdateProjectRequestDTO,
+  UpdateProjectValidation
+} from "@/type_schema/project";
 import { TeamType } from "@/type_schema/team";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
@@ -29,11 +34,13 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export function ProjectCreateDialog({
+export function ProjectUpdateDialog({
   children,
+  targetProject,
   refetchProjects
 }: {
   children: React.ReactNode;
+  targetProject: ProjectType;
   refetchProjects: () => void;
 }) {
   const [open, setOpen] = useState<boolean>(false);
@@ -43,22 +50,22 @@ export function ProjectCreateDialog({
   const [selectedTeams, setSelectedTeams] = useState<TeamType[]>([]);
   const teamOptions = teamList.map((team) => ({ label: `${team.name}`, value: team.id.toString(), icon: Users }));
 
-  const createProjectForm = useForm<CreateProjectValidation>({
+  const updateProjectForm = useForm<UpdateProjectValidation>({
     resolver: zodResolver(CreateProjectRequestSchema),
     defaultValues: {
-      name: "Project Alpha",
-      color: "#FF5733",
-      project_number: "101",
-      order_number: "2023001",
-      order_date: "2025-03-23",
-      start_date: "2025-04-01",
-      end_date: "2025-12-31",
-      budget: "50000",
-      customer: "1"
+      name: targetProject.name,
+      color: targetProject.color,
+      project_number: targetProject.project_number.toString(),
+      order_number: targetProject.order_number.toString(),
+      order_date: targetProject.order_date,
+      start_date: targetProject.start_date,
+      end_date: targetProject.end_date,
+      budget: targetProject.budget.toString(),
+      customer: targetProject.customer.id.toString()
     }
   });
 
-  async function handleSubmit(values: CreateProjectValidation) {
+  async function handleSubmit(values: UpdateProjectValidation) {
     if (!selectedTeams.length) {
       return;
     }
@@ -66,7 +73,7 @@ export function ProjectCreateDialog({
     setLoading(true);
     try {
       const { customer, project_number, order_number, budget, ...rest } = values;
-      const payload: CreateProjectRequestDTO = {
+      const payload: UpdateProjectRequestDTO = {
         ...rest,
         project_number: Number(project_number),
         order_number: Number(order_number),
@@ -78,16 +85,16 @@ export function ProjectCreateDialog({
 
       if (response == 201) {
         toast("Success", {
-          description: "Add new project successfully",
+          description: "Update project successfully",
           duration: 2000,
           className: "!bg-lime-500 !text-white"
         });
-        createProjectForm.reset();
+        updateProjectForm.reset();
         setOpen(false);
         refetchProjects();
       } else {
         toast("Failed", {
-          description: "Failed to add customer. Please try again!",
+          description: "Failed to update project. Please try again!",
           duration: 2000,
           className: "!bg-red-500 !text-white"
         });
@@ -95,7 +102,7 @@ export function ProjectCreateDialog({
     } catch (error: unknown) {
       handleErrorApi({
         error,
-        setError: createProjectForm.setError
+        setError: updateProjectForm.setError
       });
     } finally {
       setLoading(false);
@@ -144,19 +151,19 @@ export function ProjectCreateDialog({
       <DialogDescription></DialogDescription>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 select-none">
         <DialogHeader>
-          <DialogTitle>Create project</DialogTitle>
+          <DialogTitle>Update project</DialogTitle>
         </DialogHeader>
 
-        <Form {...createProjectForm}>
+        <Form {...updateProjectForm}>
           <form
-            onSubmit={createProjectForm.handleSubmit(handleSubmit)}
+            onSubmit={updateProjectForm.handleSubmit(handleSubmit)}
             className="p-2 md:p-4 border border-gray-200 rounded-lg"
             noValidate
           >
             <div className="grid grid-cols-6 gap-4 pb-3 items-start">
               {/* Name and Color */}
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem className="col-span-5">
@@ -173,7 +180,7 @@ export function ProjectCreateDialog({
                 )}
               />
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="color"
                 render={({ field }) => (
                   <FormItem>
@@ -191,7 +198,7 @@ export function ProjectCreateDialog({
               />
               {/* Company Name and VAT ID */}
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="project_number"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
@@ -209,7 +216,7 @@ export function ProjectCreateDialog({
                 )}
               />
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="order_number"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
@@ -227,7 +234,7 @@ export function ProjectCreateDialog({
               />
               {/* Account Number */}
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="order_date"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
@@ -243,7 +250,7 @@ export function ProjectCreateDialog({
                 )}
               />
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="start_date"
                 render={({ field }) => (
                   <FormItem className="col-span-3">
@@ -259,7 +266,7 @@ export function ProjectCreateDialog({
                 )}
               />
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="end_date"
                 render={({ field }) => (
                   <FormItem className="col-span-3">
@@ -276,7 +283,7 @@ export function ProjectCreateDialog({
               />
               {customerList.length > 0 && (
                 <FormField
-                  control={createProjectForm.control}
+                  control={updateProjectForm.control}
                   name="customer"
                   render={({ field }) => (
                     <FormItem className="col-span-4">
@@ -308,7 +315,7 @@ export function ProjectCreateDialog({
               )}
 
               <FormField
-                control={createProjectForm.control}
+                control={updateProjectForm.control}
                 name="budget"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
@@ -339,7 +346,7 @@ export function ProjectCreateDialog({
                 type="submit"
                 className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
               >
-                Create
+                Update
               </Button>
             </DialogFooter>
           </form>

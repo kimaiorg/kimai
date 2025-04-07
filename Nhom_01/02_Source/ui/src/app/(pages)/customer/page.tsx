@@ -1,22 +1,19 @@
 "use client";
 
 import { getAllCustomers } from "@/api/customer.api";
+import { CustomerUpdateDialog } from "@/app/(pages)/customer/customer-edit-dialog";
+import CustomerViewDialog from "@/app/(pages)/customer/customer-view-dialog";
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { TableCell } from "@/components/ui/table";
 import { Pagination } from "@/type_schema/common";
 import { CustomerType } from "@/type_schema/customer";
 import { Role } from "@/type_schema/role";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@radix-ui/react-dropdown-menu";
-import { FileDown, Filter, MoreHorizontal, Plus, Search, Upload } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CustomerCreateDialog } from "./customer-create-dialog";
@@ -28,8 +25,8 @@ function CustomerPage() {
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
-  const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
-  const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const sortBy = queryParams.get("sortBy") || "";
+  const sortOrder = queryParams.get("sortOrder") || "";
   const [customerList, setCustomerList] = useState<Pagination<CustomerType>>({
     metadata: {
       page: 1,
@@ -42,15 +39,13 @@ function CustomerPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchCustomers = async (
-    page: number,
-    size: number,
-    keyword: string,
-    sortBy: string,
-    sortOrder: string
+    page?: number,
+    size?: number,
+    keyword?: string,
+    sortBy?: string,
+    sortOrder?: string
   ) => {
     try {
-      setSortBy(sortBy);
-      setSortOrder(sortOrder);
       const data = await getAllCustomers(page, size, keyword, sortBy, sortOrder);
       setCustomerList(data);
     } catch (error) {
@@ -170,25 +165,42 @@ function CustomerPage() {
                 <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.country}</td>
                 <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.email}</td>
                 <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.phone}</td>
-                <td className="px-4 py-2 text-center">
-                  <DropdownMenu>
+                <TableCell>
+                  <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 cursor-pointer text-center"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Show</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-28 border border-gray-200 rounded-md bg-white dark:bg-slate-800"
+                    >
+                      <CustomerViewDialog customer={customer}>
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Eye size={14} /> Show
+                        </div>
+                      </CustomerViewDialog>
+                      <CustomerUpdateDialog
+                        targetCustomer={customer}
+                        fetchCustomers={() => handleFetchCustomers(1)}
+                      >
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <SquarePen size={14} />
+                          Edit
+                        </div>
+                      </CustomerUpdateDialog>
+                      <div className="text-red-500 items-center flex gap-2 cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                        <Trash2 size={14} />
+                        Delete
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </td>
+                </TableCell>
               </tr>
             ))}
           </tbody>

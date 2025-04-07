@@ -1,7 +1,6 @@
+import { RootState } from "@/lib/redux-toolkit/store";
 import { UserType } from "@/type_schema/user.schema";
 import { createSlice, Slice } from "@reduxjs/toolkit";
-
-export type UserState = UserType | null;
 
 const userListSlice: Slice<any> = createSlice({
   name: "users",
@@ -15,6 +14,8 @@ const userListSlice: Slice<any> = createSlice({
   }
 });
 export const { updateUserList } = userListSlice.actions;
-export const getUserById = (userId: string): UserType =>
-  userListSlice.getInitialState().users.find((user: UserType) => user.user_id === userId);
+// Selector to get a user by ID
+export const getUserById = (userId: string, state: RootState): UserType | undefined => {
+  return state.userListState.users.find((user: UserType) => user.user_id === userId);
+};
 export default userListSlice.reducer;

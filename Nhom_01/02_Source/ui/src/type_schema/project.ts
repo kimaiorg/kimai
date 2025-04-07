@@ -1,7 +1,9 @@
+import { CustomerType } from "@/type_schema/customer";
+import { TeamSimpleType } from "@/type_schema/team";
 import { string, z } from "zod";
 
-export interface ProjectType {
-  id: 7;
+export type CustomerProjectType = {
+  id: number;
   name: string;
   color: string;
   project_number: number;
@@ -10,16 +12,28 @@ export interface ProjectType {
   start_date: string;
   end_date: string;
   budget: number;
-  teams: {
-    id: number;
-    name: string;
-  }[];
-  customer: {
-    id: number;
-    name: string;
-    company_name: string;
-  };
-}
+  customer_id: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+};
+
+export type ProjectType = {
+  id: number;
+  name: string;
+  color: string;
+  project_number: number;
+  order_number: number;
+  order_date: string;
+  start_date: string;
+  end_date: string;
+  budget: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  teams: TeamSimpleType[];
+  customer: CustomerType;
+};
 
 export const CreateProjectRequestSchema = z
   .object({
@@ -45,8 +59,22 @@ export const CreateProjectRequestSchema = z
   });
 
 export type CreateProjectValidation = z.infer<typeof CreateProjectRequestSchema>;
+export type UpdateProjectValidation = z.infer<typeof CreateProjectRequestSchema>;
 
 export type CreateProjectRequestDTO = {
+  name: string;
+  color: string;
+  project_number: number;
+  order_number: number;
+  order_date: string;
+  start_date: string;
+  end_date: string;
+  budget: number;
+  teams: number[];
+  customer: number;
+};
+
+export type UpdateProjectRequestDTO = {
   name: string;
   color: string;
   project_number: number;

@@ -43,7 +43,10 @@ export function DateTimePicker({ date, setDate }: { date: string | undefined; se
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn("w-full justify-start text-left font-normal cursor-pointer", !date && "text-muted-foreground")}
+          className={cn(
+            "w-full justify-start text-left font-normal border border-gray-200 cursor-pointer",
+            !date && "text-muted-foreground"
+          )}
         >
           <Calendar1Icon className="mr-2 h-4 w-4" />
           {date ? format(date, "MM/dd/yyyy hh:mm aa") : <span>MM/DD/YYYY hh:mm aa</span>}

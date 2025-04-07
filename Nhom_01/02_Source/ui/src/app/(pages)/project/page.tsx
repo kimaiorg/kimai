@@ -2,21 +2,19 @@
 
 import { getAllProjects } from "@/api/project.api";
 import { ProjectCreateDialog } from "@/app/(pages)/project/project-create-dialog";
+import { ProjectUpdateDialog } from "@/app/(pages)/project/project-update-dialog";
+import ProjectViewDialog from "@/app/(pages)/project/project-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination } from "@/type_schema/common";
 import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
-import { FileDown, Filter, MoreHorizontal, Plus, Search, Upload } from "lucide-react";
+import { formatDate } from "date-fns";
+import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -154,9 +152,9 @@ function ProjectPage() {
                 <TableCell className="">{project.customer?.name}</TableCell>
                 <TableCell className="">{project.budget ? `$${project.budget}` : "-"}</TableCell>
                 <TableCell className="">
-                  {new Date(project.start_date!).toDateString()}
+                  {formatDate(project.start_date!, "dd/MM/yyyy")}
                   <span> - </span>
-                  {project.end_date ? new Date(project.end_date!).toDateString() : "-"}
+                  {project.end_date ? formatDate(project.end_date, "dd/MM/yyyy") : "N/A"}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -164,15 +162,33 @@ function ProjectPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 cursor-pointer"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Show</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                    <DropdownMenuContent
+                      align="end"
+                      className="border border-gray-200"
+                    >
+                      <ProjectViewDialog project={project}>
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Eye size={14} /> Show
+                        </div>
+                      </ProjectViewDialog>
+                      <ProjectUpdateDialog
+                        targetProject={project}
+                        refetchProjects={handleReloadProjects}
+                      >
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <SquarePen size={14} />
+                          Edit
+                        </div>
+                      </ProjectUpdateDialog>
+                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                        <Trash2 size={14} />
+                        Delete
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

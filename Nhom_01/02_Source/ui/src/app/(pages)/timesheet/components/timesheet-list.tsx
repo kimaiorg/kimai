@@ -24,11 +24,11 @@ interface TimesheetListProps {
   currentUserId?: string;
 }
 
-export function TimesheetList({ 
-  timesheets, 
-  currentPage, 
-  totalPages, 
-  onPageChange, 
+export function TimesheetList({
+  timesheets,
+  currentPage,
+  totalPages,
+  onPageChange,
   itemsPerPage,
   onStartTimesheet,
   onEndTimesheet,
@@ -45,7 +45,7 @@ export function TimesheetList({
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Check if a timesheet is running (no end_time)
@@ -75,10 +75,11 @@ export function TimesheetList({
           </TableHeader>
           <TableBody>
             {currentItems.map((timesheet) => (
-              <TableRow key={timesheet.id} className={isRunning(timesheet) ? "bg-green-50 dark:bg-green-900/10" : ""}>
-                <TableCell className="font-medium">
-                  {timesheet.description || "-"}
-                </TableCell>
+              <TableRow
+                key={timesheet.id}
+                className={isRunning(timesheet) ? "bg-green-50 dark:bg-green-900/10" : ""}
+              >
+                <TableCell className="font-medium">{timesheet.description || "-"}</TableCell>
                 <TableCell>{timesheet.project || "-"}</TableCell>
                 <TableCell>{timesheet.activity || "-"}</TableCell>
                 <TableCell>{formatDateTime(timesheet.start_time)}</TableCell>

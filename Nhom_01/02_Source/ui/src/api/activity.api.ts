@@ -8,7 +8,11 @@ export async function getAllActivities(
   limit?: number,
   keyword?: string,
   sortBy?: string,
-  sortOrder?: string
+  sortOrder?: string,
+  projectId?: string,
+  teamId?: string,
+  budgetFrom?: string,
+  budgetTo?: string
 ): Promise<Pagination<ActivityType>> {
   const token = await getManagementAccessToken();
 
@@ -16,10 +20,15 @@ export async function getAllActivities(
   if (page) params.append("page", page.toString());
   if (limit) params.append("limit", limit.toString());
   if (keyword) params.append("keyword", keyword);
+  if (projectId) params.append("project_id", projectId);
+  if (teamId) params.append("team_id", teamId);
+  if (budgetFrom) params.append("budget_from", budgetFrom);
+  if (budgetTo) params.append("budget_to", budgetTo);
   if (sortBy) {
-    params.append("sortBy", sortBy);
-    const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sortOrder", order);
+    params.append("sort_by", sortBy);
+    if (sortOrder) {
+      params.append("sort_order", sortOrder);
+    }
   }
   const response = await myAxios.get<Pagination<ActivityType>>(`/api/v1/activities?${params.toString()}`, {
     headers: {

@@ -14,7 +14,7 @@ export function TimesheetPagination({ currentPage, totalPages, onPageChange }: T
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
-    
+
     if (totalPages <= maxPagesToShow) {
       // If total pages is less than or equal to maxPagesToShow, show all pages
       for (let i = 1; i <= totalPages; i++) {
@@ -23,27 +23,27 @@ export function TimesheetPagination({ currentPage, totalPages, onPageChange }: T
     } else {
       // Always include first page, last page, and current page
       // Then add pages before and after current page
-      
+
       // Start with current page
       pageNumbers.push(currentPage);
-      
+
       // Add pages before current page
-      let beforeCount = Math.min(Math.floor((maxPagesToShow - 3) / 2), currentPage - 1);
+      const beforeCount = Math.min(Math.floor((maxPagesToShow - 3) / 2), currentPage - 1);
       for (let i = 1; i <= beforeCount; i++) {
         pageNumbers.unshift(currentPage - i);
       }
-      
+
       // Add pages after current page
-      let afterCount = Math.min(maxPagesToShow - 1 - beforeCount, totalPages - currentPage);
+      const afterCount = Math.min(maxPagesToShow - 1 - beforeCount, totalPages - currentPage);
       for (let i = 1; i <= afterCount; i++) {
         pageNumbers.push(currentPage + i);
       }
-      
+
       // If we still have room, add more pages before
       while (pageNumbers.length < maxPagesToShow - 2 && pageNumbers[0] > 1) {
         pageNumbers.unshift(pageNumbers[0] - 1);
       }
-      
+
       // Add first page if not already included
       if (pageNumbers[0] > 1) {
         pageNumbers.unshift(1);
@@ -52,7 +52,7 @@ export function TimesheetPagination({ currentPage, totalPages, onPageChange }: T
           pageNumbers.splice(1, 0, -1); // -1 represents ellipsis
         }
       }
-      
+
       // Add last page if not already included
       if (pageNumbers[pageNumbers.length - 1] < totalPages) {
         // Add ellipsis if there's a gap
@@ -62,7 +62,7 @@ export function TimesheetPagination({ currentPage, totalPages, onPageChange }: T
         pageNumbers.push(totalPages);
       }
     }
-    
+
     return pageNumbers;
   };
 
@@ -86,10 +86,15 @@ export function TimesheetPagination({ currentPage, totalPages, onPageChange }: T
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      
-      {pageNumbers.map((page, index) => 
+
+      {pageNumbers.map((page, index) =>
         page === -1 ? (
-          <span key={`ellipsis-${index}`} className="px-2">...</span>
+          <span
+            key={`ellipsis-${index}`}
+            className="px-2"
+          >
+            ...
+          </span>
         ) : (
           <Button
             key={page}
@@ -101,7 +106,7 @@ export function TimesheetPagination({ currentPage, totalPages, onPageChange }: T
           </Button>
         )
       )}
-      
+
       <Button
         variant="outline"
         size="icon"

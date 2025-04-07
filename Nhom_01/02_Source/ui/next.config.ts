@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
   // Increase serverless function timeout for Auth0 callbacks
   serverRuntimeConfig: {
     timeout: 60
+  },
+  images: {
+    domains: ["s.gravatar.com", "cdn.auth0.com"]
   }
 };
 

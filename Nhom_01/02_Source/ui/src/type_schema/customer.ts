@@ -1,6 +1,7 @@
+import { CustomerProjectType } from "@/type_schema/project";
 import { z } from "zod";
 
-export interface CustomerType {
+export type CustomerType = {
   id: number;
   name: string;
   color: string;
@@ -18,7 +19,8 @@ export interface CustomerType {
   created_at: string;
   updated_at: string;
   deleted_at: null;
-}
+  projects: CustomerProjectType[];
+};
 
 export const CreateCustomerRequestSchema = z.object({
   name: z
@@ -85,8 +87,8 @@ export const CreateCustomerRequestSchema = z.object({
       message: "Phone number must be exactly 10 digits"
     }),
   homepage: z.string().optional(),
-  visible: z.boolean().default(false),
   createdAt: z.date().optional()
 });
 
 export type CreateCustomerRequestDTO = z.infer<typeof CreateCustomerRequestSchema>;
+export type UpdateCustomerRequestDTO = z.infer<typeof CreateCustomerRequestSchema>;

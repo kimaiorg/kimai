@@ -1,28 +1,34 @@
+import { ActivitySimpleType, ActivityType } from "@/type_schema/activity";
+import { CustomerProjectType } from "@/type_schema/project";
 import { UserType } from "@/type_schema/user.schema";
 import { z } from "zod";
 
-export type UserTeamType = UserType & {
-  isTeamLead: boolean;
-  color?: string;
-};
-
-export interface TeamType {
+export type TeamType = {
   id: number;
   name: string;
   color: string;
+  lead: UserType;
+  users: UserType[];
   created_at: string;
   updated_at: string;
-  users: UserTeamType[];
-}
+  deleted_at: null | string;
+  projects: CustomerProjectType[];
+  activities: ActivitySimpleType[];
+};
 
-export interface TeamSimpleType {
+export type TeamSimpleType = {
   id: number;
   name: string;
   color: string;
   created_at: string;
   updated_at: string;
   users: string[];
-}
+};
+
+export type TeamResponseType = Omit<TeamType, "users" | "lead"> & {
+  lead: string;
+  users: string[];
+};
 
 export const CreateTeamRequestSchema = z.object({
   name: z
@@ -41,5 +47,6 @@ export const CreateTeamRequestSchema = z.object({
 
 export type CreateTeamValidation = Omit<z.infer<typeof CreateTeamRequestSchema>, "members">;
 export type CreateTeamRequestDTO = z.infer<typeof CreateTeamRequestSchema> & {
-  members: string[];
+  users: string[];
+  lead: string;
 };

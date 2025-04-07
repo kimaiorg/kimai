@@ -1,15 +1,19 @@
 "use client";
 
 import { getAllUsers } from "@/api/user.api";
-import AddUserModal from "@/app/(pages)/user/add-user-modal";
+import AddUserModal from "@/app/(pages)/user/user-add-dialog";
+import UserUpdateDialog from "@/app/(pages)/user/user-update-dialog";
+import UserViewDialog from "@/app/(pages)/user/user-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import DefaultAvatar from "@/components/shared/default-avatar";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Role } from "@/type_schema/role";
 import { UserListType } from "@/type_schema/user.schema";
-import { Plus, SquarePen } from "lucide-react";
+import { format } from "date-fns";
+import { Eye, MoreHorizontal, Plus, SquarePen, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -18,6 +22,10 @@ function User() {
   const pathname = usePathname();
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
+  const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 5;
+  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const sortBy = queryParams.get("sortBy") || "";
+  const sortOrder = queryParams.get("sortOrder") || "";
   const [userList, setUserList] = useState<UserListType>({
     start: 1,
     limit: 10,
@@ -26,33 +34,40 @@ function User() {
     users: []
   });
 
-  const fetchUser = async (page: number, size: number = 2) => {
-    const result = await getAllUsers(page, size);
+  const fetchUser = async (page?: number, limit?: number, keyword?: string, sortBy?: string, sortOrder?: string) => {
+    const result = await getAllUsers(page, limit, keyword, sortBy, sortOrder);
     setUserList(result);
   };
 
-  const goToPage = (page: number) => {
-    fetchUser(page);
-    const params = new URLSearchParams(queryParams);
-    params.set("page", page.toString());
+  const updateQueryParams = (params: URLSearchParams) => {
     const newUrl = `${pathname}?${params.toString()}`;
     replace(newUrl);
   };
 
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setKeyword(`name:${value}`);
+  };
+
+  const goToPage = (page: number) => {
+    const params = new URLSearchParams(queryParams);
+    params.set("page", page.toString());
+    updateQueryParams(params);
+  };
+
   const handleReloadUser = () => {
-    fetchUser(1);
     const params = new URLSearchParams(queryParams);
     params.set("page", "1");
-    const newUrl = `${pathname}?${params.toString()}`;
-    replace(newUrl);
+    updateQueryParams(params);
   };
 
   useEffect(() => {
     const getUsers = async () => {
-      await fetchUser(page);
+      await fetchUser(page, limit, keyword, sortBy, sortOrder);
     };
     getUsers();
-  }, []);
+  }, [page, limit, keyword, sortBy, sortOrder]);
 
   return (
     <>
@@ -67,7 +82,7 @@ function User() {
             </AddUserModal>
           </div>
         </div>
-        <Table className="bg-white dark:bg-slate-800 rounded-lg shadow-md">
+        <Table className="bg-white dark:bg-slate-800 rounded-lg shadow-md border border-gray-200">
           <TableCaption>
             <PaginationWithLinks
               page={page}
@@ -100,14 +115,44 @@ function User() {
                 </TableCell>
                 <TableCell>{userItem.name}</TableCell>
                 <TableCell>{userItem.email}</TableCell>
-                <TableCell>{userItem.created_at}</TableCell>
-                <TableCell
-                  className="cursor-pointer"
-                  onClick={() => {
-                    alert("This feature is coming soon");
-                  }}
-                >
-                  <SquarePen />
+                <TableCell>{format(userItem.created_at, "dd/MM/yyyy HH:mm:ss")}</TableCell>
+                <TableCell className="cursor-pointer">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 p-0 cursor-pointer"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="border border-gray-200"
+                    >
+                      <UserViewDialog user={userItem}>
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Eye size={14} /> Show
+                        </div>
+                      </UserViewDialog>
+                      <UserUpdateDialog
+                        targetUser={userItem}
+                        fetchUsers={() => fetchUser(1, limit)}
+                      >
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <SquarePen size={14} /> Edit
+                        </div>
+                      </UserUpdateDialog>
+                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                        <Trash2
+                          size={14}
+                          stroke="red"
+                        />{" "}
+                        Delete
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

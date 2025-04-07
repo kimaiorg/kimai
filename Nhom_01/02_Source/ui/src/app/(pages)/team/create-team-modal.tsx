@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { handleErrorApi } from "@/lib/utils";
-import { CreateTeamRequestDTO, CreateTeamRequestSchema, CreateTeamValidation, UserTeamType } from "@/type_schema/team";
+import { CreateTeamRequestDTO, CreateTeamRequestSchema, CreateTeamValidation } from "@/type_schema/team";
 import { UserType } from "@/type_schema/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
@@ -22,7 +22,7 @@ import { toast } from "sonner";
 export function CreateTeamModal({ children, refetchTeams }: { children: React.ReactNode; refetchTeams: () => void }) {
   const [open, setOpen] = useState<boolean>(false);
   const [userList, setUserList] = useState<UserType[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<UserTeamType[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [teamLead, setTeamLead] = useState<string | undefined>(undefined);
   const [memberRequiredMessage, setMemberRequiredMessage] = useState<string>("");
@@ -30,14 +30,17 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
   const createTeamForm = useForm<CreateTeamValidation>({
     resolver: zodResolver(CreateTeamRequestSchema),
     defaultValues: {
-      name: "Web developer",
-      color: "#ededed"
+      name: "Front end Team",
+      color: "#4d7efc"
     }
   });
 
   async function onSubmit(values: CreateTeamValidation) {
     if (!selectedUsers.length) {
       setMemberRequiredMessage("Please add at least one member");
+      return;
+    } else if (!teamLead) {
+      setMemberRequiredMessage("Please select a team lead");
       return;
     } else {
       setMemberRequiredMessage("");
@@ -46,8 +49,12 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
     setLoading(true);
 
     try {
-      const payload: CreateTeamRequestDTO = { ...values, members: selectedUsers.map((user) => user.user_id) };
-      console.log(JSON.stringify(payload));
+      const payload: CreateTeamRequestDTO = {
+        ...values,
+        lead: teamLead!,
+        users: selectedUsers.map((user) => user.user_id)
+      };
+      console.log(payload);
       const response = await addNewTeam(payload);
       if (response == 201) {
         toast("Success", {
@@ -91,7 +98,7 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
     setMemberRequiredMessage("");
     const user = availableUsers.find((user) => user.user_id === userId);
     if (user) {
-      setSelectedUsers([...selectedUsers, { ...user, isTeamLead: false }]);
+      setSelectedUsers([...selectedUsers, user]);
     }
   };
 
@@ -101,9 +108,6 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
 
   const toggleTeamLead = (event: React.ChangeEvent<HTMLInputElement>) => {
     const userId = event.target.value;
-    // setSelectedUsers(
-    //   selectedUsers.map((user) => (user.user_id === userId ? { ...user, isTeamLead: !user.isTeamLead } : user))
-    // );
     setTeamLead(userId);
   };
 

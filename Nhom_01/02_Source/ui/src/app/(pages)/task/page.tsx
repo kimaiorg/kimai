@@ -1,23 +1,24 @@
 "use client";
 
 import { getAllTasks } from "@/api/task.api";
+import { getAllUsers } from "@/api/user.api";
 import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
+import { TaskUpdateDialog } from "@/app/(pages)/task/task-update-dialog";
+import TaskViewDialog from "@/app/(pages)/task/task-view-dialog";
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { Pagination } from "@/type_schema/common";
 import { Role } from "@/type_schema/role";
 import { TaskType } from "@/type_schema/task";
-import { FileDown, Filter, MoreHorizontal, Plus, Search, Upload } from "lucide-react";
+import { UserType } from "@/type_schema/user.schema";
+import { format } from "date-fns";
+import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -25,11 +26,13 @@ function Task() {
   const queryParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
+  const users: UserType[] = useAppSelector((state) => state.userListState.users);
+  const dispatch = useAppDispatch();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
-  const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
-  const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const sortBy = queryParams.get("sortBy") || "";
+  const sortOrder = queryParams.get("sortOrder") || "";
   const [taskList, setTaskList] = useState<Pagination<TaskType>>({
     metadata: {
       page: 1,
@@ -41,11 +44,33 @@ function Task() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleFetchTasks = async (page: number, limit: number, keyword: string, sortBy: string, sortOrder: string) => {
+  const handleFetchTasks = async (
+    page?: number,
+    limit?: number,
+    keyword?: string,
+    sortBy?: string,
+    sortOrder?: string
+  ) => {
     try {
-      const data = await getAllTasks(page, limit, keyword, sortBy, sortOrder);
-      console.log(data);
-      setTaskList(data);
+      let userList = users;
+      if (users.length == 0) {
+        const result = await getAllUsers();
+        userList = result.users;
+        dispatch(updateUserList(result.users));
+      }
+      const result = await getAllTasks(page, limit, keyword, sortBy, sortOrder);
+      const { data, metadata } = result;
+      const taskData = data.map((task) => {
+        const { user_id, ...rest } = task;
+        return {
+          ...rest,
+          user: userList.find((user) => user.user_id === user_id)!
+        };
+      });
+      setTaskList({
+        metadata: metadata,
+        data: taskData
+      });
     } catch (error) {
       console.error("Error fetching tasks:", error);
     }
@@ -53,10 +78,13 @@ function Task() {
 
   // Fetch Tasks on component mount
   useEffect(() => {
-    setIsLoading(true);
-    handleFetchTasks(page, limit, keyword, sortBy, sortOrder);
-    setIsLoading(false);
-  }, []);
+    const fetchNecessaryData = async () => {
+      setIsLoading(true);
+      await handleFetchTasks(page, limit, keyword, sortBy, sortOrder);
+      setIsLoading(false);
+    };
+    fetchNecessaryData();
+  }, [page, limit, keyword, sortBy, sortOrder]);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -69,8 +97,6 @@ function Task() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    setSortBy(sortBy);
-    setSortOrder("");
     updateQueryParams("keyword", keyword);
   };
 
@@ -124,11 +150,11 @@ function Task() {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white dark:bg-slate-900 my-5">
+      <div className="rounded-md border border-gray-200 bg-white dark:bg-slate-700 my-5">
         <table className="w-full border-collapse">
-          <thead className="bg-gray-100 dark:bg-slate-800">
+          <thead className="bg-gray-100 dark:bg-slate-900">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">ID</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">No.</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Name</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Activity</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Assignee</th>
@@ -156,25 +182,46 @@ function Task() {
                 <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="ml-2">{task.title}</span>
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.activity_id}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.user_id}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.deadline}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.activity.name}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.user?.name}</td>
+                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                  {format(task.deadline, "dd/MM/yyyy HH:mm")}
+                </td>
                 <td className="px-4 py-2 text-center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 cursor-pointer"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Show</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                    <DropdownMenuContent
+                      align="end"
+                      className="border border-gray-200"
+                    >
+                      <TaskViewDialog task={task}>
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Eye size={14} /> Show
+                        </div>
+                      </TaskViewDialog>
+                      <TaskUpdateDialog
+                        targetTask={task}
+                        fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}
+                      >
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <SquarePen size={14} /> Edit
+                        </div>
+                      </TaskUpdateDialog>
+                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                        <Trash2
+                          size={14}
+                          stroke="red"
+                        />{" "}
+                        Delete
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>

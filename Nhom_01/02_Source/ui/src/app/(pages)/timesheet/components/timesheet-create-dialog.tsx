@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,60 +35,66 @@ export function TimesheetCreateDialog({
     description: initialData.description || "",
     project: initialData.project || "",
     activity: initialData.activity || "",
-    start_time: initialData.start_time ? new Date(initialData.start_time).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
+    start_time: initialData.start_time
+      ? new Date(initialData.start_time).toISOString().slice(0, 16)
+      : new Date().toISOString().slice(0, 16),
     end_time: initialData.end_time ? new Date(initialData.end_time).toISOString().slice(0, 16) : "",
     billable: initialData.billable || false,
-    tags: initialData.tags?.join(", ") || "",
+    tags: initialData.tags?.join(", ") || ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === "checkbox") {
       const target = e.target as HTMLInputElement;
       setFormData({
         ...formData,
-        [name]: target.checked,
+        [name]: target.checked
       });
     } else {
       setFormData({
         ...formData,
-        [name]: value,
+        [name]: value
       });
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Convert form data to the correct types
     const timesheetData = {
       ...formData,
       start_time: new Date(formData.start_time),
       end_time: formData.end_time ? new Date(formData.end_time) : undefined,
-      tags: formData.tags ? formData.tags.split(",").map(tag => tag.trim()) : [],
-      billable: Boolean(formData.billable),
+      tags: formData.tags ? formData.tags.split(",").map((tag) => tag.trim()) : [],
+      billable: Boolean(formData.billable)
     };
-    
+
     onCreateTimesheet(timesheetData);
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Timesheet" : "Create Timesheet"}</DialogTitle>
           <DialogDescription>
-            {isEditing 
-              ? "Edit your timesheet details below." 
-              : "Fill in the details to create a new timesheet entry."}
+            {isEditing ? "Edit your timesheet details below." : "Fill in the details to create a new timesheet entry."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
+              <Label
+                htmlFor="description"
+                className="text-right"
+              >
                 Description
               </Label>
               <Textarea
@@ -101,7 +107,10 @@ export function TimesheetCreateDialog({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="project" className="text-right">
+              <Label
+                htmlFor="project"
+                className="text-right"
+              >
                 Project
               </Label>
               <Input
@@ -114,7 +123,10 @@ export function TimesheetCreateDialog({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="activity" className="text-right">
+              <Label
+                htmlFor="activity"
+                className="text-right"
+              >
                 Activity
               </Label>
               <Input
@@ -127,7 +139,10 @@ export function TimesheetCreateDialog({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="start_time" className="text-right">
+              <Label
+                htmlFor="start_time"
+                className="text-right"
+              >
                 Start Time
               </Label>
               <Input
@@ -140,7 +155,10 @@ export function TimesheetCreateDialog({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="end_time" className="text-right">
+              <Label
+                htmlFor="end_time"
+                className="text-right"
+              >
                 End Time
               </Label>
               <Input
@@ -153,7 +171,10 @@ export function TimesheetCreateDialog({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tags" className="text-right">
+              <Label
+                htmlFor="tags"
+                className="text-right"
+              >
                 Tags
               </Label>
               <Input
@@ -166,7 +187,10 @@ export function TimesheetCreateDialog({
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="billable" className="text-right">
+              <Label
+                htmlFor="billable"
+                className="text-right"
+              >
                 Billable
               </Label>
               <div className="col-span-3 flex items-center">
@@ -178,7 +202,10 @@ export function TimesheetCreateDialog({
                   checked={Boolean(formData.billable)}
                   onChange={handleChange}
                 />
-                <Label htmlFor="billable" className="ml-2">
+                <Label
+                  htmlFor="billable"
+                  className="ml-2"
+                >
                   Mark as billable
                 </Label>
               </div>
