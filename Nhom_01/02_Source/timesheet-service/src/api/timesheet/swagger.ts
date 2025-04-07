@@ -31,3 +31,35 @@ export class StartTimesheetSwagger {
   })
   task_id?: string;
 }
+
+export class ListTimesheetsMeSwaggerDto {
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Page number for pagination',
+    default: 1,
+  })
+  page?: number;
+
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Number of items per page',
+    default: 10,
+  })
+  limit?: number;
+
+  @ApiPropertyOptional({
+    example: 'created_at',
+    enum: ['created_at'],
+    description: 'Field to sort by',
+    default: 'created_at',
+  })
+  sort_by?: 'created_at';
+
+  @ApiPropertyOptional({
+    example: 'desc',
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+    default: 'desc',
+  })
+  sort_order?: 'asc' | 'desc';
+}

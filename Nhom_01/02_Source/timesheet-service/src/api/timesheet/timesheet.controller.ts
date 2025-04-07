@@ -25,8 +25,11 @@ import {
 } from '@/api/timesheet/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { PaginationResponse } from '@/libs/response/pagination';
-import { StartTimesheetSwagger } from '@/api/timesheet/swagger';
-import { ApiBody } from '@nestjs/swagger';
+import {
+  StartTimesheetSwagger,
+  ListTimesheetsMeSwaggerDto,
+} from '@/api/timesheet/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
 
 @Controller('timesheets')
 export class TimesheetController {
@@ -58,6 +61,7 @@ export class TimesheetController {
   }
 
   @Get('me')
+  @ApiQuery({type: ListTimesheetsMeSwaggerDto, required: false})
   @UsePipes(new ZodValidationPipe(listTimesheetsMeSchema))
   async listTimesheetsMe(
     @Req() req: Request,
