@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { TimesheetRepository } from '@/infrastructure/timesheet/timesheet.repository';
 import { Timesheet } from '@prisma/client';
 import {
-  ListTimesheetDto,
+  ListTimesheetsDto,
   ListTimesheetsMeDto,
   StartTimesheetDto,
 } from '@/api/timesheet/dto';
 import { PaginationResponse } from '@/libs/response/pagination';
-import { buildListTimesheetsMeQuery } from './builder';
+import {
+  buildListTimesheetsMeQuery,
+  buildListTimesheetsQuery,
+} from './builder';
 
 @Injectable()
 export class TimesheetService {
@@ -67,18 +70,16 @@ export class TimesheetService {
   }
 
   async listTimesheets(
-    dto: ListTimesheetDto,
+    dto: ListTimesheetsDto,
   ): Promise<PaginationResponse<Timesheet>> {
+    const where = buildListTimesheetsQuery(dto);
+
     const count = (await this.timesheetRepository.count({
-      where: {
-        user_id: dto.user_id,
-      },
+      where,
     })) as number;
 
     const data = await this.timesheetRepository.findAll({
-      where: {
-        user_id: dto.user_id,
-      },
+      where,
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
       orderBy: {
