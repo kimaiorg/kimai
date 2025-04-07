@@ -10,9 +10,9 @@ model Timesheet {
   user_id  String
   username String?
 
-  project_id  String?
-  activity_id String?
-  task_id     String?
+  project_id  Int?
+  activity_id Int?
+  task_id     Int?
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt

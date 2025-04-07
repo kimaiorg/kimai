@@ -18,8 +18,8 @@ import {
   StartTimesheetDto,
   endTimesheetSchema,
   EndTimesheetDto,
-  listTimesheetSchema,
-  ListTimesheetDto,
+  listTimesheetsSchema,
+  ListTimesheetsDto,
   ListTimesheetsMeDto,
   listTimesheetsMeSchema,
 } from '@/api/timesheet/dto';
@@ -28,6 +28,7 @@ import { PaginationResponse } from '@/libs/response/pagination';
 import {
   StartTimesheetSwagger,
   ListTimesheetsMeSwaggerDto,
+  ListTimesheetsSwaggerDto,
 } from '@/api/timesheet/swagger';
 import { ApiBody, ApiQuery } from '@nestjs/swagger';
 
@@ -52,16 +53,17 @@ export class TimesheetController {
   }
 
   @Get('')
+  @ApiQuery({ type: ListTimesheetsSwaggerDto, required: false })
   @Permissions(['read:timesheets'])
-  @UsePipes(new ZodValidationPipe(listTimesheetSchema))
+  @UsePipes(new ZodValidationPipe(listTimesheetsSchema))
   async listTimesheets(
-    @Query() dto: ListTimesheetDto,
+    @Query() dto: ListTimesheetsDto,
   ): Promise<PaginationResponse<Timesheet>> {
     return await this.timesheetService.listTimesheets(dto);
   }
 
   @Get('me')
-  @ApiQuery({type: ListTimesheetsMeSwaggerDto, required: false})
+  @ApiQuery({ type: ListTimesheetsMeSwaggerDto, required: false })
   @UsePipes(new ZodValidationPipe(listTimesheetsMeSchema))
   async listTimesheetsMe(
     @Req() req: Request,
