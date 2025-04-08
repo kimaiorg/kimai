@@ -8,8 +8,6 @@ import { InvoiceHistoryItem, INVOICE_STATUS_OPTIONS } from "@/type_schema/invoic
 import { DatabaseProvider, useDatabase } from "@/db/DatabaseContext";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { InvoiceService } from "@/db/invoiceService";
-import { pdf } from "@react-pdf/renderer";
-import { InvoiceDocument } from "@/components/invoice/invoice-pdf";
 
 // Define status options
 const statusOptions = INVOICE_STATUS_OPTIONS;
@@ -99,6 +97,10 @@ function InvoiceHistoryContent() {
         console.error("Invoice not found");
         return;
       }
+
+      // Dynamically import PDF components to avoid crypto errors
+      const { pdf } = await import("@react-pdf/renderer");
+      const { InvoiceDocument } = await import("@/components/invoice/invoice-pdf");
 
       // Tạo PDF blob từ InvoiceDocument component
       const blob = await pdf(<InvoiceDocument invoice={invoice} />).toBlob();
