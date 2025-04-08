@@ -18,7 +18,7 @@ export default function UserDetails() {
 
   const router = useRouter();
 
-  if (!isLoading && !user) {
+  if (isLoading || !user) {
     toast("Unauthorized", {
       description: "You are not authorized to view this page",
       className: "!bg-red-500 !text-white"
@@ -49,7 +49,7 @@ export default function UserDetails() {
           </div>
           <div className="mx-4 sm:w-sm md:w-sm lg:w-sm xl:w-sm sm:mx-auto md:mx-auto lg:mx-auto xl:mx-auto bg-white dark:bg-black shadow-xl rounded-lg ">
             <UpdateUserForm
-              user={user!}
+              user={user}
               back={() => setUpdate(!update)}
             />
           </div>
@@ -85,7 +85,7 @@ export default function UserDetails() {
                 {user?.image ? (
                   <img
                     className="object-cover object-center h-52"
-                    src={user!.image as string}
+                    src={user.image as string}
                     alt="Woman looking front"
                   />
                 ) : avatarFile ? (
@@ -95,7 +95,7 @@ export default function UserDetails() {
                     alt="Woman looking front"
                   />
                 ) : (
-                  <DefaultAvatar name={user!.name!} />
+                  <DefaultAvatar name={user.name || ""} />
                 )}
                 <div className="absolute bottom-3 right-3 hidden group-hover:flex items-center justify-center bg-black border border-white p-2 rounded-full shadow-lg cursor-pointer">
                   <UploadFileModal onUploadFile={handleUploadAvatar}>
@@ -105,20 +105,20 @@ export default function UserDetails() {
               </div>
             </div>
             <div className="flex flex-col my-2 justify-center items-center gap-1">
-              <h2 className="font-semibold text-2xl">Sarah Smith</h2>
+              <h2 className="font-semibold text-2xl">{user.name || "User"}</h2>
             </div>
             <div className="info-section bg-white dark:bg-black shadow-md border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
               <div className="info-item flex justify-between items-center py-2 border-b">
                 <span className="info-label font-medium ">ID:</span>
-                <span className="info-value">{user?.name}</span>
+                <span className="info-value">{user.name || "N/A"}</span>
               </div>
               <div className="info-item flex justify-between items-center py-2 border-b">
                 <span className="info-label font-medium ">Email:</span>
-                <span className="info-value">{user?.email}</span>
+                <span className="info-value">{user.email || "N/A"}</span>
               </div>
               <div className="info-item flex justify-between items-center py-2 border-b">
                 <span className="info-label font-medium ">Status:</span>
-                <span className="info-value">{user?.email_verified ? "Verified" : "N/A"}</span>
+                <span className="info-value">{user.email_verified ? "Verified" : "N/A"}</span>
               </div>
               <div className="info-item flex justify-between items-center py-2 border-b">
                 <span className="info-label font-medium ">Role:</span>
