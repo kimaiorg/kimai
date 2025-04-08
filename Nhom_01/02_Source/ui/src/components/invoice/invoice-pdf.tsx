@@ -1,25 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { InvoiceHistoryItem } from "@/type_schema/invoice";
-import dynamic from "next/dynamic";
-
-// Dynamically import the entire @react-pdf/renderer package
-// Sử dụng noSSR thay vì dynamic import để tránh lỗi ESM
-const PDFRenderer = dynamic(
-  () => import("./pdf-renderer").then((mod) => mod.default),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Loading PDF viewer...</p>
-        </div>
-      </div>
-    ),
-  }
-);
+import { generateInvoicePDF } from "./pdf-generator";
 
 // Format currency
 const formatCurrency = (amount: string | number, currency: string) => {
@@ -64,12 +47,33 @@ const calculateGrandTotal = (items: any[], taxRate = 16) => {
 // Main component
 const InvoicePDF = ({ invoice }: { invoice: InvoiceHistoryItem }) => {
   const [isClient, setIsClient] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    
+    if (isClient) {
+      try {
+        // Generate PDF
+        const doc = generateInvoicePDF(invoice);
+        
+        // Create blob URL
+        const blob = doc.output('blob');
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+        
+        // Cleanup function
+        return () => {
+          if (url) URL.revokeObjectURL(url);
+        };
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+      }
+    }
+  }, [invoice, isClient]);
 
-  if (!isClient) {
+  if (!isClient || !pdfUrl) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
@@ -81,16 +85,14 @@ const InvoicePDF = ({ invoice }: { invoice: InvoiceHistoryItem }) => {
   }
 
   return (
-    <PDFRenderer 
-      invoice={invoice}
-      helpers={{
-        formatCurrency,
-        calculateItemAmount,
-        calculateSubtotal,
-        calculateTaxTotal,
-        calculateGrandTotal
-      }}
-    />
+    <div className="w-full h-full">
+      <iframe 
+        ref={iframeRef}
+        src={pdfUrl}
+        className="w-full h-full border-0"
+        title="Invoice PDF"
+      />
+    </div>
   );
 };
 
@@ -98,13 +100,13 @@ export default InvoicePDF;
 
 // Để sử dụng trong download, export một hàm tạo document
 export const createInvoiceDocument = async (invoice: InvoiceHistoryItem) => {
-  // Sẽ được triển khai trong file pdf-renderer.tsx
-  const { createDocument } = await import("./pdf-renderer");
-  return createDocument(invoice, {
-    formatCurrency,
-    calculateItemAmount,
-    calculateSubtotal,
-    calculateTaxTotal,
-    calculateGrandTotal
-  });
+  // Sử dụng jsPDF thay vì @react-pdf/renderer
+  const doc = generateInvoicePDF(invoice);
+  return doc;
+};
+
+// Hàm tải xuống PDF
+export const downloadInvoicePDF = (invoice: InvoiceHistoryItem, filename?: string) => {
+  const { downloadInvoicePDF: downloadPDF } = require('./pdf-generator');
+  return downloadPDF(invoice, filename);
 };
