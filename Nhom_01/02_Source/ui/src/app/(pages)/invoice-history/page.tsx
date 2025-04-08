@@ -98,12 +98,11 @@ function InvoiceHistoryContent() {
         return;
       }
 
-      // Dynamically import PDF components to avoid crypto errors
-      const { pdf } = await import("@react-pdf/renderer");
-      const { InvoiceDocument } = await import("@/components/invoice/invoice-pdf");
-
-      // Tạo PDF blob từ InvoiceDocument component
-      const blob = await pdf(<InvoiceDocument invoice={invoice} />).toBlob();
+      // Import createInvoiceDocument từ invoice-pdf
+      const { createInvoiceDocument } = await import("@/components/invoice/invoice-pdf");
+      
+      // Tạo PDF blob
+      const blob = await createInvoiceDocument(invoice).then(doc => doc.toBlob());
 
       // Tạo URL cho blob
       const url = URL.createObjectURL(blob);
