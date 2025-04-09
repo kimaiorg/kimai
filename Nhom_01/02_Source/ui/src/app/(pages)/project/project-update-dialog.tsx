@@ -64,7 +64,7 @@ export function ProjectUpdateDialog({
       start_date: targetProject.start_date,
       end_date: targetProject.end_date,
       budget: targetProject.budget.toString(),
-      customer: targetProject.customer.id.toString()
+      customer_id: targetProject.customer.id.toString()
     }
   });
 
@@ -75,18 +75,18 @@ export function ProjectUpdateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { customer, project_number, order_number, budget, ...rest } = values;
+      const { customer_id, project_number, order_number, budget, ...rest } = values;
       const payload: UpdateProjectRequestDTO = {
         ...rest,
         project_number: Number(project_number),
         order_number: Number(order_number),
-        customer: Number(customer),
+        customer_id: Number(customer_id),
         budget: Number(budget),
         teams: selectedTeams.map((team) => Number(team.id))
       };
       const response = await updateProject(payload, targetProject.id);
 
-      if (response == 201) {
+      if (response == 200) {
         toast("Success", {
           description: "Update project successfully",
           duration: 2000,
@@ -282,7 +282,7 @@ export function ProjectUpdateDialog({
               {customerList && (
                 <FormField
                   control={updateProjectForm.control}
-                  name="customer"
+                  name="customer_id"
                   render={({ field }) => (
                     <FormItem className="col-span-4">
                       <FormLabel>Customer</FormLabel>

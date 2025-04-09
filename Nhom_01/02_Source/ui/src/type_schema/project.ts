@@ -45,7 +45,7 @@ export const CreateProjectRequestSchema = z
     start_date: z.string(),
     end_date: z.string(),
     budget: z.string(),
-    customer: string()
+    customer_id: string()
   })
   .strict()
   .superRefine(({ start_date, end_date }, ctx) => {
@@ -71,7 +71,7 @@ export type CreateProjectRequestDTO = {
   end_date: string;
   budget: number;
   teams: number[];
-  customer: number;
+  customer_id: number;
 };
 
 export type UpdateProjectRequestDTO = {
@@ -84,5 +84,5 @@ export type UpdateProjectRequestDTO = {
   end_date: string;
   budget: number;
   teams: number[];
-  customer: number;
+  customer_id: number;
 };

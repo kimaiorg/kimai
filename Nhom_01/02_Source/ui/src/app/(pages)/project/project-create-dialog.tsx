@@ -56,7 +56,7 @@ export function ProjectCreateDialog({
       start_date: "2025-04-01",
       end_date: "2025-12-31",
       budget: "50000",
-      customer: "1"
+      customer_id: "1"
     }
   });
 
@@ -67,12 +67,12 @@ export function ProjectCreateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { customer, project_number, order_number, budget, ...rest } = values;
+      const { customer_id, project_number, order_number, budget, ...rest } = values;
       const payload: CreateProjectRequestDTO = {
         ...rest,
         project_number: Number(project_number),
         order_number: Number(order_number),
-        customer: Number(customer),
+        customer_id: Number(customer_id),
         budget: Number(budget),
         teams: selectedTeams.map((team) => Number(team.id))
       };
@@ -273,7 +273,7 @@ export function ProjectCreateDialog({
               {customerList && (
                 <FormField
                   control={createProjectForm.control}
-                  name="customer"
+                  name="customer_id"
                   render={({ field }) => (
                     <FormItem className="col-span-4">
                       <FormLabel>Customer</FormLabel>
