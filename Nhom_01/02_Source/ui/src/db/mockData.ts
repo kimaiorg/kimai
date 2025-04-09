@@ -11,7 +11,7 @@ const generateRandomDate = (pastDays = 30) => {
 
 // Generate a random price
 const generateRandomPrice = (min = 100, max = 10000) => {
-  const price = ((Math.random() * (max - min)) + min).toFixed(2);
+  const price = (Math.random() * (max - min) + min).toFixed(2);
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
@@ -67,7 +67,7 @@ const generateRandomInvoice = (): InvoiceHistoryItem => {
     totalPrice,
     currency: "TTD",
     createdBy,
-    createdAt: new Date(Date.now() - ((Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000))).toISOString(),
+    createdAt: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
     notes: Math.random() > 0.5 ? "Payment due within terms specified in contract." : undefined,
     items
   };
@@ -106,7 +106,7 @@ export const mockInvoiceTemplates: InvoiceTemplate[] = [
     invoiceNumberGenerator: "Configured format",
     invoiceTemplate: "Invoice",
     grouping: "Default (one row per entry)",
-    createdAt: new Date(Date.now() - ((Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000))).toISOString()
+    createdAt: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: "template-2",
@@ -125,7 +125,7 @@ export const mockInvoiceTemplates: InvoiceTemplate[] = [
     invoiceNumberGenerator: "Configured format",
     invoiceTemplate: "Invoice",
     grouping: "Activity",
-    createdAt: new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)).toISOString()
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: "template-3",
@@ -144,7 +144,7 @@ export const mockInvoiceTemplates: InvoiceTemplate[] = [
     invoiceNumberGenerator: "Configured format",
     invoiceTemplate: "Invoice",
     grouping: "Project",
-    createdAt: new Date(Date.now() - (25 * 24 * 60 * 60 * 1000)).toISOString()
+    createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 

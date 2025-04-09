@@ -25,7 +25,7 @@ const calculateSubtotal = (items: any[]) => {
   return items.reduce((total, item) => {
     const quantity = Number(item.quantity) || 0;
     const unitPrice = Number(item.unitPrice) || 0;
-    return total + (quantity * unitPrice);  
+    return total + quantity * unitPrice;
   }, 0);
 };
 
@@ -52,17 +52,17 @@ const InvoicePDF = ({ invoice }: { invoice: InvoiceHistoryItem }) => {
 
   useEffect(() => {
     setIsClient(true);
-    
+
     if (isClient) {
       try {
         // Generate PDF
         const doc = generateInvoicePDF(invoice);
-        
+
         // Create blob URL
-        const blob = doc.output('blob');
+        const blob = doc.output("blob");
         const url = URL.createObjectURL(blob);
         setPdfUrl(url);
-        
+
         // Cleanup function
         return () => {
           if (url) URL.revokeObjectURL(url);
@@ -86,7 +86,7 @@ const InvoicePDF = ({ invoice }: { invoice: InvoiceHistoryItem }) => {
 
   return (
     <div className="w-full h-full">
-      <iframe 
+      <iframe
         ref={iframeRef}
         src={pdfUrl}
         className="w-full h-full border-0"
@@ -110,14 +110,14 @@ export const downloadInvoicePDF = (invoice: InvoiceHistoryItem, filename?: strin
   try {
     // Import trực tiếp từ pdf-generator để tránh lỗi
     const doc = generateInvoicePDF(invoice);
-    
+
     // Set filename
     const defaultFilename = `Invoice-${invoice.id || "INV-2025-0001"}.pdf`;
     const finalFilename = filename || defaultFilename;
-    
+
     // Download PDF
     doc.save(finalFilename);
-    
+
     return true;
   } catch (error) {
     console.error("Error downloading PDF:", error);

@@ -100,11 +100,11 @@ function InvoiceHistoryContent() {
 
       // Import downloadInvoicePDF từ invoice-pdf
       const { downloadInvoicePDF } = await import("@/components/invoice/invoice-pdf");
-      
+
       // Tải xuống PDF trực tiếp
       const filename = `invoice-${invoiceId}.pdf`;
       const success = downloadInvoicePDF(invoice, filename);
-      
+
       if (!success) {
         throw new Error("Failed to download PDF");
       }

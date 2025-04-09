@@ -165,7 +165,10 @@ export const InvoiceDocument = ({ invoice, helpers }: { invoice: InvoiceHistoryI
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page
+        size="A4"
+        style={styles.page}
+      >
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.title}>Invoice</Text>
@@ -290,14 +293,22 @@ export const InvoiceDocument = ({ invoice, helpers }: { invoice: InvoiceHistoryI
 const PDFRenderer = ({ invoice, helpers }: { invoice: InvoiceHistoryItem; helpers: HelperFunctions }) => {
   return (
     <PDFViewer style={styles.viewer}>
-      <InvoiceDocument invoice={invoice} helpers={helpers} />
+      <InvoiceDocument
+        invoice={invoice}
+        helpers={helpers}
+      />
     </PDFViewer>
   );
 };
 
 // Export function to create PDF document for download
 export const createDocument = async (invoice: InvoiceHistoryItem, helpers: HelperFunctions) => {
-  return pdf(<InvoiceDocument invoice={invoice} helpers={helpers} />);
+  return pdf(
+    <InvoiceDocument
+      invoice={invoice}
+      helpers={helpers}
+    />
+  );
 };
 
 export default PDFRenderer;

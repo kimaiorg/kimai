@@ -93,8 +93,8 @@ export default defineConfig([
       //     ],
       //     allowSamePrecedence: true
       //   }
-      // ], 
-      
+      // ],
+
       // Disallow mixed binary operators in an expression], use parentheses for readability.
 
       // Miscs
