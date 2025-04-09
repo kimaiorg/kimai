@@ -43,8 +43,12 @@ export const calculateGrandTotal = (items: any[], taxRate = 16) => {
 
 // Main function to generate PDF
 export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
-  // Create a new PDF document
-  const doc = new jsPDF();
+  // Create a new PDF document with larger page size
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4"
+  });
   
   // Set document properties
   doc.setProperties({
@@ -61,63 +65,86 @@ export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
   const borderColor: number[] = [229, 231, 235]; // Light gray for borders
   
   // Set page margins
-  const margin = 20;
+  const margin = 15;
   const pageWidth = doc.internal.pageSize.getWidth();
   const contentWidth = pageWidth - 2 * margin;
   
   // Add header with logo-like styling
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.rect(margin, margin, contentWidth, 15, 'F');
+  doc.rect(margin, margin, contentWidth, 10, 'F');
   
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("KIMAI", margin + 5, margin + 10);
+  doc.setFontSize(12);
+  doc.text("KIMAI", margin + 5, margin + 7);
   
   // Invoice title and number
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(24);
-  doc.text("Invoice", margin, margin + 30);
+  doc.setFontSize(18);
+  doc.text("Invoice", margin, margin + 20);
   
-  doc.setFontSize(16);
-  doc.text(invoice.id || "INV-2025-0001", margin, margin + 40);
+  doc.setFontSize(14);
+  doc.text(invoice.id || "INV-2025-0001", margin, margin + 27);
   
-  // Add invoice details in a nice box
+  // Create a two-column layout for invoice details and company info
+  const colWidth = (contentWidth - 5) / 2;
+  
+  // Left column - Invoice details in a nice box
   doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
   doc.setFillColor(252, 252, 253);
-  doc.roundedRect(margin, margin + 45, contentWidth / 2 - 10, 40, 2, 2, 'FD');
+  doc.roundedRect(margin, margin + 32, colWidth, 30, 2, 2, 'FD');
   
   doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${invoice.date || new Date().toLocaleDateString()}`, margin + 5, margin + 55);
-  doc.text(`Due Date: ${invoice.dueDate || new Date().toLocaleDateString()}`, margin + 5, margin + 65);
-  doc.text(`Status: ${invoice.status || "Pending"}`, margin + 5, margin + 75);
   
-  // Add company information in a nice box on the right
-  doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-  doc.setFillColor(252, 252, 253);
-  doc.roundedRect(margin + contentWidth / 2 + 10, margin + 45, contentWidth / 2 - 10, 40, 2, 2, 'FD');
+  // Add invoice details with proper spacing
+  const detailsStartY = margin + 38;
+  const lineHeight = 5;
   
   doc.setFont("helvetica", "bold");
-  doc.text("From:", margin + contentWidth / 2 + 15, margin + 55);
+  doc.text("Date:", margin + 3, detailsStartY);
   doc.setFont("helvetica", "normal");
-  doc.text("Kimai Time Tracking", margin + contentWidth / 2 + 15, margin + 65);
-  doc.text("123 Time Street", margin + contentWidth / 2 + 15, margin + 75);
-  doc.text("Time City, TC 12345", margin + contentWidth / 2 + 15, margin + 85);
+  doc.text(invoice.date || new Date().toLocaleDateString(), margin + 20, detailsStartY);
+  
+  doc.setFont("helvetica", "bold");
+  doc.text("Due Date:", margin + 3, detailsStartY + lineHeight);
+  doc.setFont("helvetica", "normal");
+  doc.text(invoice.dueDate || new Date().toLocaleDateString(), margin + 20, detailsStartY + lineHeight);
+  
+  doc.setFont("helvetica", "bold");
+  doc.text("Status:", margin + 3, detailsStartY + lineHeight * 2);
+  doc.setFont("helvetica", "normal");
+  doc.text(invoice.status || "Pending", margin + 20, detailsStartY + lineHeight * 2);
+  
+  // Right column - Company information in a nice box
+  const rightColX = margin + colWidth + 5;
+  doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
+  doc.setFillColor(252, 252, 253);
+  doc.roundedRect(rightColX, margin + 32, colWidth, 30, 2, 2, 'FD');
+  
+  // Add company information with proper spacing
+  doc.setFont("helvetica", "bold");
+  doc.text("From:", rightColX + 3, detailsStartY);
+  doc.setFont("helvetica", "normal");
+  doc.text("Kimai Time Tracking", rightColX + 3, detailsStartY + lineHeight);
+  doc.text("123 Time Street", rightColX + 3, detailsStartY + lineHeight * 2);
+  doc.text("Time City, TC 12345", rightColX + 3, detailsStartY + lineHeight * 3);
   
   // Add customer information in a nice box
   doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
   doc.setFillColor(252, 252, 253);
-  doc.roundedRect(margin, margin + 95, contentWidth, 40, 2, 2, 'FD');
+  doc.roundedRect(margin, margin + 67, contentWidth, 25, 2, 2, 'FD');
+  
+  const customerStartY = margin + 73;
   
   doc.setFont("helvetica", "bold");
-  doc.text("Bill To:", margin + 5, margin + 105);
+  doc.text("Bill To:", margin + 3, customerStartY);
   doc.setFont("helvetica", "normal");
-  doc.text(invoice.customer || "Customer Name", margin + 5, margin + 115);
-  doc.text("Customer Address", margin + 5, margin + 125);
-  doc.text("customer@example.com", margin + 5, margin + 135);
+  doc.text(invoice.customer || "Customer Name", margin + 3, customerStartY + lineHeight);
+  doc.text("Customer Address", margin + 3, customerStartY + lineHeight * 2);
+  doc.text("customer@example.com", margin + 3, customerStartY + lineHeight * 3);
   
   // Add items table with improved styling
   const tableColumn = ["Date", "Description", "Unit Price", "Quantity", "Amount"];
@@ -146,13 +173,15 @@ export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
   autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
-    startY: margin + 145,
+    startY: margin + 97,
     theme: 'grid',
     styles: {
-      fontSize: 10,
-      cellPadding: 6,
+      fontSize: 9,
+      cellPadding: 4,
       lineColor: [229, 231, 235],
       lineWidth: 0.1,
+      overflow: 'linebreak',
+      cellWidth: 'wrap'
     },
     headStyles: {
       fillColor: [primaryColor[0], primaryColor[1], primaryColor[2]],
@@ -161,11 +190,11 @@ export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
       halign: 'center'
     },
     columnStyles: {
-      0: { cellWidth: 30 }, // Date
+      0: { cellWidth: 25 }, // Date
       1: { cellWidth: 'auto' }, // Description
-      2: { cellWidth: 35, halign: 'right' }, // Unit Price
-      3: { cellWidth: 25, halign: 'center' }, // Quantity
-      4: { cellWidth: 35, halign: 'right' } // Amount
+      2: { cellWidth: 30, halign: 'right' }, // Unit Price
+      3: { cellWidth: 20, halign: 'center' }, // Quantity
+      4: { cellWidth: 30, halign: 'right' } // Amount
     },
     alternateRowStyles: {
       fillColor: [252, 252, 253]
@@ -178,7 +207,14 @@ export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
         doc.text(
-          "Thank you for your business! Invoice generated by Kimai Time Tracking System",
+          "Thank you for your business!",
+          doc.internal.pageSize.getWidth() / 2,
+          doc.internal.pageSize.getHeight() - 15,
+          { align: "center" }
+        );
+        
+        doc.text(
+          "Invoice generated by Kimai Time Tracking System",
           doc.internal.pageSize.getWidth() / 2,
           doc.internal.pageSize.getHeight() - 10,
           { align: "center" }
@@ -221,15 +257,15 @@ export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
     startY: finalY,
     theme: 'plain',
     styles: {
-      fontSize: 10,
+      fontSize: 9,
       lineColor: [229, 231, 235],
       lineWidth: 0.1
     },
     columnStyles: {
-      0: { cellWidth: 80, fontStyle: 'bold' },
-      1: { cellWidth: 35, halign: 'right' }
+      0: { cellWidth: 60, fontStyle: 'bold' },
+      1: { cellWidth: 30, halign: 'right' }
     },
-    margin: { left: pageWidth - 115 },
+    margin: { left: pageWidth - 90 },
     didParseCell: function(data) {
       // Add background color to total row
       if (data.row.index === 2) {
@@ -242,18 +278,22 @@ export const generateInvoicePDF = (invoice: InvoiceHistoryItem) => {
   
   // Add notes section if available
   if (invoice.notes) {
-    const notesY = (doc as any).lastAutoTable.finalY + 20;
+    const notesY = (doc as any).lastAutoTable.finalY + 15;
     
     doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
     doc.setFillColor(252, 252, 253);
-    doc.roundedRect(margin, notesY, contentWidth, 30, 2, 2, 'FD');
+    doc.roundedRect(margin, notesY, contentWidth, 25, 2, 2, 'FD');
     
     doc.setFont("helvetica", "bold");
     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-    doc.text("Notes:", margin + 5, notesY + 10);
+    doc.text("Notes:", margin + 5, notesY + 7);
     
     doc.setFont("helvetica", "normal");
-    doc.text(invoice.notes, margin + 5, notesY + 20);
+    doc.setFontSize(9);
+    
+    // Split long notes into multiple lines
+    const splitNotes = doc.splitTextToSize(invoice.notes, contentWidth - 10);
+    doc.text(splitNotes, margin + 5, notesY + 14);
   }
   
   return doc;
