@@ -27,9 +27,14 @@ export const updateProjectSchema = z.object({
     })
     .transform((val) => (val ? new Date(val) : undefined)),
   budget: z.number().optional(),
-
-  teams: z.array(z.number()).optional(),
-  customer: z.number().optional(),
+  teams: z
+    .array(z.number())
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return {};
+      return { set: val.map((id) => ({ id })) };
+    }),
+  customer_id: z.number().optional(),
 });
 
 export type UpdateProjectDto = z.infer<typeof updateProjectSchema>;
