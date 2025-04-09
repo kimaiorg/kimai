@@ -98,25 +98,16 @@ function InvoiceHistoryContent() {
         return;
       }
 
-      // Import createInvoiceDocument từ invoice-pdf
-      const { createInvoiceDocument } = await import("@/components/invoice/invoice-pdf");
+      // Import downloadInvoicePDF từ invoice-pdf
+      const { downloadInvoicePDF } = await import("@/components/invoice/invoice-pdf");
       
-      // Tạo PDF blob
-      const blob = await createInvoiceDocument(invoice).then(doc => doc.toBlob());
-
-      // Tạo URL cho blob
-      const url = URL.createObjectURL(blob);
-
-      // Tạo link download và kích hoạt
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `invoice-${invoiceId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-
-      // Dọn dẹp
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
+      // Tải xuống PDF trực tiếp
+      const filename = `invoice-${invoiceId}.pdf`;
+      const success = downloadInvoicePDF(invoice, filename);
+      
+      if (!success) {
+        throw new Error("Failed to download PDF");
+      }
     } catch (error) {
       console.error("Error downloading invoice:", error);
       alert("Error downloading invoice. Please try again.");

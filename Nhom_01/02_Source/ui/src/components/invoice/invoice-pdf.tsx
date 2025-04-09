@@ -107,6 +107,20 @@ export const createInvoiceDocument = async (invoice: InvoiceHistoryItem) => {
 
 // Hàm tải xuống PDF
 export const downloadInvoicePDF = (invoice: InvoiceHistoryItem, filename?: string) => {
-  const { downloadInvoicePDF: downloadPDF } = require('./pdf-generator');
-  return downloadPDF(invoice, filename);
+  try {
+    // Import trực tiếp từ pdf-generator để tránh lỗi
+    const doc = generateInvoicePDF(invoice);
+    
+    // Set filename
+    const defaultFilename = `Invoice-${invoice.id || "INV-2025-0001"}.pdf`;
+    const finalFilename = filename || defaultFilename;
+    
+    // Download PDF
+    doc.save(finalFilename);
+    
+    return true;
+  } catch (error) {
+    console.error("Error downloading PDF:", error);
+    return false;
+  }
 };
