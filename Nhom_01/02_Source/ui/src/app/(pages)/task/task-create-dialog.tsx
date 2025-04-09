@@ -192,7 +192,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   </FormItem>
                 )}
               />
-              {activityList.length > 0 && (
+              {activityList && (
                 <FormField
                   control={createTaskForm.control}
                   name="activity_id"
@@ -226,7 +226,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   )}
                 />
               )}
-              {userList.length > 0 && (
+              {userList && (
                 <FormField
                   control={createTaskForm.control}
                   name="user_id"

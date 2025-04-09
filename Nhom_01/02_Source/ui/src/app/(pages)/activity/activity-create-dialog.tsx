@@ -174,7 +174,7 @@ export function ActivityCreateDialog({
                 )}
               />
 
-              {projectList.length > 0 && (
+              {projectList && (
                 <FormField
                   control={createActivityForm.control}
                   name="project_id"
@@ -216,7 +216,7 @@ export function ActivityCreateDialog({
                   )}
                 />
               )}
-              {teamList.length > 0 && (
+              {teamList && (
                 <FormField
                   control={createActivityForm.control}
                   name="team_id"

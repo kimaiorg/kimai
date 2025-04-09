@@ -17,11 +17,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getUserById } from "@/lib/redux-toolkit/slices/list-user-slice";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { handleErrorApi } from "@/lib/utils";
 import { CustomerType } from "@/type_schema/customer";
 import { CreateProjectRequestDTO, CreateProjectRequestSchema, CreateProjectValidation } from "@/type_schema/project";
 import { TeamType } from "@/type_schema/team";
+import { UserType } from "@/type_schema/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Users } from "lucide-react";
@@ -41,6 +42,7 @@ export function ProjectCreateDialog({
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [teamList, setTeamList] = useState<TeamType[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<TeamType[]>([]);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const teamOptions = teamList.map((team) => ({ label: `${team.name}`, value: team.id.toString(), icon: Users }));
 
   const createProjectForm = useForm<CreateProjectValidation>({
@@ -110,17 +112,11 @@ export function ProjectCreateDialog({
     const fetchAllTeams = async () => {
       const result = await getAllTeams();
       const teams: TeamType[] = result.data.map((simpleTeam) => {
-        const { users, ...data } = simpleTeam;
-        const userMembers = users.map((userId) => {
-          const user = getUserById(userId);
-          return {
-            ...user!,
-            isTeamLead: false,
-            color: simpleTeam.color
-          };
-        });
+        const { users, lead, ...data } = simpleTeam;
+        const userMembers = users.map((userId) => userList.find((user) => user.user_id == userId)) as UserType[];
         return {
           ...data,
+          lead: userList.find((user) => user.user_id == lead)!,
           users: userMembers
         };
       });
@@ -274,7 +270,7 @@ export function ProjectCreateDialog({
                   </FormItem>
                 )}
               />
-              {customerList.length > 0 && (
+              {customerList && (
                 <FormField
                   control={createProjectForm.control}
                   name="customer"

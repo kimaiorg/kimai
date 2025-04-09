@@ -46,3 +46,18 @@ export async function addNewProject(request: CreateProjectRequestDTO): Promise<n
     return error.response.status;
   }
 }
+
+export async function updateProject(request: CreateProjectRequestDTO, projectId: number): Promise<number> {
+  const token = await getManagementAccessToken();
+  const payload = { ...request };
+  try {
+    const response = await myAxios.put(`/api/v1/projects/${projectId}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.status;
+  } catch (error: any) {
+    return error.response.status;
+  }
+}

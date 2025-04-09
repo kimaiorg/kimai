@@ -2,7 +2,7 @@
 
 import ErrorPage from "@/app/error";
 import Loading from "@/app/loading";
-import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Role, RolePermissionType, RoleType } from "@/type_schema/role";
 import { useUser } from "@auth0/nextjs-auth0/client";
 

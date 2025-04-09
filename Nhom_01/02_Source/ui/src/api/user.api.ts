@@ -2,19 +2,6 @@ import { createAccessToken } from "@/api/auth.api";
 import mockUser from "@/lib/mock-users.json";
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserListType } from "@/type_schema/user.schema";
 
-export async function getAllUsers2(page: number, perPage: number): Promise<UserListType> {
-  const total = mockUser.length;
-  const users = mockUser.slice((page - 1) * perPage, page * perPage);
-  const data: UserListType = {
-    start: (page - 1) * perPage,
-    limit: perPage,
-    length: users.length,
-    total: total,
-    users: users
-  };
-  return data;
-}
-
 export async function getAllUsers(
   page?: number,
   perPage?: number,

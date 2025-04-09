@@ -36,6 +36,7 @@ function User() {
 
   const fetchUser = async (page?: number, limit?: number, keyword?: string, sortBy?: string, sortOrder?: string) => {
     const result = await getAllUsers(page, limit, keyword, sortBy, sortOrder);
+    goToPage(page || 1);
     setUserList(result);
   };
 
@@ -75,7 +76,7 @@ function User() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">User</h1>
           <div className="flex items-center space-x-2">
-            <AddUserModal fetchUsers={handleReloadUser}>
+            <AddUserModal fetchUsers={() => fetchUser(1, limit)}>
               <Button className="btn btn-primary cursor-pointer">
                 Create User <Plus />
               </Button>

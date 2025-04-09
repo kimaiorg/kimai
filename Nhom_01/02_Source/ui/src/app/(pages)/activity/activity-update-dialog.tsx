@@ -48,7 +48,7 @@ export function ActivityUpdateDialog({
       budget: targetActivity.budget.toString(),
       activity_number: targetActivity.activity_number.toString(),
       project_id: targetActivity.project_id.toString(),
-      team_id: targetActivity.team_id.toString()
+      team_id: targetActivity.id.toString()
     }
   });
   async function onSubmit(values: UpdateActivityValidation) {
@@ -178,7 +178,7 @@ export function ActivityUpdateDialog({
                 )}
               />
 
-              {projectList.length > 0 && (
+              {projectList && (
                 <FormField
                   control={updateActivityForm.control}
                   name="project_id"
@@ -220,7 +220,7 @@ export function ActivityUpdateDialog({
                   )}
                 />
               )}
-              {teamList.length > 0 && (
+              {teamList && (
                 <FormField
                   control={updateActivityForm.control}
                   name="team_id"

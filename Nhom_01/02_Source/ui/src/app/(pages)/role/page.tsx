@@ -10,7 +10,7 @@ import {
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 // import { allSystemPermissions } from "@/lib/constants";
-import { PermissionType, Role, RolePermissionType, RoleUserType } from "@/type_schema/role";
+import { PermissionType, Role, RolePermissionType, RoleType, RoleUserType } from "@/type_schema/role";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +22,17 @@ function RolePage() {
   const [roleUsers, setRoleUsers] = useState<RoleUserType[]>([]);
   const updatePermissionRef = useRef<boolean>(false);
 
+  async function fetchUserEachRoles(roles: RoleType[], retries = 3, backoff = 300) {
+    try {
+      const roleUserList = await getUsersForEachRole(roles);
+      setRoleUsers(roleUserList);
+      return;
+    } catch (error) {
+      console.log("Try again");
+    }
+    return fetchUserEachRoles(roles, retries - 1, backoff * 2);
+  }
+
   useEffect(() => {
     const fetchRolePermissions = async () => {
       const result = await getAllRolePermissions();
@@ -30,9 +41,9 @@ function RolePage() {
         const permissions = await getAllSystemPermissions();
         setAllSystemPermissions(permissions);
       }, 500);
+      const roles = result.map((rp) => rp.role);
       setTimeout(async () => {
-        const roleUserList = await getUsersForEachRole(result.map((rp) => rp.role));
-        setRoleUsers(roleUserList);
+        await fetchUserEachRoles(roles);
       }, 1000);
     };
     if (!fetchRolePermissionsRef.current) {
@@ -122,13 +133,7 @@ function RolePage() {
     <>
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Role and Permissions</h1>
-        <div className="flex items-center space-x-2">
-          {/* <AddUserModal fetchUsers={handleReloadUser}>
-            <Button className="btn btn-primary cursor-pointer">
-              Create User <Plus />
-            </Button>
-          </AddUserModal> */}
-        </div>
+        <div className="flex items-center space-x-2"></div>
       </div>
       <div className="pt-2">
         <div className="grid grid-cols-2 gap-4 lg:gap-2 mb-8 ">

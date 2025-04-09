@@ -1,14 +1,17 @@
 "use client";
 
 import { getUserRolePermissions } from "@/api/auth.api";
+import { getAllUsers } from "@/api/user.api";
 import ErrorPage from "@/app/error";
 import Loading from "@/app/loading";
 import Header from "@/components/shared/Header";
 import { MySidebar } from "@/components/shared/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Locale, locales } from "@/lib/i18n";
-import { useAppDispatch } from "@/lib/redux-toolkit/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { updatePrivilege } from "@/lib/redux-toolkit/slices/user-slice";
+import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { usePathname, useRouter } from "next/navigation";
 import { CSSProperties, use, useEffect, useState } from "react";
@@ -30,6 +33,7 @@ export default function LocaleLayout({
 
   const { user, error, isLoading } = useUser();
   const dispatch = useAppDispatch();
+  const users = useAppSelector((state) => state.userListState.users) as UserType[];
   const [isFetchingRole, setIsFetchingRole] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -44,6 +48,14 @@ export default function LocaleLayout({
   // Handle authentication and permissions
   useEffect(() => {
     if (user && !isLoading) {
+      const fetchUsers = async () => {
+        try {
+          const userList = await getAllUsers();
+          dispatch(updateUserList(userList.users));
+        } catch (error) {
+          console.error(error);
+        }
+      };
       const fetchUserRolePermissions = async () => {
         try {
           const rolePermissions = await getUserRolePermissions(user.sub!);
@@ -52,6 +64,9 @@ export default function LocaleLayout({
             return;
           }
           dispatch(updatePrivilege(rolePermissions));
+          if (!users || users.length === 0) {
+            await fetchUsers();
+          }
           setIsFetchingRole(false);
         } catch (error) {
           console.error(error);
@@ -64,7 +79,7 @@ export default function LocaleLayout({
     } else if (!isLoading && !user) {
       setIsFetchingRole(false);
     }
-  }, [user, isLoading, dispatch]);
+  }, [user]);
 
   if (isLoading || isFetchingRole) {
     return <Loading />;

@@ -73,6 +73,7 @@ export default function UpdateUserModal({
     const fetchRolePermission = async () => {
       const response = await getUserRolePermissions(targetUser.user_id);
       setRolePermission(response);
+      updateUserForm.setValue("roleId", response.role.id);
     };
     const fetchRole = async () => {
       const result = await getAllRoles();
@@ -145,7 +146,7 @@ export default function UpdateUserModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
-                      {roles.length > 0 && rolePermission && (
+                      {roles && rolePermission && (
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={rolePermission.role.id}

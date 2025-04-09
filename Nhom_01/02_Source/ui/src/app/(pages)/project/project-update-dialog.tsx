@@ -1,7 +1,7 @@
 "use client";
 
 import { getAllCustomers } from "@/api/customer.api";
-import { addNewProject } from "@/api/project.api";
+import { updateProject } from "@/api/project.api";
 import { getAllTeams } from "@/api/team.api";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
@@ -17,7 +17,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getUserById } from "@/lib/redux-toolkit/slices/list-user-slice";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+
 import { handleErrorApi } from "@/lib/utils";
 import { CustomerType } from "@/type_schema/customer";
 import {
@@ -27,6 +28,7 @@ import {
   UpdateProjectValidation
 } from "@/type_schema/project";
 import { TeamType } from "@/type_schema/team";
+import { UserType } from "@/type_schema/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Users } from "lucide-react";
@@ -48,6 +50,7 @@ export function ProjectUpdateDialog({
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [teamList, setTeamList] = useState<TeamType[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<TeamType[]>([]);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const teamOptions = teamList.map((team) => ({ label: `${team.name}`, value: team.id.toString(), icon: Users }));
 
   const updateProjectForm = useForm<UpdateProjectValidation>({
@@ -81,7 +84,7 @@ export function ProjectUpdateDialog({
         budget: Number(budget),
         teams: selectedTeams.map((team) => Number(team.id))
       };
-      const response = await addNewProject(payload);
+      const response = await updateProject(payload, targetProject.id);
 
       if (response == 201) {
         toast("Success", {
@@ -117,21 +120,16 @@ export function ProjectUpdateDialog({
     const fetchAllTeams = async () => {
       const result = await getAllTeams();
       const teams: TeamType[] = result.data.map((simpleTeam) => {
-        const { users, ...data } = simpleTeam;
-        const userMembers = users.map((userId) => {
-          const user = getUserById(userId);
-          return {
-            ...user!,
-            isTeamLead: false,
-            color: simpleTeam.color
-          };
-        });
+        const { users, lead, ...data } = simpleTeam;
         return {
           ...data,
-          users: userMembers
+          lead: userList.find((user) => user.user_id == lead)!,
+          users: users.map((userId) => userList.find((user) => user.user_id === userId)) as UserType[]
         };
       });
       setTeamList(teams);
+      const allTeamIds = targetProject.teams.map((team) => team.id);
+      setSelectedTeams(teams.filter((team) => allTeamIds.includes(team.id)));
     };
     fetchCustomers();
     fetchAllTeams();
@@ -281,7 +279,7 @@ export function ProjectUpdateDialog({
                   </FormItem>
                 )}
               />
-              {customerList.length > 0 && (
+              {customerList && (
                 <FormField
                   control={updateProjectForm.control}
                   name="customer"
@@ -334,6 +332,7 @@ export function ProjectUpdateDialog({
                 <MultiSelect
                   options={teamOptions}
                   onValueChange={handleSelectTeam}
+                  defaultValue={selectedTeams.map((team) => team.id.toString())}
                   placeholder="Select teams"
                   variant="secondary"
                   className="border border-gray-200 cursor-pointer"

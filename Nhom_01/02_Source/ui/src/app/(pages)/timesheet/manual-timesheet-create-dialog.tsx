@@ -194,7 +194,7 @@ export function ManualTimesheetCreateDialog({
                   </FormItem>
                 )}
               />
-              {taskList.length > 0 && (
+              {taskList && (
                 <FormField
                   control={createTimesheetForm.control}
                   name="task_id"

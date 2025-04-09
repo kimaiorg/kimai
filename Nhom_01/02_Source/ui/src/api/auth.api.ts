@@ -75,36 +75,36 @@ export async function getAllSystemPermissions(): Promise<PermissionType[]> {
 }
 
 export async function getUsersForEachRole(roles: RoleType[]): Promise<RoleUserType[]> {
-  return roles.map((role, index) => ({
-    role: role,
-    userCount: [1, 10, 2, 4][index]
-  }));
+  // return roles.map((role, index) => ({
+  //   role: role,
+  //   userCount: [1, 10, 2, 4][index]
+  // }));
 
-  // const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
-  // const fetchPromises = roles.map((role) =>
-  //     fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles/${role.id}/users`, {
-  //         method: "GET",
-  //         headers: {
-  //             Accept: "application/json",
-  //             Authorization: `Bearer ${token}`
-  //         }
-  //     })
-  // );
+  const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
+  const fetchPromises = roles.map((role) =>
+    fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles/${role.id}/users`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    })
+  );
 
-  // const roleUsers: RoleUserType[] = await Promise.all(
-  //     fetchPromises.map(async (fetchPromise, index) => {
-  //         const response = await fetchPromise; // Await the actual response
+  const roleUsers: RoleUserType[] = await Promise.all(
+    fetchPromises.map(async (fetchPromise, index) => {
+      const response = await fetchPromise; // Await the actual response
 
-  //         const users = (await response.json()) as any[];
+      const users = (await response.json()) as any[];
 
-  //         return {
-  //             role: roles[index],
-  //             userCount: users.length || 99
-  //         };
-  //     })
-  // );
+      return {
+        role: roles[index],
+        userCount: users.length || 99
+      };
+    })
+  );
 
-  // return roleUsers;
+  return roleUsers;
 }
 
 export async function addPermissionForRole(
@@ -173,7 +173,7 @@ export async function getUserRolePermissions(userId: string): Promise<RolePermis
     }
   });
   const roleData: RoleType[] = await roleResponse.json();
-
+  console.log(roleData);
   const role = roleData[0];
 
   await new Promise((resolve) => setTimeout(resolve, 500));

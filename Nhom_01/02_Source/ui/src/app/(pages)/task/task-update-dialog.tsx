@@ -199,7 +199,7 @@ export function TaskUpdateDialog({
                   </FormItem>
                 )}
               />
-              {activityList.length > 0 && (
+              {activityList && (
                 <FormField
                   control={updateTaskForm.control}
                   name="activity_id"
@@ -233,7 +233,7 @@ export function TaskUpdateDialog({
                   )}
                 />
               )}
-              {userList.length > 0 && (
+              {userList && (
                 <FormField
                   control={updateTaskForm.control}
                   name="user_id"
