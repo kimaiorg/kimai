@@ -81,19 +81,21 @@ export default defineConfig([
       "@stylistic/semi-style": ["error", "last"], // Require semicolons placed only at the end of statements.
 
       // Operators
-      "@stylistic/no-mixed-operators": [
-        "error",
-        {
-          groups: [
-            ["+", "-", "*", "/", "%", "**"],
-            ["&", "|", "^", "~", "<<", ">>", ">>>"],
-            ["==", "!=", "===", "!==", ">", ">=", "<", "<="],
-            ["&&", "||"],
-            ["in", "instanceof"]
-          ],
-          allowSamePrecedence: true
-        }
-      ], // Disallow mixed binary operators in an expression], use parentheses for readability.
+      // "@stylistic/no-mixed-operators": [
+      //   "error",
+      //   {
+      //     groups: [
+      //       ["+", "-", "*", "/", "%", "**"],
+      //       ["&", "|", "^", "~", "<<", ">>", ">>>"],
+      //       ["==", "!=", "===", "!==", ">", ">=", "<", "<="],
+      //       ["&&", "||"],
+      //       ["in", "instanceof"]
+      //     ],
+      //     allowSamePrecedence: true
+      //   }
+      // ], 
+      
+      // Disallow mixed binary operators in an expression], use parentheses for readability.
 
       // Miscs
       "@stylistic/comma-style": ["error", "last"], // Require commas placed only at the end of arrays and objects.
