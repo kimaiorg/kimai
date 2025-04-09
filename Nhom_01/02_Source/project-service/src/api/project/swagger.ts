@@ -112,7 +112,7 @@ export class UpdateProjectSwagger {
     example: 101,
     description: 'ID of the customer',
   })
-  customer?: number;
+  customer_id?: number;
 }
 
 export class ListProjectSwaggerDto {
