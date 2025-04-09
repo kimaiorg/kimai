@@ -14,7 +14,8 @@ Nhom_01/
 │   ├── notification-service/ # Notification service
 │   ├── project-service/      # Core project management service
 │   ├── timesheet-service/    # Timesheet management
-│   └── ui/                   # Next.js frontend 
+│   ├── ui/                   # Next.js frontend
+│   └── docker-compose.yaml   # Docker configuration
 └── 03_Deployment/       # Deployment configurations
 ```
 
@@ -90,7 +91,7 @@ Next.js based frontend application.
 - Tailwind CSS
 - Cypress/Jest testing
 
-## Installation and Running Setup
+## Development Setup
 
 ### Prerequisites
 - Docker 
@@ -98,49 +99,53 @@ Next.js based frontend application.
 - npm v9+ 
 - PostgreSQL (for local development)
 
-### Running Services
+### Installation
 
-1. Start the repository:
-    ```bash
-    git clone [repository-url] # skip if you already have the repo
-    cd Nhom_01/02_Source
-    ```
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd Nhom_01/02_Source
+```
 
-2. Setup backend environment variables:
-* Project service: `cd /project-service`
-    - Create a `.env` file: `touch .env`
-    - Paste the following values into the `.env` file:
-    ```env
-    # app configs
-    APP_HOST=localhost
-    APP_PORT=3333
-    APP_VERSION=1
-
-    # database configs
-    DATABASE_URL=postgres://postgres:postgres@localhost:5433/project
-
-    ```
-* Timesheet service: `cd /timesheet-service`
-    - Create a `.env` file: `touch .env`
-    - Paste the following values into the `.env` file:
-    ```.env
-    # app configs
-    APP_HOST=localhost
-    APP_PORT=3334
-    APP_VERSION=1
-
-    # database configs
-    DATABASE_URL=postgres://postgres:postgres@localhost:5434/timesheet
-    ```
+2. Setup environment variables:
+```bash
+cp .env.example .env
+```
 
 3. Start services:
-- At your command line, run the following command to start all services:    
-    ```cmd
-    run.bat
-    ```
+```bash
+docker-compose up -d
+```
 
-### Running UI
-```cmd
+4. Install dependencies for each service:
+```bash
+cd invoice-service && npm install
+cd ../notification-service && npm install
+cd ../project-service && npm install
+cd ../timesheet-service && npm install
+cd ../ui && npm install
+```
+
+5. Run database migrations:
+```bash
+cd project-service
+npx prisma migrate dev
+```
+
+### Running Services
+
+**Development mode:**
+```bash
+npm run start:dev  # For each service
+```
+
+**Production mode:**
+```bash
+docker-compose up --build
+```
+
+**UI Development:**
+```bash
 cd ui
 npm run dev
 ```
