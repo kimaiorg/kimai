@@ -22,6 +22,8 @@ export type TeamSimpleType = {
   color: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
+  lead: string;
   users: string[];
 };
 

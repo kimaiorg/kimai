@@ -72,7 +72,7 @@ export function ProjectCreateDialog({
         ...rest,
         project_number: Number(project_number),
         order_number: Number(order_number),
-        customer_id: Number(customer_id),
+        customer: Number(customer_id),
         budget: Number(budget),
         teams: selectedTeams.map((team) => Number(team.id))
       };

@@ -1,6 +1,6 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { myAxios } from "@/api/axios";
-import { ActivityType, CreateActivityRequestDTO } from "@/type_schema/activity";
+import { ActivityType, CreateActivityRequestDTO, UpdateActivityRequestDTO } from "@/type_schema/activity";
 import { Pagination } from "@/type_schema/common";
 
 export async function getAllActivities(
@@ -46,6 +46,21 @@ export async function addNewActivity(request: CreateActivityRequestDTO): Promise
   const payload = { ...request };
   try {
     const response = await myAxios.post(`/api/v1/activities`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.status;
+  } catch (error: any) {
+    return error.response.status;
+  }
+}
+
+export async function updateActivity(request: UpdateActivityRequestDTO, id: number): Promise<number> {
+  const token = await getManagementAccessToken();
+  const payload = { ...request };
+  try {
+    const response = await myAxios.put(`/api/v1/activities/${id}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

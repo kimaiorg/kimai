@@ -2,8 +2,14 @@ import { getManagementAccessToken } from "@/api/auth.api";
 import { myAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
 import { UpdateTaskRequestDTO } from "@/type_schema/task";
-import { CreateManualTimesheetRequestDTO, CreateTimesheetRequestDTO, TimesheetTestType } from "@/type_schema/timesheet";
+import {
+  CreateManualTimesheetRequestDTO,
+  CreateTimesheetRequestDTO,
+  TimesheetResponseType
+} from "@/type_schema/timesheet";
 import axios from "axios";
+
+const TIMESHEET_BACKEND_URL = process.env.TIMESHEET_BACKEND_URL;
 
 export async function getAllTimesheets(
   page?: number,
@@ -11,7 +17,7 @@ export async function getAllTimesheets(
   keyword?: string,
   sortBy?: string,
   sortOrder?: string
-): Promise<Pagination<TimesheetTestType>> {
+): Promise<Pagination<TimesheetResponseType>> {
   const token = await getManagementAccessToken();
 
   const params = new URLSearchParams();
@@ -24,8 +30,8 @@ export async function getAllTimesheets(
     params.append("sort_order", order);
   }
 
-  const response = await axios.get<Pagination<TimesheetTestType>>(
-    `http://localhost:3334/api/v1/timesheets?${params.toString()}`,
+  const response = await axios.get<Pagination<TimesheetResponseType>>(
+    `${TIMESHEET_BACKEND_URL}/api/v1/timesheets?${params.toString()}`,
     {
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -44,7 +50,7 @@ export async function getAllMyTimesheets(
   keyword?: string,
   sortBy?: string,
   sortOrder?: string
-): Promise<Pagination<TimesheetTestType>> {
+): Promise<Pagination<TimesheetResponseType>> {
   const token = await getManagementAccessToken();
 
   const params = new URLSearchParams();
@@ -57,8 +63,8 @@ export async function getAllMyTimesheets(
     params.append("sort_order", order);
   }
 
-  const response = await axios.get<Pagination<TimesheetTestType>>(
-    `http://localhost:3334/api/v1/timesheets/me?${params.toString()}`,
+  const response = await axios.get<Pagination<TimesheetResponseType>>(
+    `${TIMESHEET_BACKEND_URL}/api/v1/timesheets/me?${params.toString()}`,
     {
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -75,7 +81,7 @@ export async function addNewTimesheetRecord(request: CreateTimesheetRequestDTO):
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await axios.post(`http://localhost:3334/api/v1/timesheets/start`, payload, {
+    const response = await axios.post(`${TIMESHEET_BACKEND_URL}/api/v1/timesheets/start`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -91,7 +97,7 @@ export async function endTimesheetRecord(): Promise<number> {
 
   try {
     const response = await axios.post(
-      `http://localhost:3334/api/v1/timesheets/end`,
+      `${TIMESHEET_BACKEND_URL}/api/v1/timesheets/end`,
       {},
       {
         headers: {
@@ -109,7 +115,7 @@ export async function addNewManualTimesheetRecord(request: CreateManualTimesheet
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await axios.post(`http://localhost:3334/api/v1/timesheets`, payload, {
+    const response = await axios.post(`${TIMESHEET_BACKEND_URL}/api/v1/timesheets`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

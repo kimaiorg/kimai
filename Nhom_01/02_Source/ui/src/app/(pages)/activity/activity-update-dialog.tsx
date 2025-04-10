@@ -1,6 +1,6 @@
 "use client";
 
-import { addNewActivity } from "@/api/activity.api";
+import { updateActivity } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTeams } from "@/api/team.api";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { handleErrorApi } from "@/lib/utils";
 import {
   ActivityType,
-  CreateActivityRequestDTO,
   CreateActivityRequestSchema,
   UpdateActivityRequestDTO,
   UpdateActivityValidation
@@ -47,8 +46,8 @@ export function ActivityUpdateDialog({
       description: targetActivity.description,
       budget: targetActivity.budget.toString(),
       activity_number: targetActivity.activity_number.toString(),
-      project_id: targetActivity.project_id.toString(),
-      team_id: targetActivity.id.toString()
+      project_id: targetActivity.project.id.toString(),
+      team_id: targetActivity.team.id.toString()
     }
   });
   async function onSubmit(values: UpdateActivityValidation) {
@@ -64,8 +63,8 @@ export function ActivityUpdateDialog({
         activity_number: parseInt(activity_number),
         team_id: parseInt(team_id)
       };
-      const response = await addNewActivity(payload);
-      if (response == 201) {
+      const response = await updateActivity(payload, targetActivity.id);
+      if (response == 200) {
         toast("Success", {
           description: "Add new activity successfully",
           duration: 2000,

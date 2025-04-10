@@ -130,7 +130,7 @@ export function TimesheetCreateDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
         <DialogHeader>
-          <DialogTitle>Create timesheet</DialogTitle>
+          <DialogTitle>Start tracking</DialogTitle>
         </DialogHeader>
 
         <Form {...createTimesheetForm}>
@@ -209,7 +209,7 @@ export function TimesheetCreateDialog({
                 type="submit"
                 className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
               >
-                Create
+                Start
               </Button>
             </DialogFooter>
           </form>
