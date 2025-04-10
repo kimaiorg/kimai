@@ -90,6 +90,11 @@ export interface ProjectOverviewResponse {
 export interface WeeklyAllUsersReportResponse {
   entries: WeeklyReportEntry[];
   users: UserReportData[];
+  projects: {
+    id: number;
+    name: string;
+    color: string;
+  }[];
   week: {
     number: number;
     year: number;

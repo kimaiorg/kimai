@@ -48,10 +48,10 @@ function WeeklyUserReport() {
       setIsLoading(true);
       try {
         const data = await getWeeklyUserReport(selectedUserId, currentWeekNumber, currentYear);
-        setTimeEntries(data.entries);
-        setProjects(data.projects);
-        setSelectedUser(data.user.name);
-        setWeekInfo(data.week);
+        setTimeEntries(data.entries || []);
+        setProjects(data.projects || []);
+        setSelectedUser(data.user?.name || "Anna Smith");
+        setWeekInfo(data.week || { number: currentWeekNumber, year: currentYear, start: "", end: "" });
       } catch (error) {
         console.error("Error fetching weekly report data:", error);
       } finally {
@@ -258,28 +258,42 @@ function WeeklyUserReport() {
 
   // Format week display
   const formatWeekDisplay = () => {
-    const startDate = new Date(weekInfo.start);
-    const endDate = new Date(weekInfo.end);
+    if (!weekInfo || !weekInfo.start || !weekInfo.end) {
+      // Fallback if week info is not available
+      return `${currentYear} - Week ${currentWeekNumber}`;
+    }
 
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ];
+    try {
+      // Parse dates from ISO format (YYYY-MM-DD)
+      const startParts = weekInfo.start.split("-");
+      const endParts = weekInfo.end.split("-");
 
-    if (startDate.getMonth() === endDate.getMonth()) {
-      return `${monthNames[startDate.getMonth()]} ${currentYear} – Week ${currentWeekNumber}`;
-    } else {
-      return `${monthNames[startDate.getMonth()]}/${monthNames[endDate.getMonth()]} ${currentYear} – Week ${currentWeekNumber}`;
+      if (startParts.length !== 3 || endParts.length !== 3) {
+        return `${currentYear} - Week ${currentWeekNumber}`;
+      }
+
+      // Create date objects
+      const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+      const endDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+
+      // Check if dates are valid
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return `${currentYear} - Week ${currentWeekNumber}`;
+      }
+
+      // Format dates
+      const startMonth = startDate.toLocaleString("default", { month: "long" });
+      const endMonth = endDate.toLocaleString("default", { month: "long" });
+
+      // If same month
+      if (startMonth === endMonth) {
+        return `${startMonth} ${currentYear} - Week ${currentWeekNumber}`;
+      } else {
+        return `${startMonth}/${endMonth} ${currentYear} - Week ${currentWeekNumber}`;
+      }
+    } catch (error) {
+      console.error("Error formatting week display:", error);
+      return `${currentYear} - Week ${currentWeekNumber}`;
     }
   };
 
@@ -335,7 +349,7 @@ function WeeklyUserReport() {
           <div className="flex items-center space-x-2">
             <div className="relative">
               <select
-                className="appearance-none bg-pink-500 text-white rounded-md px-3 py-1 pr-8 cursor-pointer"
+                className="appearance-none rounded-md px-3 py-1 pr-8 cursor-pointer"
                 onChange={handleUserChange}
                 value={selectedUserId}
               >
@@ -348,7 +362,7 @@ function WeeklyUserReport() {
                   </option>
                 ))}
               </select>
-              <ChevronDownIcon className="absolute right-2 top-2 h-4 w-4 text-white pointer-events-none" />
+              <ChevronDownIcon className="absolute right-2 top-2 h-4 w-4 pointer-events-none" />
             </div>
 
             <div className="relative">

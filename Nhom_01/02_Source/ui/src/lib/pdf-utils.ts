@@ -198,9 +198,17 @@ export function generateWeeklyReportPdf(
         value: formatDuration(
           data.reduce((sum, row) => {
             // Assuming the total duration is in the second column (index 1)
+            if (!row[1] || typeof row[1] !== "string") {
+              return sum; // Skip invalid entries
+            }
+
             const durationParts = row[1].split(":");
-            const hours = parseInt(durationParts[0]);
-            const minutes = parseInt(durationParts[1]);
+            if (durationParts.length < 2) {
+              return sum; // Skip invalid format
+            }
+
+            const hours = parseInt(durationParts[0]) || 0;
+            const minutes = parseInt(durationParts[1]) || 0;
             return sum + hours * 3600 + minutes * 60;
           }, 0)
         )
