@@ -42,9 +42,9 @@ function ProjectOverviewReport() {
         const data = await getProjectOverviewReport(customerId);
 
         // Đảm bảo tất cả các dự án đều có customer_name
-        const projectsWithCustomers = data.projects.map((project) => {
+        const projectsWithCustomers = (data.projects || []).map((project) => {
           if (!project.customer_name && project.customer_id) {
-            const customer = data.customers.find((c) => c.id === project.customer_id);
+            const customer = (data.customers || []).find((c) => c.id === project.customer_id);
             return {
               ...project,
               customer_name: customer?.name || "Unknown Customer"
@@ -54,7 +54,7 @@ function ProjectOverviewReport() {
         });
 
         setProjects(projectsWithCustomers);
-        setCustomers(data.customers);
+        setCustomers(data.customers || []);
       } catch (error) {
         console.error("Error fetching report data:", error);
       } finally {
@@ -69,7 +69,7 @@ function ProjectOverviewReport() {
   const calculateTotals = () => {
     const totalBudget = projects.reduce((sum, project) => sum + (project.budget || 0), 0);
     const totalSpent = projects.reduce((sum, project) => sum + (project.spent || 0), 0);
-    const totalRemaining = projects.reduce((sum, project) => sum + ((project.budget || 0) - (project.spent || 0)), 0);
+    const totalRemaining = totalBudget - totalSpent;
     const totalTimeSpent = projects.reduce((sum, project) => sum + (project.time_spent || 0), 0);
     const totalThisMonth = projects.reduce((sum, project) => sum + (project.this_month || 0), 0);
     const totalNotExported = projects.reduce((sum, project) => sum + (project.not_exported || 0), 0);

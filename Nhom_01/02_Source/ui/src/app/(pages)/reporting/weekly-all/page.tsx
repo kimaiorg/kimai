@@ -49,24 +49,16 @@ function WeeklyAllUsersReport() {
       setIsLoading(true);
       try {
         const data = await getWeeklyAllUsersReport(currentWeekNumber, currentYear);
-        setTimeEntries(data.entries);
-
-        // Mock projects data since API doesn't return it
-        const mockProjects = [
-          { id: 1, name: "Website Redesign", color: "blue" },
-          { id: 2, name: "Mobile App", color: "green" },
-          { id: 3, name: "CRM Integration", color: "pink" },
-          { id: 4, name: "Marketing Campaign", color: "orange" }
-        ];
-        setProjects(mockProjects);
+        setTimeEntries(data.entries || []);
+        setProjects(data.projects || []);
 
         // Convert user IDs to strings for consistency
-        const formattedUsers = data.users.map((user) => ({
+        const formattedUsers = (data.users || []).map((user) => ({
           ...user,
           id: String(user.id)
         }));
         setUsers(formattedUsers);
-        setWeekInfo(data.week);
+        setWeekInfo(data.week || { number: currentWeekNumber, year: currentYear, start: "", end: "" });
       } catch (error) {
         console.error("Error fetching weekly all users report data:", error);
       } finally {
@@ -345,6 +337,47 @@ function WeeklyAllUsersReport() {
     window.open(pdfUrl, "_blank");
   };
 
+  // Format week display
+  const formatWeekDisplay = () => {
+    if (!weekInfo || !weekInfo.start || !weekInfo.end) {
+      // Fallback if week info is not available
+      return `${currentYear} - Week ${currentWeekNumber}`;
+    }
+
+    try {
+      // Parse dates from ISO format (YYYY-MM-DD)
+      const startParts = weekInfo.start.split("-");
+      const endParts = weekInfo.end.split("-");
+
+      if (startParts.length !== 3 || endParts.length !== 3) {
+        return `${currentYear} - Week ${currentWeekNumber}`;
+      }
+
+      // Create date objects
+      const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+      const endDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+
+      // Check if dates are valid
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return `${currentYear} - Week ${currentWeekNumber}`;
+      }
+
+      // Format dates
+      const startMonth = startDate.toLocaleString("default", { month: "long" });
+      const endMonth = endDate.toLocaleString("default", { month: "long" });
+
+      // If same month
+      if (startMonth === endMonth) {
+        return `${startMonth} ${currentYear} - Week ${currentWeekNumber}`;
+      } else {
+        return `${startMonth}/${endMonth} ${currentYear} - Week ${currentWeekNumber}`;
+      }
+    } catch (error) {
+      console.error("Error formatting week display:", error);
+      return `${currentYear} - Week ${currentWeekNumber}`;
+    }
+  };
+
   // Color dot for project
   const ProjectColorDot = ({ color }: { color: string }) => {
     const colorMap: Record<string, string> = {
@@ -368,33 +401,6 @@ function WeeklyAllUsersReport() {
   const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedProjectId(value ? parseInt(value) : undefined);
-  };
-
-  // Format week display
-  const formatWeekDisplay = () => {
-    const startDate = new Date(weekInfo.start || `${currentYear}-01-01`);
-    const endDate = new Date(weekInfo.end || `${currentYear}-01-07`);
-
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ];
-
-    if (startDate.getMonth() === endDate.getMonth()) {
-      return `${monthNames[startDate.getMonth()]} ${currentYear} – Week ${currentWeekNumber}`;
-    } else {
-      return `${monthNames[startDate.getMonth()]}/${monthNames[endDate.getMonth()]} ${currentYear} – Week ${currentWeekNumber}`;
-    }
   };
 
   return (
