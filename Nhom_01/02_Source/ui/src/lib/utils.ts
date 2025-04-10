@@ -71,3 +71,28 @@ export const handleErrorApi = ({
     });
   }
 };
+
+/**
+ * Format seconds to a human-readable duration string (HH:MM)
+ * @param seconds - Duration in seconds
+ * @returns Formatted duration string (HH:MM)
+ */
+export function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours}:${minutes.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Format number to currency string
+ * @param amount - Amount to format
+ * @param currency - Currency code (default: USD)
+ * @returns Formatted currency string
+ */
+export function formatCurrency(amount: number, currency: string = "USD"): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 2
+  }).format(amount);
+}
