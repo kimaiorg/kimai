@@ -41,8 +41,8 @@ export function ProjectCreateDialog({
   const [loading, setLoading] = useState<boolean>(false);
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [teamList, setTeamList] = useState<TeamType[]>([]);
-  const [selectedTeams, setSelectedTeams] = useState<TeamType[]>([]);
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+  const [selectedTeams, setSelectedTeams] = useState<TeamType[]>([]);
   const teamOptions = teamList.map((team) => ({ label: `${team.name}`, value: team.id.toString(), icon: Users }));
 
   const createProjectForm = useForm<CreateProjectValidation>({

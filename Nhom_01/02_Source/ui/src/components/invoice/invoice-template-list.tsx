@@ -56,9 +56,9 @@ export function InvoiceTemplateList({ templates, setTemplates }: InvoiceTemplate
 
   return (
     <div className="rounded-md">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50">
+      <Table className="rounded-lg border border-slate-200 bg-white dark:bg-slate-700">
+        <TableHeader className="rounded-lg border border-slate-200 bg-gray-100 dark:bg-slate-800">
+          <TableRow>
             <TableHead className="font-semibold">{t("invoiceTemplate.NAME")}</TableHead>
             <TableHead className="font-semibold">{t("invoiceTemplate.FORMAT")}</TableHead>
             <TableHead className="w-[80px]"></TableHead>

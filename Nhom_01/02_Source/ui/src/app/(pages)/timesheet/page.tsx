@@ -6,6 +6,7 @@ import { getAllTasks } from "@/api/task.api";
 import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
 import TimesheetViewDialog from "@/app/(pages)/timesheet/timesheet-view-dialog";
+import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -14,7 +15,6 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { secondsToTime } from "@/lib/utils";
 import { Pagination } from "@/type_schema/common";
-import { Role } from "@/type_schema/role";
 import { TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
@@ -35,6 +35,9 @@ function Timesheet() {
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [trackingTime, setTrackingTime] = useState("");
+
   const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetType>>({
     data: [],
     metadata: {
@@ -82,13 +85,13 @@ function Timesheet() {
         task: tasks.data.find((task) => task.id === task_id)!
       };
     });
-    console.log(timesheets);
     setTimesheetList({
       data: timesheets,
       metadata
     });
+    setLoadingPage(false);
   };
-  console.log(currentUser);
+
   const goToPage = (page: number) => {
     handleFetchTimesheets(page, limit, keyword, sortBy, sortOrder);
     updateQueryParams("page", page.toString());
@@ -115,7 +118,8 @@ function Timesheet() {
 
   // Check if the current user has a running timesheet
   const hasRunningTimesheet = timesheetList.data.find(
-    (timesheet) => timesheet.user.user_id === currentUser!.sub && !timesheet?.end_time && timesheet.status === "running"
+    (timesheet) =>
+      timesheet?.user?.user_id === currentUser!.sub && !timesheet?.end_time && timesheet?.status === "running"
   );
 
   function handleStartingTracking(): void {
@@ -124,7 +128,17 @@ function Timesheet() {
 
   useEffect(() => {
     handleFetchTimesheets(page, limit, keyword, sortBy, sortOrder);
+    // const hasRunningTimesheet = timesheetList.data.find(
+    //    (timesheet) => timesheet?.user?.user_id === currentUser!.sub && !timesheet?.end_time &&
+    //       timesheet?.status === "running"
+    // )!;
+    // if (hasRunningTimesheet) {
+    //   const timeStr = secondsToTime(new Date().getTime() - new Date(hasRunningTimesheet.duration).getTime());
+    //   setTrackingTime(timeStr);
+    // }
   }, [page, limit, keyword, sortBy, sortOrder]);
+
+  if (loadingPage) return <Loading />;
 
   return (
     <>
@@ -269,4 +283,4 @@ function Timesheet() {
   );
 }
 
-export default AuthenticatedRoute(Timesheet, [Role.SUPER_ADMIN, Role.ADMIN]);
+export default AuthenticatedRoute(Timesheet, []);

@@ -1,46 +1,107 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { DatabaseProvider, useDatabase } from "@/db/DatabaseContext";
+import { getAllActivities } from "@/api/activity.api";
+import { getAllCustomers } from "@/api/customer.api";
+import { filterInvoices } from "@/api/invoice.api";
+import { getAllProjects } from "@/api/project.api";
+import ActivityViewDialog from "@/app/(pages)/activity/activity-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
-import { Role } from "@/type_schema/role";
-import { InvoiceHistoryItem } from "@/type_schema/invoice";
-import { Calendar, Filter, Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatabaseProvider, useDatabase } from "@/db/DatabaseContext";
 import { InvoiceService } from "@/db/invoiceService"; // Sửa đường dẫn import
+import { handleErrorApi } from "@/lib/utils";
+import { ActivityType } from "@/type_schema/activity";
+import { CustomerType } from "@/type_schema/customer";
+import {
+  FilterInvoiceRequestSchema,
+  FilterInvoiceValidation,
+  InvoiceHistoryItem,
+  InvoiceType
+} from "@/type_schema/invoice";
+import { ProjectType } from "@/type_schema/project";
+import { Role } from "@/type_schema/role";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, MoreHorizontal, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
 function InvoiceContent() {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
   const { invoices, customers, updateInvoiceStatus } = useDatabase();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [dateRange, setDateRange] = useState("01/04/2025 - 30/04/2025");
   const [filteredInvoices, setFilteredInvoices] = useState<InvoiceHistoryItem[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceType>();
 
-  // Filter invoices based on search criteria
-  const handleSearch = () => {
-    let filtered = [...invoices];
+  const [customerList, setCustomerList] = useState<CustomerType[]>([]);
+  const [projectList, setProjectList] = useState<ProjectType[]>([]);
+  const [activityList, setActivityList] = useState<ActivityType[]>([]);
 
-    // Filter by customer if selected
-    if (selectedCustomer) {
-      filtered = filtered.filter((invoice) => invoice.customer.toLowerCase() === selectedCustomer.toLowerCase());
+  const activityOptions = activityList.map((activity) => ({
+    label: `${activity.name}`,
+    value: activity.id.toString(),
+    icon: Star
+  }));
+
+  const filterInvoiceForm = useForm<FilterInvoiceValidation>({
+    resolver: zodResolver(FilterInvoiceRequestSchema),
+    defaultValues: {
+      from: new Date().toISOString(),
+      to: new Date().toISOString(),
+      customer_id: "9",
+      project_id: "16",
+      activities: []
     }
-
-    // Filter by search term if provided
-    if (searchTerm.trim() !== "") {
-      filtered = filtered.filter(
-        (invoice) =>
-          invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          invoice.customer.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  });
+  async function handleSubmitFilterInvoice(values: FilterInvoiceValidation) {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const { customer_id, project_id, activities, ...rest } = values;
+      const payload = {
+        ...rest,
+        customer_id: Number(customer_id),
+        project_id: Number(project_id),
+        activities: activities.map((activity) => Number(activity))
+      };
+      const response = await filterInvoices(payload);
+      setSelectedInvoice({
+        project: projectList.find((project) => project.id === payload.project_id)!,
+        activities: payload.activities.map(
+          (activityId) => activityList.find((activity) => activity.id === activityId)!
+        ),
+        customer: customerList.find((customer) => customer.id === payload.customer_id)!
+      });
+      if (response == 201 || response == 200) {
+        toast("Success", {
+          description: "Add new customer successfully",
+          duration: 2000,
+          className: "!bg-lime-500 !text-white"
+        });
+        setFilteredInvoices(invoices);
+      } else {
+        toast("Failed", {
+          description: "Failed to add customer. Please try again!",
+          duration: 2000,
+          className: "!bg-red-500 !text-white"
+        });
+      }
+    } catch (error: unknown) {
+      handleErrorApi({
+        error,
+        setError: filterInvoiceForm.setError
+      });
+    } finally {
+      setLoading(false);
     }
-
-    // Set filtered invoices and mark as searched
-    setFilteredInvoices(filtered);
-    setHasSearched(true);
-  };
+  }
 
   // Handle preview invoice
   const handlePreviewInvoice = (invoiceId: string) => {
@@ -108,115 +169,296 @@ function InvoiceContent() {
     return colors[index];
   };
 
+  const fetchCustomerData = async () => {
+    try {
+      const customers = await getAllCustomers();
+      setCustomerList(customers.data);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+  const fetchProjectData = async (customerId: number) => {
+    try {
+      const projects = await getAllProjects(undefined, undefined, undefined, undefined, undefined, customerId);
+      setProjectList(projects.data);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+  const fetchActivityData = async (projectId: string) => {
+    try {
+      const activities = await getAllActivities(undefined, undefined, undefined, undefined, undefined, projectId);
+      setActivityList(activities.data);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+    }
+  };
+  const selectedCustomerId = useWatch({
+    control: filterInvoiceForm.control,
+    name: "customer_id"
+  });
+
+  const selectedProjectId = useWatch({
+    control: filterInvoiceForm.control,
+    name: "project_id"
+  });
+
+  useEffect(() => {
+    fetchCustomerData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCustomerId) return;
+    fetchProjectData(Number(selectedCustomerId));
+  }, [selectedCustomerId]);
+
+  useEffect(() => {
+    if (!selectedProjectId) return;
+    fetchActivityData(selectedProjectId);
+  }, [selectedProjectId]);
+
+  function handleSelectActivities(activityIds: string[]): void {
+    // const chosenActivities = activityList.filter((activity) => activityIds.includes(activity.id.toString()));
+    // setSelectedActivities(chosenActivities);
+    filterInvoiceForm.setValue("activities", [...activityIds]);
+  }
+
   return (
-    <div className="container mx-auto py-6 px-4">
+    <>
       <h1 className="text-2xl font-bold mb-6">Invoices</h1>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-md shadow-sm mb-6">
-        <div className="p-4 border-b">
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 rounded-md p-4">
+        <div className="pb-3">
           <h2 className="text-lg font-medium">Filter invoice data</h2>
         </div>
 
-        <div className="p-4 space-y-4">
-          {/* Search Term */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search term</label>
-            <input
-              type="text"
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* Time Range */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time range</label>
-            <div className="relative">
-              <input
-                type="text"
-                className="w-full border rounded-md p-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-              />
-              <Calendar className="h-5 w-5 absolute left-3 top-2.5 text-gray-400" />
-            </div>
-          </div>
-
-          {/* Customer */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
-            <div className="relative">
-              <select
-                className="w-full border rounded-md p-2 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={selectedCustomer}
-                onChange={(e) => setSelectedCustomer(e.target.value)}
-              >
-                <option value="">All customers</option>
-                {customers.map((customer, index) => (
-                  <option
-                    key={index}
-                    value={customer}
-                  >
-                    {customer}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="h-4 w-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter Buttons */}
-        <div className="p-4 flex space-x-2 border-t">
-          <button className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50 flex items-center">
-            <svg
-              className="h-4 w-4 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            Save
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
-            onClick={handleSearch}
+        <Form {...filterInvoiceForm}>
+          <form
+            onSubmit={filterInvoiceForm.handleSubmit(handleSubmitFilterInvoice)}
+            className="p-2 md:p-4 border border-gray-200 rounded-md mx-20"
+            noValidate
           >
-            <Search className="h-4 w-4 mr-1" />
-            Search
-          </button>
-        </div>
-      </div>
+            <div className="grid grid-cols-6 gap-4 pb-3 items-start">
+              {/* Name and Color */}
+              {/* <FormField
+                control={filterInvoiceForm.control}
+                name="start"
+                render={({ field }) => (
+                  <FormItem className="col-span-5">
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your name"
+                        className="!mt-0 border-gray-200"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />  */}
+              <FormField
+                control={filterInvoiceForm.control}
+                name="from"
+                render={({ field }) => (
+                  <FormItem className="col-span-3">
+                    <FormLabel>Start date</FormLabel>
+                    <FormControl>
+                      <DateTimePicker
+                        date={field.value}
+                        setDate={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={filterInvoiceForm.control}
+                name="to"
+                render={({ field }) => (
+                  <FormItem className="col-span-3">
+                    <FormLabel>End date</FormLabel>
+                    <FormControl>
+                      <DateTimePicker
+                        date={field.value}
+                        setDate={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={filterInvoiceForm.control}
+                name="customer_id"
+                render={({ field }) => (
+                  <FormItem className="col-span-6">
+                    <FormLabel>Customer</FormLabel>
+                    <FormControl>
+                      {customerList.length > 0 ? (
+                        <Select
+                          onValueChange={field.onChange}
+                          {...field}
+                        >
+                          <SelectTrigger className="!mt-0 border border-gray-200 rounded-md w-full">
+                            <SelectValue placeholder="Select a customer" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {customerList.map((customer, index) => (
+                              <SelectItem
+                                key={index}
+                                value={customer.id.toString()}
+                              >
+                                {customer.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-center text-sm">No customers were found</p>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      {/* Results Section */}
-      {hasSearched && (
-        <div>
+              <FormField
+                control={filterInvoiceForm.control}
+                name="project_id"
+                render={({ field }) => (
+                  <FormItem className="col-span-6">
+                    <FormLabel>Project</FormLabel>
+                    <FormControl>
+                      {projectList.length > 0 ? (
+                        <Select
+                          onValueChange={field.onChange}
+                          {...field}
+                        >
+                          <SelectTrigger className="w-full !mt-0 border rounded-md border-gray-200">
+                            <SelectValue placeholder="Select a project" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {projectList.map((project, index) => (
+                              <SelectItem
+                                key={index}
+                                value={project.id.toString()}
+                              >
+                                {project.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-center text-sm">No projects were found</p>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={filterInvoiceForm.control}
+                name="activities"
+                render={({ field }) => (
+                  <FormItem className="col-span-6">
+                    <FormLabel>Activities</FormLabel>
+                    <FormControl>
+                      {activityList.length > 0 ? (
+                        <MultiSelect
+                          options={activityOptions}
+                          onValueChange={handleSelectActivities}
+                          value={field.value}
+                          placeholder="Select activities"
+                          variant="secondary"
+                          className="border border-gray-200 cursor-pointer"
+                        />
+                      ) : (
+                        <p className="text-center text-sm">No activities were found</p>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
+            >
+              Filter
+            </Button>
+          </form>
+        </Form>
+
+        {/* Results Section */}
+
+        <div className="mt-6">
           <h2 className="text-lg font-medium mb-4">Preview</h2>
-
-          {/* Results Table */}
+          <div className="rounded-md border bg-white dark:bg-slate-900 my-5">
+            <table className="w-full border-collapse border border-gray-200">
+              <thead className="bg-gray-100 dark:bg-slate-800">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Budget</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Project</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Team</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedInvoice &&
+                  selectedInvoice.activities.map((activity, index) => (
+                    <tr
+                      key={index}
+                      className={`border-t dark:border-slate-700 `}
+                    >
+                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.id}</td>
+                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                        <div className="flex items-center">
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: activity.color || "#FF5733" }}
+                          ></div>
+                          <span className="ml-2">{activity.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.budget}</td>
+                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.project.name}</td>
+                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.team.name}</td>
+                      <td className="px-4 py-2 text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 p-0 cursor-pointer"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="border border-gray-200"
+                          >
+                            <ActivityViewDialog activity={activity}>
+                              <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                                <Eye size={14} /> Show
+                              </div>
+                            </ActivityViewDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+          {/* {filteredInvoices.length >= 0 && (  
           <div className="bg-white rounded-md shadow-sm overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -323,14 +565,15 @@ function InvoiceContent() {
                 )}
               </tbody>
             </table>
-          </div>
+          </div> 
+        )} */}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
-function Invoice() {
+export function Invoice() {
   const [isClientSide, setIsClientSide] = useState(false);
 
   useEffect(() => {

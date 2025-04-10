@@ -1,6 +1,7 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { myAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
+import { FilterInvoiceRequestDTO } from "@/type_schema/invoice";
 import { CreateProjectRequestDTO, ProjectType, UpdateProjectRequestDTO } from "@/type_schema/project";
 
 export async function getAllProjects(
@@ -8,11 +9,7 @@ export async function getAllProjects(
   perPage?: number,
   keyword?: string,
   sortBy?: string,
-  sortOrder?: string,
-  customerId?: number,
-  teamId?: number,
-  budgetFrom?: number,
-  budgetTo?: number
+  sortOrder?: string
 ): Promise<Pagination<ProjectType>> {
   const token = await getManagementAccessToken();
 
@@ -25,10 +22,6 @@ export async function getAllProjects(
     const order = sortOrder === "asc" ? "asc" : "desc";
     params.append("sort_order", order);
   }
-  if (customerId) params.append("customer_id", customerId.toString());
-  if (teamId) params.append("team_id", teamId.toString());
-  if (budgetFrom) params.append("budget_from", budgetFrom.toString());
-  if (budgetTo) params.append("budget_from", budgetTo.toString());
   const response = await myAxios.get<Pagination<ProjectType>>(`/api/v1/projects?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -55,11 +48,12 @@ export async function addNewProject(request: CreateProjectRequestDTO): Promise<n
   }
 }
 
-export async function updateProject(request: UpdateProjectRequestDTO, projectId: number): Promise<number> {
+export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<any> {
   const token = await getManagementAccessToken();
-  const payload = { ...request };
+
+  return 200;
   try {
-    const response = await myAxios.put(`/api/v1/projects/${projectId}`, payload, {
+    const response = await myAxios.post(`/api/v1/invoices`, request, {
       headers: {
         Authorization: `Bearer ${token}`
       }

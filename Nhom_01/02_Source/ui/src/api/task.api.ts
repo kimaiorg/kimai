@@ -8,7 +8,9 @@ export async function getAllTasks(
   limit?: number,
   keyword?: string,
   sortBy?: string,
-  sortOrder?: string
+  sortOrder?: string,
+  activityId?: string,
+  userId?: string
 ): Promise<Pagination<TaskResponseType>> {
   const token = await getManagementAccessToken();
 
@@ -21,6 +23,8 @@ export async function getAllTasks(
     const order = sortOrder === "asc" ? "asc" : "desc";
     params.append("sort_order", order);
   }
+  if (activityId) params.append("activity_id", activityId);
+  if (userId) params.append("user_id", userId);
 
   const response = await myAxios.get<Pagination<TaskResponseType>>(`/api/v1/tasks?${params.toString()}`, {
     headers: {

@@ -1,3 +1,8 @@
+import { ActivityType } from "@/type_schema/activity";
+import { CustomerType } from "@/type_schema/customer";
+import { ProjectType } from "@/type_schema/project";
+import { z } from "zod";
+
 // Invoice history item type
 export interface InvoiceHistoryItem {
   id: string;
@@ -43,3 +48,52 @@ export interface InvoiceTemplate {
   createdAt: string;
   updatedAt?: string;
 }
+
+export const FilterInvoiceRequestSchema = z
+  .object({
+    customer_id: z.string().nonempty({
+      message: "Please select a customer"
+    }),
+    from: z.string().nonempty({
+      message: "Please select a date start"
+    }),
+    to: z.string().nonempty({
+      message: "Please select a date end"
+    }),
+    project_id: z.string().nonempty({
+      message: "Please select a project"
+    }),
+    activities: z.string().array()
+  })
+  .strict()
+  .superRefine(({ from, to, activities }, ctx) => {
+    if (from > to) {
+      ctx.addIssue({
+        code: "custom",
+        message: "End time must be after the start time",
+        path: ["to"]
+      });
+    }
+    if (activities.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "At least one activity must be selected",
+        path: ["activities"]
+      });
+    }
+  });
+
+export type FilterInvoiceValidation = z.infer<typeof FilterInvoiceRequestSchema>;
+export type FilterInvoiceRequestDTO = {
+  customer_id: number;
+  from: string;
+  to: string;
+  project_id: number;
+  activities: number[];
+};
+
+export type InvoiceType = {
+  customer: CustomerType;
+  project: ProjectType;
+  activities: ActivityType[];
+};

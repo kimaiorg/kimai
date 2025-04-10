@@ -14,7 +14,9 @@ export async function getAllTeams(
   limit?: number,
   keyword?: string,
   sortBy?: string,
-  sortOrder?: string
+  sortOrder?: string,
+  projectId?: string,
+  leadId?: string
 ): Promise<Pagination<TeamResponseType>> {
   const token = await getManagementAccessToken();
 
@@ -27,6 +29,8 @@ export async function getAllTeams(
     const order = sortOrder === "asc" ? "asc" : "desc";
     params.append("sort_order", order);
   }
+  if (projectId) params.append("project_id", projectId);
+  if (leadId) params.append("lead_id", leadId);
 
   const response = await myAxios.get<Pagination<TeamResponseType>>(`/api/v1/teams?${params.toString()}`, {
     headers: {
