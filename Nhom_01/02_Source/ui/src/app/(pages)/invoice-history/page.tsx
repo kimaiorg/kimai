@@ -187,12 +187,7 @@ function InvoiceHistoryContent() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Invoice History</h1>
-        <button
-          onClick={() => router.push("/invoice-create")}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md"
-        >
-          Create Invoice
-        </button>
+       
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
