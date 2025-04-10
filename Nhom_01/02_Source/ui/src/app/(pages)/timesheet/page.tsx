@@ -1,5 +1,8 @@
 "use client";
 
+import { getAllActivities } from "@/api/activity.api";
+import { getAllProjects } from "@/api/project.api";
+import { getAllTasks } from "@/api/task.api";
 import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
 import { ManualTimesheetCreateDialog } from "@/app/(pages)/timesheet/manual-timesheet-create-dialog";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
@@ -9,50 +12,19 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { ActivityType } from "@/type_schema/activity";
 import { Pagination } from "@/type_schema/common";
+import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
-import { TimesheetTestType } from "@/type_schema/timesheet";
+import { TaskResponseType } from "@/type_schema/task";
+import { TimesheetType } from "@/type_schema/timesheet";
+import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
 import { Eye, FileDown, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
-// Mock data for timesheets
-const mockTimesheets: TimesheetTestType[] = [
-  {
-    id: "1",
-    description: "Working on UI components",
-    start_time: "2025-04-04T08:30:00",
-    end_time: "2025-04-04T12:45:00",
-    duration: 15300, // 4 hours, 15 minutes
-    user_id: "user123",
-    user_name: "John Doe",
-    project_id: "Kimai Clone",
-    activity_id: "Development",
-    task_id: "UI-123",
-    status: "stopped",
-    created_at: "2025-04-04T08:30:00",
-    deleted_at: "2025-04-04T08:30:00",
-    updated_at: "2025-04-04T12:45:00"
-  },
-  {
-    id: "2",
-    description: "Demo ABC components",
-    start_time: "2025-04-04T08:30:00",
-    end_time: "2025-04-04T12:45:00",
-    duration: 15300, // 4 hours, 15 minutes
-    user_id: "user123",
-    user_name: "John Doe",
-    project_id: "Kimai Clone",
-    activity_id: "Development",
-    task_id: "UI-123",
-    status: "stopped",
-    created_at: "2025-04-04T08:30:00",
-    deleted_at: "2025-04-04T08:30:00",
-    updated_at: "2025-04-04T12:45:00"
-  }
-];
 
 function Timesheet() {
   const queryParams = useSearchParams();
@@ -65,7 +37,11 @@ function Timesheet() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetTestType>>({
+  const [projectList, setProjectList] = useState<ProjectType[]>([]);
+  const [taskList, setTaskList] = useState<TaskResponseType[]>([]);
+  const [activityList, setActivityList] = useState<ActivityType[]>([]);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+  const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetType>>({
     data: [],
     metadata: {
       page: 1,
@@ -74,6 +50,7 @@ function Timesheet() {
       total: 0
     }
   });
+  console.log(currentUser);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -96,10 +73,33 @@ function Timesheet() {
     sortBy?: string,
     sortOrder?: string
   ) => {
+    // Start all fetch requests concurrently
+    const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
+    // Update state with the fetched data
+    setProjectList(projects.data);
+    setActivityList(activities.data);
+    setTaskList(tasks.data);
     const result = await getAllMyTimesheets(page, limit, keyword, sortBy, sortOrder);
-    setTimesheetList(result);
+    const { data, metadata } = result;
+    const timesheets: TimesheetType[] = data.map((timesheet) => {
+      const { user_id, project_id, activity_id, task_id, ...rest } = timesheet;
+      return {
+        ...rest,
+        status: timesheet.status as "running" | "stopped",
+        user: userList.find((user) => user.sub === user_id)!,
+        project: projects.data.find((project) => project.id === project_id)!,
+        activity: activities.data.find((activity) => activity.id === activity_id)!,
+        task: tasks.data.find((task) => task.id === task_id)!
+      };
+    });
+    console.log(timesheets);
+    // 67d991b80f7916d942e25d1d
+    setTimesheetList({
+      data: timesheets,
+      metadata
+    });
   };
-
+  console.log(currentUser);
   const goToPage = (page: number) => {
     handleFetchTimesheets(page, limit, keyword, sortBy, sortOrder);
     updateQueryParams("page", page.toString());
@@ -113,7 +113,7 @@ function Timesheet() {
 
   // Check if the current user has a running timesheet
   const hasRunningTimesheet = timesheetList.data.some(
-    (timesheet) => timesheet.user_id === currentUser!.user_id && !timesheet.end_time
+    (timesheet) => timesheet.user.user_id === currentUser!.sub && !timesheet?.end_time && timesheet.status === "running"
   );
 
   function handleStartingTracking(): void {
@@ -185,11 +185,10 @@ function Timesheet() {
             <thead className="bg-gray-100 dark:bg-slate-900">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Task</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Activity</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Project</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Start</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">End</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Duration</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
               </tr>
             </thead>
@@ -209,11 +208,8 @@ function Timesheet() {
                   key={index}
                   className={`border-t dark:border-slate-700 `}
                 >
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.task_id}</td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    <span className="ml-2">{timesheet.activity_id}</span>
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.project_id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.task?.title}</td>
+
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                     {format(timesheet.start_time, "dd/MM/yyyy HH:mm")}
                   </td>
@@ -221,6 +217,8 @@ function Timesheet() {
                     {timesheet.end_time ? format(timesheet.end_time, "dd/MM/yyyy HH:mm") : "N/A"}
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.duration}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.status}</td>
+
                   <td className="px-4 py-2 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

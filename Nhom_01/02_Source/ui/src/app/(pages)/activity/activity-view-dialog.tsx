@@ -27,7 +27,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { ActivityType } from "@/type_schema/activity";
+import { UserType } from "@/type_schema/user.schema";
 
 export default function ActivityViewDialog({
   children,
@@ -37,6 +39,11 @@ export default function ActivityViewDialog({
   activity: ActivityType;
 }) {
   const [open, setOpen] = useState(false);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+
+  const findUser = (userId: string) => {
+    return userList.find((user) => user.user_id === userId);
+  };
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -95,7 +102,10 @@ export default function ActivityViewDialog({
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   // Find team lead
-  const teamLead = activity.team?.users.find((user) => user.isTeamLead);
+  const teamLead = findUser(activity.team!.lead)!;
+  const activityTeamUsers = activity.team.users
+    .filter((user) => user != activity.team.lead)
+    .map((userId) => findUser(userId)!);
 
   return (
     <>
@@ -327,7 +337,7 @@ export default function ActivityViewDialog({
                 <div className="space-y-4">
                   {activity.tasks.map((task) => {
                     const taskStatus = getTaskStatus(task.deadline);
-                    const assignedUser = activity.team?.users.find((user) => user.user_id === task.user_id);
+                    const assignedUser = findUser(activity.team!.users.find((userId) => userId === task.user_id)!);
 
                     return (
                       <Card
@@ -386,7 +396,7 @@ export default function ActivityViewDialog({
                               <div className="ml-4 flex flex-col items-end">
                                 <Avatar
                                   className="h-10 w-10 border-2"
-                                  style={{ borderColor: assignedUser.color || "#e2e8f0" }}
+                                  style={{ backgroundColor: "#e2e8f0" }}
                                 >
                                   {assignedUser.picture ? (
                                     <AvatarImage
@@ -396,7 +406,7 @@ export default function ActivityViewDialog({
                                   ) : (
                                     <AvatarFallback
                                       className="text-sm font-medium"
-                                      style={{ backgroundColor: assignedUser.color || "#f1f5f9" }}
+                                      style={{ backgroundColor: "#f1f5f9" }}
                                     >
                                       {getInitials(assignedUser.name)}
                                     </AvatarFallback>
@@ -453,7 +463,7 @@ export default function ActivityViewDialog({
                           <div className="flex items-center gap-3 p-4 border rounded-lg">
                             <Avatar
                               className="h-12 w-12 border-2"
-                              style={{ borderColor: teamLead.color || "#e2e8f0" }}
+                              style={{ borderColor: "#e2e8f0" }}
                             >
                               {teamLead.picture ? (
                                 <AvatarImage
@@ -463,7 +473,7 @@ export default function ActivityViewDialog({
                               ) : (
                                 <AvatarFallback
                                   className="text-lg font-medium"
-                                  style={{ backgroundColor: teamLead.color || "#f1f5f9" }}
+                                  style={{ backgroundColor: "#f1f5f9" }}
                                 >
                                   {getInitials(teamLead.name)}
                                 </AvatarFallback>
@@ -483,37 +493,35 @@ export default function ActivityViewDialog({
                       <div>
                         <h4 className="text-sm font-medium text-muted-foreground mb-3">Team Members</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {activity.team.users
-                            .filter((user) => !user.isTeamLead)
-                            .map((user) => (
-                              <div
-                                key={user.user_id}
-                                className="flex items-center gap-3 p-3 border rounded-lg"
+                          {activityTeamUsers.map((user, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-3 p-3 border rounded-lg"
+                            >
+                              <Avatar
+                                className="h-10 w-10 border-2"
+                                style={{ borderColor: "#e2e8f0" }}
                               >
-                                <Avatar
-                                  className="h-10 w-10 border-2"
-                                  style={{ borderColor: user.color || "#e2e8f0" }}
-                                >
-                                  {user.picture ? (
-                                    <AvatarImage
-                                      src={user.picture}
-                                      alt={user.name}
-                                    />
-                                  ) : (
-                                    <AvatarFallback
-                                      className="text-sm font-medium"
-                                      style={{ backgroundColor: user.color || "#f1f5f9" }}
-                                    >
-                                      {getInitials(user.name)}
-                                    </AvatarFallback>
-                                  )}
-                                </Avatar>
-                                <div>
-                                  <h4 className="font-medium">{user.name}</h4>
-                                  <p className="text-xs text-muted-foreground">{user.email}</p>
-                                </div>
+                                {user.picture ? (
+                                  <AvatarImage
+                                    src={user.picture}
+                                    alt={user.name}
+                                  />
+                                ) : (
+                                  <AvatarFallback
+                                    className="text-sm font-medium"
+                                    style={{ backgroundColor: "#f1f5f9" }}
+                                  >
+                                    {getInitials(user.name)}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                              <div>
+                                <h4 className="font-medium">{user.name}</h4>
+                                <p className="text-xs text-muted-foreground">{user.email}</p>
                               </div>
-                            ))}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -539,84 +547,86 @@ export default function ActivityViewDialog({
                     <div className="text-center py-6 text-muted-foreground">No tasks to display</div>
                   ) : (
                     <div className="space-y-4">
-                      {activity.team?.users.map((user) => {
-                        const userTasks = activity.tasks.filter((task) => task.user_id === user.user_id);
-                        if (userTasks.length === 0) return null;
+                      {activity.team?.users
+                        .map((userId) => findUser(userId)!)
+                        .map((user) => {
+                          const userTasks = activity.tasks.filter((task) => task.user_id === user.user_id);
+                          if (userTasks.length === 0) return null;
 
-                        return (
-                          <div
-                            key={user.user_id}
-                            className="border rounded-lg p-4"
-                          >
-                            <div className="flex items-center gap-3 mb-3">
-                              <Avatar
-                                className="h-8 w-8 border-2"
-                                style={{ borderColor: user.color || "#e2e8f0" }}
-                              >
-                                {user.picture ? (
-                                  <AvatarImage
-                                    src={user.picture}
-                                    alt={user.name}
-                                  />
-                                ) : (
-                                  <AvatarFallback
-                                    className="text-xs font-medium"
-                                    style={{ backgroundColor: user.color || "#f1f5f9" }}
-                                  >
-                                    {getInitials(user.name)}
-                                  </AvatarFallback>
-                                )}
-                              </Avatar>
-                              <div>
-                                <h4 className="font-medium">{user.name}</h4>
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {userTasks.length} Tasks
-                                  </Badge>
-                                  {user.isTeamLead && (
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-xs bg-amber-100 text-amber-800"
+                          return (
+                            <div
+                              key={user.user_id}
+                              className="border rounded-lg p-4"
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                <Avatar
+                                  className="h-8 w-8 border-2"
+                                  style={{ borderColor: "#e2e8f0" }}
+                                >
+                                  {user.picture ? (
+                                    <AvatarImage
+                                      src={user.picture}
+                                      alt={user.name}
+                                    />
+                                  ) : (
+                                    <AvatarFallback
+                                      className="text-xs font-medium"
+                                      style={{ backgroundColor: "#f1f5f9" }}
                                     >
-                                      Team Lead
-                                    </Badge>
+                                      {getInitials(user.name)}
+                                    </AvatarFallback>
                                   )}
+                                </Avatar>
+                                <div>
+                                  <h4 className="font-medium">{user.name}</h4>
+                                  <div className="flex items-center gap-2">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {userTasks.length} Tasks
+                                    </Badge>
+                                    {user.user_id === activity.team?.lead && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs bg-amber-100 text-amber-800"
+                                      >
+                                        Team Lead
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="space-y-2 mt-2 pl-11">
-                              {userTasks.map((task) => {
-                                const taskStatus = getTaskStatus(task.deadline);
+                              <div className="space-y-2 mt-2 pl-11">
+                                {userTasks.map((task) => {
+                                  const taskStatus = getTaskStatus(task.deadline);
 
-                                return (
-                                  <div
-                                    key={task.id}
-                                    className="flex items-center justify-between text-sm"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      {task.deleted_at ? (
-                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                      ) : (
-                                        <div className={`h-2 w-2 rounded-full ${taskStatus.color}`}></div>
-                                      )}
-                                      <span className={task.deleted_at ? "line-through text-muted-foreground" : ""}>
-                                        {task.title}
+                                  return (
+                                    <div
+                                      key={task.id}
+                                      className="flex items-center justify-between text-sm"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {task.deleted_at ? (
+                                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                        ) : (
+                                          <div className={`h-2 w-2 rounded-full ${taskStatus.color}`}></div>
+                                        )}
+                                        <span className={task.deleted_at ? "line-through text-muted-foreground" : ""}>
+                                          {task.title}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs text-muted-foreground">
+                                        {task.deadline ? formatShortDate(task.deadline) : "No deadline"}
                                       </span>
                                     </div>
-                                    <span className="text-xs text-muted-foreground">
-                                      {task.deadline ? formatShortDate(task.deadline) : "No deadline"}
-                                    </span>
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
                     </div>
                   )}
                 </CardContent>

@@ -23,10 +23,10 @@ export default function AddUserModal({ children, fetchUsers }: { children: React
   const createUserForm = useForm<CreateUserRequestDTO>({
     resolver: zodResolver(CreateUserRequestSchema),
     defaultValues: {
-      name: "Alysa Kojou",
-      email: "alysa@gmail.com",
-      password: "Admin123@",
-      repassword: "Admin123@"
+      name: "",
+      email: "",
+      password: "",
+      repassword: ""
     }
   });
 

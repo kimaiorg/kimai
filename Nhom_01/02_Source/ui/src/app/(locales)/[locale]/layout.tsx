@@ -38,6 +38,8 @@ export default function LocaleLayout({
   const router = useRouter();
   const pathname = usePathname();
 
+  console.log(user);
+
   // Validate locale
   useEffect(() => {
     if (!locales.includes(locale as Locale)) {
@@ -51,6 +53,7 @@ export default function LocaleLayout({
       const fetchUsers = async () => {
         try {
           const userList = await getAllUsers();
+          console.log(userList);
           dispatch(updateUserList(userList.users));
         } catch (error) {
           console.error(error);

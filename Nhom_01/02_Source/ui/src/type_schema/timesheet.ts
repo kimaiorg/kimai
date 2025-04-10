@@ -1,56 +1,41 @@
-import { ActivitySimpleType } from "@/type_schema/activity";
+import { ActivityType } from "@/type_schema/activity";
 import { ProjectType } from "@/type_schema/project";
-import { TaskSimpleType } from "@/type_schema/task";
+import { TaskResponseType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
 import { z } from "zod";
 
-export type TimesheetTestType = {
-  id: string;
-  user_id: string;
-  user_name: string;
-  description?: string;
+export type TimesheetResponseType = {
+  id: number;
+  description: string;
+  status: string;
   start_time: string;
-  end_time: string | null;
-  duration: number | null;
+  end_time: null;
+  duration: number;
+  user_id: string;
+  username: string;
+  project_id: number;
+  activity_id: number;
+  task_id: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  project_id: string | null;
-  activity_id: string | null;
-  task_id: string | null;
-  status?: "running" | "stopped";
-};
-
-export type TimesheetSimpleType = {
-  id: string;
-  user_id: string;
-  description?: string;
-  start_time: string;
-  end_time: string | null;
-  duration: string | null;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  project: ProjectType | null;
-  activity: ActivitySimpleType | null;
-  task: TaskSimpleType | null;
-  status?: "running" | "stopped";
 };
 
 export type TimesheetType = {
-  id: string;
-  user: UserType;
-  description?: string;
+  id: number;
+  description: string;
   start_time: string;
-  end_time: string | null;
-  duration: string | null; // in seconds
+  end_time: null;
+  duration: number;
+  user: UserType;
+  username: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  task: TaskSimpleType | null;
+  task: TaskResponseType | null;
   project: ProjectType | null;
-  activity: ActivitySimpleType | null;
-  status?: "running" | "stopped";
+  activity: ActivityType | null;
+  status: "running" | "stopped";
 };
 
 export const CreateTimesheetRequestSchema = z.object({

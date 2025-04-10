@@ -21,9 +21,6 @@ const compat = new FlatCompat({
 
 export default defineConfig([
   eslintConfigPrettier,
-  // ...compat.config({
-  //     extends: ["eslint:recommended", "next"],
-  // }),
   {
     extends: compat.extends("next/core-web-vitals", "next/typescript"),
     files: ["**/*.{js,mjs,cjs,jsx,tsx,ts,mts,cts,xml,yml,yaml}"],
@@ -79,23 +76,6 @@ export default defineConfig([
       "@stylistic/semi": "error", // Require semi for all statements
       "@stylistic/no-extra-semi": "error", // Disallow unnecessary semicolons. Ex: console.log();;
       "@stylistic/semi-style": ["error", "last"], // Require semicolons placed only at the end of statements.
-
-      // Operators
-      // "@stylistic/no-mixed-operators": [
-      //   "error",
-      //   {
-      //     groups: [
-      //       ["+", "-", "*", "/", "%", "**"],
-      //       ["&", "|", "^", "~", "<<", ">>", ">>>"],
-      //       ["==", "!=", "===", "!==", ">", ">=", "<", "<="],
-      //       ["&&", "||"],
-      //       ["in", "instanceof"]
-      //     ],
-      //     allowSamePrecedence: true
-      //   }
-      // ],
-
-      // Disallow mixed binary operators in an expression], use parentheses for readability.
 
       // Miscs
       "@stylistic/comma-style": ["error", "last"], // Require commas placed only at the end of arrays and objects.
