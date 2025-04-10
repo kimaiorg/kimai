@@ -1,7 +1,7 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { myAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
-import { CreateProjectRequestDTO, ProjectType } from "@/type_schema/project";
+import { CreateProjectRequestDTO, ProjectType, UpdateProjectRequestDTO } from "@/type_schema/project";
 
 export async function getAllProjects(
   page?: number,
@@ -47,7 +47,7 @@ export async function addNewProject(request: CreateProjectRequestDTO): Promise<n
   }
 }
 
-export async function updateProject(request: CreateProjectRequestDTO, projectId: number): Promise<number> {
+export async function updateProject(request: UpdateProjectRequestDTO, projectId: number): Promise<number> {
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {

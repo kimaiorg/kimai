@@ -24,7 +24,7 @@ export function NavUser() {
   const handleLogout = () => {
     toast("Logout", {
       description: "You are logging out",
-      className: "bg-sky-500 text-white",
+      className: "!bg-sky-500 !text-white",
       duration: 3000
     });
     window.location.href = "/api/auth/logout";

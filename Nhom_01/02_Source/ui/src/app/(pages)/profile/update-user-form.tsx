@@ -33,7 +33,7 @@ export function UpdateUserForm({ user, back }: { user: UserProfile; back: () => 
       toast("Update successfully", {
         description: "Update info successfully",
         duration: 2000,
-        className: "!bg-green-500 !text-white"
+        className: "!bg-lime-500 !text-white"
       });
       back();
     } catch (error: any) {
@@ -158,7 +158,7 @@ export function UpdateUserForm({ user, back }: { user: UserProfile; back: () => 
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
               control={updateUserForm.control}
               name="password"
               render={({ field }) => (
@@ -173,9 +173,8 @@ export function UpdateUserForm({ user, back }: { user: UserProfile; back: () => 
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )}
-              defaultValue="123456"
-            />
+              )} 
+            /> */}
           </div>
         </div>
         <div className="!mt-5 flex justify-center items-center gap-5 ">

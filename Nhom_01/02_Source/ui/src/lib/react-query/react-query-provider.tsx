@@ -18,7 +18,7 @@ const ReactQueryProvider = ({ children }: { children: React.ReactNode }) => {
           onError: (error) => {
             toast("Error", {
               description: error?.message || "Unexpected error! Please try again.",
-              className: "bg-red-500 text-white"
+              className: "!bg-red-500 !text-white"
             });
           }
         })

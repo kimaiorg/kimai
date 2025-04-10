@@ -4,7 +4,6 @@ import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTasks } from "@/api/task.api";
 import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
-import { ManualTimesheetCreateDialog } from "@/app/(pages)/timesheet/manual-timesheet-create-dialog";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
 import TimesheetViewDialog from "@/app/(pages)/timesheet/timesheet-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
@@ -13,33 +12,28 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { ActivityType } from "@/type_schema/activity";
+import { secondsToTime } from "@/lib/utils";
 import { Pagination } from "@/type_schema/common";
-import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
-import { TaskResponseType } from "@/type_schema/task";
 import { TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
-import { Eye, FileDown, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2, Upload } from "lucide-react";
+import { Eye, FileDown, Filter, MoreHorizontal, Play, Search, Square, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 function Timesheet() {
   const queryParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
   const { user: currentUser } = useUser();
-  // const dispatch = useAppDispatch();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const [projectList, setProjectList] = useState<ProjectType[]>([]);
-  const [taskList, setTaskList] = useState<TaskResponseType[]>([]);
-  const [activityList, setActivityList] = useState<ActivityType[]>([]);
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetType>>({
     data: [],
@@ -75,10 +69,6 @@ function Timesheet() {
   ) => {
     // Start all fetch requests concurrently
     const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
-    // Update state with the fetched data
-    setProjectList(projects.data);
-    setActivityList(activities.data);
-    setTaskList(tasks.data);
     const result = await getAllMyTimesheets(page, limit, keyword, sortBy, sortOrder);
     const { data, metadata } = result;
     const timesheets: TimesheetType[] = data.map((timesheet) => {
@@ -86,14 +76,13 @@ function Timesheet() {
       return {
         ...rest,
         status: timesheet.status as "running" | "stopped",
-        user: userList.find((user) => user.sub === user_id)!,
+        user: userList.find((user) => user.user_id === user_id)!,
         project: projects.data.find((project) => project.id === project_id)!,
         activity: activities.data.find((activity) => activity.id === activity_id)!,
         task: tasks.data.find((task) => task.id === task_id)!
       };
     });
     console.log(timesheets);
-    // 67d991b80f7916d942e25d1d
     setTimesheetList({
       data: timesheets,
       metadata
@@ -107,12 +96,25 @@ function Timesheet() {
 
   // Handle ending a running timesheet
   const handleEndTimesheet = async () => {
-    await endTimesheetRecord();
-    await handleFetchTimesheets(1);
+    const result = await endTimesheetRecord();
+    if (result == 201 || result == 200) {
+      toast("End tracking", {
+        duration: 2000,
+        className: "!bg-lime-500 !text-white",
+        description: "Timesheet ended successfully"
+      });
+      await handleFetchTimesheets(1, limit);
+    } else {
+      toast("Error", {
+        duration: 2000,
+        className: "!bg-red-500 !text-white",
+        description: "Error ending timesheet"
+      });
+    }
   };
 
   // Check if the current user has a running timesheet
-  const hasRunningTimesheet = timesheetList.data.some(
+  const hasRunningTimesheet = timesheetList.data.find(
     (timesheet) => timesheet.user.user_id === currentUser!.sub && !timesheet?.end_time && timesheet.status === "running"
   );
 
@@ -148,22 +150,22 @@ function Timesheet() {
           {hasRunningTimesheet ? (
             <Button
               onClick={handleEndTimesheet}
-              className="flex items-center bg-red-500 hover:bg-red-600"
+              className="flex items-center bg-red-500 hover:bg-red-600 cursor-pointer text-white"
             >
-              <Square className="mr-2 h-4 w-4" /> Stop
+              <Square className="mr-2 h-4 w-4" /> {secondsToTime(hasRunningTimesheet.duration)}
             </Button>
           ) : (
             <TimesheetCreateDialog fetchTimesheets={handleStartingTracking}>
-              <Button className="flex items-center bg-green-500 hover:bg-green-600">
+              <Button className="flex items-center bg-green-500 hover:bg-green-600 cursor-pointer text-white">
                 <Play className="mr-2 h-4 w-4" /> Start
               </Button>
             </TimesheetCreateDialog>
           )}
-          <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
+          {/* <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
             <Button className="flex items-center gap-2 cursor-pointer">
               Create <Plus />
             </Button>
-          </ManualTimesheetCreateDialog>
+          </ManualTimesheetCreateDialog> */}
           <Button
             variant="outline"
             size="icon"
@@ -179,8 +181,8 @@ function Timesheet() {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white dark:bg-slate-900">
-        <div className="rounded-md border border-gray-200 bg-white dark:bg-slate-700 my-5">
+      <div className="space-y-4">
+        <div className="rounded-md border border-gray-200 bg-white dark:bg-slate-700">
           <table className="w-full border-collapse">
             <thead className="bg-gray-100 dark:bg-slate-900">
               <tr>
@@ -216,7 +218,9 @@ function Timesheet() {
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                     {timesheet.end_time ? format(timesheet.end_time, "dd/MM/yyyy HH:mm") : "N/A"}
                   </td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.duration}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    {secondsToTime(timesheet.duration)}
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.status}</td>
 
                   <td className="px-4 py-2 text-center">
