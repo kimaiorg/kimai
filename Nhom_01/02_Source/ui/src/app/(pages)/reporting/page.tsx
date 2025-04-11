@@ -45,8 +45,8 @@ function Reporting() {
             href={card.href}
             key={index}
           >
-            <Card className="p-4 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
-              <div className="bg-white p-2 rounded-md">{card.icon}</div>
+            <Card className="p-4 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer flex items-center space-x-3 border border-gray-200">
+              <div className="bg-white dark:bg-slate-700 p-2 rounded-md">{card.icon}</div>
               <span className="font-medium">{card.title}</span>
             </Card>
           </Link>

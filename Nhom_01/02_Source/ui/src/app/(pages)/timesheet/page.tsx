@@ -4,6 +4,7 @@ import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTasks } from "@/api/task.api";
 import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
+import { ManualTimesheetCreateDialog } from "@/app/(pages)/timesheet/manual-timesheet-create-dialog";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
 import TimesheetViewDialog from "@/app/(pages)/timesheet/timesheet-view-dialog";
 import Loading from "@/app/loading";
@@ -19,7 +20,7 @@ import { TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
-import { Eye, FileDown, Filter, MoreHorizontal, Play, Search, Square, Trash2, Upload } from "lucide-react";
+import { Eye, FileDown, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -36,7 +37,8 @@ function Timesheet() {
   const sortOrder = queryParams.get("sortOrder") || "";
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const [loadingPage, setLoadingPage] = useState(false);
-  const [trackingTime, setTrackingTime] = useState("");
+  const [trackingTime, setTrackingTime] = useState<TimesheetType | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetType>>({
     data: [],
@@ -74,21 +76,31 @@ function Timesheet() {
     const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
     const result = await getAllMyTimesheets(page, limit, keyword, sortBy, sortOrder);
     const { data, metadata } = result;
-    const timesheets: TimesheetType[] = data.map((timesheet) => {
-      const { user_id, project_id, activity_id, task_id, ...rest } = timesheet;
-      return {
-        ...rest,
-        status: timesheet.status as "running" | "stopped",
-        user: userList.find((user) => user.user_id === user_id)!,
-        project: projects.data.find((project) => project.id === project_id)!,
-        activity: activities.data.find((activity) => activity.id === activity_id)!,
-        task: tasks.data.find((task) => task.id === task_id)!
-      };
-    });
+    const timesheets: TimesheetType[] = data
+      .map((timesheet) => {
+        const { user_id, project_id, activity_id, task_id, ...rest } = timesheet;
+        return {
+          ...rest,
+          status: timesheet.status as "running" | "stopped",
+          user: userList.find((user) => user.user_id === user_id)!,
+          project: projects.data.find((project) => project.id === project_id)!,
+          activity: activities.data.find((activity) => activity.id === activity_id)!,
+          task: tasks.data.find((task) => task.id === task_id)!
+        };
+      })
+      .filter((timesheet) => timesheet.user.user_id === currentUser?.sub);
     setTimesheetList({
       data: timesheets,
       metadata
     });
+    const runningRecord = timesheets.find(
+      (timesheet) => timesheet.status === "running" && timesheet.user.user_id === currentUser!.sub
+    );
+    if (runningRecord) {
+      setTrackingTime(runningRecord);
+      const timeStr = Math.floor(Date.now() - new Date(runningRecord.start_time).getTime()) / 1000;
+      setElapsedTime(timeStr);
+    }
     setLoadingPage(false);
   };
 
@@ -99,6 +111,8 @@ function Timesheet() {
 
   // Handle ending a running timesheet
   const handleEndTimesheet = async () => {
+    setTrackingTime(null);
+    setElapsedTime(0);
     const result = await endTimesheetRecord();
     if (result == 201 || result == 200) {
       toast("End tracking", {
@@ -116,27 +130,24 @@ function Timesheet() {
     }
   };
 
-  // Check if the current user has a running timesheet
-  const hasRunningTimesheet = timesheetList.data.find(
-    (timesheet) =>
-      timesheet?.user?.user_id === currentUser!.sub && !timesheet?.end_time && timesheet?.status === "running"
-  );
-
   function handleStartingTracking(): void {
     handleFetchTimesheets(1);
   }
 
   useEffect(() => {
     handleFetchTimesheets(page, limit, keyword, sortBy, sortOrder);
-    // const hasRunningTimesheet = timesheetList.data.find(
-    //    (timesheet) => timesheet?.user?.user_id === currentUser!.sub && !timesheet?.end_time &&
-    //       timesheet?.status === "running"
-    // )!;
-    // if (hasRunningTimesheet) {
-    //   const timeStr = secondsToTime(new Date().getTime() - new Date(hasRunningTimesheet.duration).getTime());
-    //   setTrackingTime(timeStr);
-    // }
   }, [page, limit, keyword, sortBy, sortOrder]);
+
+  useEffect(() => {
+    if (!trackingTime) return;
+    const intervalId = setInterval(() => {
+      const timeStr = Math.floor(Date.now() - new Date(trackingTime.start_time).getTime()) / 1000;
+      setElapsedTime(timeStr);
+    }, 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [trackingTime]);
 
   if (loadingPage) return <Loading />;
 
@@ -150,7 +161,7 @@ function Timesheet() {
             <Input
               type="search"
               placeholder="Search..."
-              className="pl-8 w-[200px]"
+              className="pl-8 w-[200px] border border-gray-200"
               value={keyword}
               onChange={handleSearchChange}
             />
@@ -158,15 +169,16 @@ function Timesheet() {
           <Button
             variant="outline"
             size="icon"
+            className="border border-gray-200 cursor-pointer"
           >
             <Filter className="h-4 w-4" />
           </Button>
-          {hasRunningTimesheet ? (
+          {elapsedTime ? (
             <Button
               onClick={handleEndTimesheet}
               className="flex items-center bg-red-500 hover:bg-red-600 cursor-pointer text-white"
             >
-              <Square className="mr-2 h-4 w-4" /> {secondsToTime(hasRunningTimesheet.duration)}
+              <Square className="mr-2 h-4 w-4" /> {secondsToTime(elapsedTime)}
             </Button>
           ) : (
             <TimesheetCreateDialog fetchTimesheets={handleStartingTracking}>
@@ -175,20 +187,22 @@ function Timesheet() {
               </Button>
             </TimesheetCreateDialog>
           )}
-          {/* <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
+          <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
             <Button className="flex items-center gap-2 cursor-pointer">
               Create <Plus />
             </Button>
-          </ManualTimesheetCreateDialog> */}
+          </ManualTimesheetCreateDialog>
           <Button
             variant="outline"
             size="icon"
+            className="border border-gray-200 cursor-pointer"
           >
             <FileDown className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
+            className="border border-gray-200 cursor-pointer"
           >
             <Upload className="h-4 w-4" />
           </Button>

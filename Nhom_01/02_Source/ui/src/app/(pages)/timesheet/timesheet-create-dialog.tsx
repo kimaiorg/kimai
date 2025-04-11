@@ -175,7 +175,7 @@ export function TimesheetCreateDialog({
                         >
                           <FormControl>
                             <SelectTrigger className="w-full !mt-0 border-gray-200">
-                              <SelectValue placeholder="Select activity" />
+                              <SelectValue placeholder="Select a task" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

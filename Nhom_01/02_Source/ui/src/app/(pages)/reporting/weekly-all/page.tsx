@@ -416,12 +416,12 @@ function WeeklyAllUsersReport() {
         <span>Weekly view for all users</span>
       </div>
 
-      <div className="bg-white rounded-md shadow mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-md shadow mb-6">
         <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <button
               onClick={previousWeek}
-              className="p-1 rounded hover:bg-gray-100"
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
@@ -446,7 +446,7 @@ function WeeklyAllUsersReport() {
 
             <button
               onClick={nextWeek}
-              className="p-1 rounded hover:bg-gray-100"
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer"
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
@@ -455,7 +455,7 @@ function WeeklyAllUsersReport() {
           <div className="flex items-center space-x-2">
             <div className="relative">
               <select
-                className="appearance-none border rounded-md p-2 pr-8 cursor-pointer"
+                className="appearance-none border rounded-md p-1 pr-8 cursor-pointer border-gray-200"
                 onChange={handleTeamChange}
                 value={selectedTeamId}
               >
@@ -463,38 +463,43 @@ function WeeklyAllUsersReport() {
                   <option
                     key={team.id}
                     value={team.id}
+                    className="dark:bg-slate-800 dark:text-white"
                   >
                     {team.name}
                   </option>
                 ))}
               </select>
-              <ChevronDownIcon className="absolute right-2 top-2.5 h-4 w-4 pointer-events-none" />
             </div>
 
             <div className="relative">
               <select
-                className="appearance-none border rounded-md p-2 pr-8 cursor-pointer"
+                className="appearance-none border rounded-md p-1 pr-8 cursor-pointer border-gray-200"
                 onChange={handleProjectChange}
                 value={selectedProjectId || ""}
               >
-                <option value="">All Projects</option>
+                <option
+                  value=""
+                  className="dark:bg-slate-800 dark:text-white"
+                >
+                  All Projects
+                </option>
                 {projects.map((project) => (
                   <option
                     key={project.id}
                     value={project.id}
+                    className="dark:bg-slate-800 dark:text-white"
                   >
                     {project.name}
                   </option>
                 ))}
               </select>
-              <ChevronDownIcon className="absolute right-2 top-2.5 h-4 w-4 pointer-events-none" />
             </div>
 
             <div className="flex space-x-2">
               <Button
                 onClick={exportToExcel}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center border border-gray-200 cursor-pointer"
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
                 Excel
@@ -502,7 +507,7 @@ function WeeklyAllUsersReport() {
               <Button
                 onClick={exportToPdf}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center border border-gray-200 cursor-pointer"
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
                 PDF
@@ -515,8 +520,8 @@ function WeeklyAllUsersReport() {
           <div className="p-8 text-center">Loading report data...</div>
         ) : (
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
+            <Table className="bg-slate-700">
+              <TableHeader className="bg-slate-800">
                 <TableRow>
                   <TableHead className="w-1/6">User</TableHead>
                   <TableHead className="w-1/6">Project</TableHead>
@@ -524,7 +529,7 @@ function WeeklyAllUsersReport() {
                   {currentWeek.map((day, index) => (
                     <TableHead
                       key={index}
-                      className={day.dayName === "THU" ? "bg-amber-50" : ""}
+                      className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                     >
                       {day.dayName} {day.dayNumber}
                     </TableHead>
@@ -540,7 +545,7 @@ function WeeklyAllUsersReport() {
                       .map((project) => (
                         <TableRow
                           key={`${user.id}-${project.id}`}
-                          className="hover:bg-gray-50"
+                          className="hover:bg-gray-50 dark:bg-slate-800"
                         >
                           <TableCell>{user.name}</TableCell>
                           <TableCell className="font-medium">
@@ -555,7 +560,7 @@ function WeeklyAllUsersReport() {
                           {currentWeek.map((day, dayIndex) => (
                             <TableCell
                               key={dayIndex}
-                              className={day.dayName === "THU" ? "bg-amber-50" : ""}
+                              className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                             >
                               {getTimeForUserProjectAndDay(user.id, project.id, day.date)}
                             </TableCell>
@@ -564,7 +569,7 @@ function WeeklyAllUsersReport() {
                       ))}
 
                     {/* User total row */}
-                    <TableRow className="bg-gray-50">
+                    <TableRow className="bg-gray-50 dark:bg-slate-800">
                       <TableCell>{user.name}</TableCell>
                       <TableCell className="font-bold">Total</TableCell>
                       <TableCell className="text-blue-500 font-bold">{getUserTotal(user.id)}</TableCell>
@@ -583,7 +588,7 @@ function WeeklyAllUsersReport() {
                         return (
                           <TableCell
                             key={dayIndex}
-                            className={`${day.dayName === "THU" ? "bg-amber-50" : ""} font-bold`}
+                            className={`${day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""} font-bold`}
                           >
                             {formatDuration(totalDuration)}
                           </TableCell>
@@ -594,7 +599,7 @@ function WeeklyAllUsersReport() {
                 ))}
 
                 {/* Grand total row */}
-                <TableRow className="font-bold bg-gray-100">
+                <TableRow className="font-bold bg-gray-100 dark:bg-slate-900">
                   <TableCell>All Users</TableCell>
                   <TableCell>Grand Total</TableCell>
                   <TableCell className="text-blue-500">{getGrandTotal()}</TableCell>
@@ -611,7 +616,7 @@ function WeeklyAllUsersReport() {
                     return (
                       <TableCell
                         key={dayIndex}
-                        className={day.dayName === "THU" ? "bg-amber-50" : ""}
+                        className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                       >
                         {formatDuration(totalDuration)}
                       </TableCell>

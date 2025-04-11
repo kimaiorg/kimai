@@ -47,7 +47,8 @@ export function ActivityUpdateDialog({
       budget: targetActivity.budget.toString(),
       activity_number: targetActivity.activity_number.toString(),
       project_id: targetActivity.project.id.toString(),
-      team_id: targetActivity.team.id.toString()
+      team_id: targetActivity.team.id.toString(),
+      quota: localStorage.getItem("activity_quota") || "50"
     }
   });
   async function onSubmit(values: UpdateActivityValidation) {
@@ -55,13 +56,15 @@ export function ActivityUpdateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { project_id, team_id, budget, activity_number, ...rest } = values;
+      const { project_id, team_id, budget, activity_number, quota, ...rest } = values;
+      localStorage.setItem("activity_quota", quota);
       const payload: UpdateActivityRequestDTO = {
         ...rest,
         project_id: parseInt(project_id),
         budget: parseInt(budget),
         activity_number: parseInt(activity_number),
-        team_id: parseInt(team_id)
+        team_id: parseInt(team_id),
+        quota: parseInt(quota)
       };
       const response = await updateActivity(payload, targetActivity.id);
       if (response == 200) {
@@ -283,12 +286,30 @@ export function ActivityUpdateDialog({
                 control={updateActivityForm.control}
                 name="budget"
                 render={({ field }) => (
-                  <FormItem className="col-span-6">
-                    <FormLabel>Budget</FormLabel>
+                  <FormItem className="col-span-4">
+                    <FormLabel>Budget ($)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="Enter the budget"
+                        className="!mt-0 border-gray-200"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={updateActivityForm.control}
+                name="quota"
+                render={({ field }) => (
+                  <FormItem className="col-span-4">
+                    <FormLabel>Quota (hours)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter the quota"
                         className="!mt-0 border-gray-200"
                         {...field}
                       />

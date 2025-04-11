@@ -273,7 +273,7 @@ function ProjectOverviewReport() {
         <span>Project overview</span>
       </div>
 
-      <div className="bg-white rounded-md shadow mb-6">
+      <div className="bg-white dark:bg-slate-700 rounded-md shadow mb-6">
         <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <h2 className="text-xl font-semibold">Project Overview</h2>
@@ -282,15 +282,21 @@ function ProjectOverviewReport() {
           <div className="flex items-center space-x-2">
             <div className="relative">
               <select
-                className="appearance-none border rounded-md p-2 pr-8 cursor-pointer"
+                className="appearance-none border rounded-md p-1 pr-8 cursor-pointer border-gray-200"
                 onChange={handleCustomerChange}
                 value={selectedCustomer}
               >
-                <option value="all">All Customers</option>
+                <option
+                  value="all"
+                  className="dark:bg-slate-800 dark:text-white"
+                >
+                  All Customers
+                </option>
                 {customers.map((customer) => (
                   <option
                     key={customer.id}
                     value={customer.id}
+                    className="dark:bg-slate-800 dark:text-white"
                   >
                     {customer.name}
                   </option>
@@ -303,7 +309,7 @@ function ProjectOverviewReport() {
               <Button
                 onClick={exportToExcel}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center cursor-pointer border border-gray-200"
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
                 Excel
@@ -311,7 +317,7 @@ function ProjectOverviewReport() {
               <Button
                 onClick={exportToPdf}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center cursor-pointer border border-gray-200"
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
                 PDF
@@ -325,7 +331,7 @@ function ProjectOverviewReport() {
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-gray-100 dark:bg-slate-800">
                 <TableRow>
                   <TableHead>{t("Name")}</TableHead>
                   <TableHead>{t("Hourly Quota")}</TableHead>
@@ -355,11 +361,11 @@ function ProjectOverviewReport() {
                         return (
                           <TableRow
                             key={`customer-${item.id}`}
-                            className="bg-gray-100"
+                            className="bg-gray-100 dark:bg-slate-700"
                           >
                             <TableCell
                               colSpan={8}
-                              className="font-semibold text-gray-700"
+                              className="font-semibold "
                             >
                               <div className="flex items-center">
                                 <span className="h-3 w-3 rounded-full bg-red-500 mr-2"></span>
@@ -374,7 +380,7 @@ function ProjectOverviewReport() {
                         return (
                           <TableRow
                             key={`project-${item.id}`}
-                            className="hover:bg-gray-50"
+                            className="hover:bg-gray-50 dark:bg-slate-800"
                           >
                             <TableCell>
                               <div className="flex items-center">

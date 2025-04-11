@@ -78,8 +78,11 @@ export function secondsToTime(seconds: number): string {
 
   const formattedHours = hours.toString().padStart(2, "0");
   const formattedMinutes = minutes.toString().padStart(2, "0");
+  const formattedSeconds = Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, "0");
 
-  return `${formattedHours}:${formattedMinutes}`;
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 /**
  * Format seconds to a human-readable duration string (HH:MM)

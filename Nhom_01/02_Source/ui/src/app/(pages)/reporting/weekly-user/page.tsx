@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
-import { useTranslation } from "@/lib/i18n";
-import Link from "next/link";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
-import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, FilterIcon } from "@/components/shared/icons";
-import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
-import { useUser } from "@auth0/nextjs-auth0/client";
-import { formatDuration } from "@/lib/utils";
-import * as XLSX from "xlsx";
 import { getWeeklyUserReport } from "@/api/report.api";
-import { WeekDay, WeeklyReportEntry } from "@/type_schema/report";
+import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon } from "@/components/shared/icons";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useTranslation } from "@/lib/i18n";
 import { generateWeeklyReportPdf } from "@/lib/pdf-utils";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { formatDuration } from "@/lib/utils";
+import { WeekDay, WeeklyReportEntry } from "@/type_schema/report";
+import { UserType } from "@/type_schema/user.schema";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
 function WeeklyUserReport() {
   const { t } = useTranslation();
@@ -29,12 +29,7 @@ function WeeklyUserReport() {
   const [weekInfo, setWeekInfo] = useState({ number: 15, year: 2025, start: "", end: "" });
 
   // Mock users for filter
-  const [availableUsers, setAvailableUsers] = useState([
-    { id: "1", name: "Anna Smith", email: "anna.smith@example.com" },
-    { id: "2", name: "John Doe", email: "john.doe@example.com" },
-    { id: "3", name: "Maria Garcia", email: "maria.garcia@example.com" },
-    { id: "4", name: "David Kim", email: "david.kim@example.com" }
-  ]);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
 
   // Selected user ID
   const [selectedUserId, setSelectedUserId] = useState<string>(user?.sub || "1");
@@ -244,7 +239,7 @@ function WeeklyUserReport() {
   const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const userId = e.target.value;
     setSelectedUserId(userId);
-    const user = availableUsers.find((u) => u.id === userId);
+    const user = userList.find((u) => u.user_id === userId);
     if (user) {
       setSelectedUser(user.name);
     }
@@ -310,12 +305,12 @@ function WeeklyUserReport() {
         <span>Weekly view for one user</span>
       </div>
 
-      <div className="bg-white rounded-md shadow mb-6">
+      <div className="bg-white dark:bg-slate-700 rounded-md shadow mb-6">
         <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <button
               onClick={previousWeek}
-              className="p-1 rounded hover:bg-gray-100"
+              className="p-1 rounded hover:bg-gray-100 cursor-pointer dark:hover:bg-slate-800"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
@@ -340,7 +335,7 @@ function WeeklyUserReport() {
 
             <button
               onClick={nextWeek}
-              className="p-1 rounded hover:bg-gray-100"
+              className="p-1 rounded hover:bg-gray-100 cursor-pointer dark:hover:bg-slate-800"
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
@@ -349,46 +344,51 @@ function WeeklyUserReport() {
           <div className="flex items-center space-x-2">
             <div className="relative">
               <select
-                className="appearance-none rounded-md px-3 py-1 pr-8 cursor-pointer"
+                className="rounded-md px-3 py-1 pr-8 cursor-pointer border border-gray-200"
                 onChange={handleUserChange}
                 value={selectedUserId}
               >
-                {availableUsers.map((user) => (
+                {userList.map((user, index) => (
                   <option
-                    key={user.id}
-                    value={user.id}
+                    key={index}
+                    value={user.user_id}
+                    className="dark:bg-slate-800 dark:text-white"
                   >
                     {user.name}
                   </option>
                 ))}
               </select>
-              <ChevronDownIcon className="absolute right-2 top-2 h-4 w-4 pointer-events-none" />
             </div>
 
             <div className="relative">
               <select
-                className="appearance-none border rounded-md p-2 pr-8 cursor-pointer"
+                className="appearance-none border rounded-md py-1 pr-8 cursor-pointer border-gray-200"
                 onChange={handleProjectChange}
                 value={selectedProjectId || ""}
               >
-                <option value="">All Projects</option>
+                <option
+                  value=""
+                  className="dark:bg-slate-800 dark:text-white px-3"
+                >
+                  All projects
+                </option>
                 {projects.map((project) => (
                   <option
                     key={project.id}
                     value={project.id}
+                    className="dark:bg-slate-800 dark:text-white px-3"
                   >
                     {project.name}
                   </option>
                 ))}
               </select>
-              <ChevronDownIcon className="absolute right-2 top-2.5 h-4 w-4 pointer-events-none" />
             </div>
 
             <div className="flex space-x-2">
               <Button
                 onClick={exportToExcel}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center cursor-pointer border-gray-200"
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
                 Excel
@@ -396,7 +396,7 @@ function WeeklyUserReport() {
               <Button
                 onClick={exportToPdf}
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center cursor-pointer border-gray-200"
               >
                 <DownloadIcon className="h-4 w-4 mr-1" />
                 PDF
@@ -410,14 +410,14 @@ function WeeklyUserReport() {
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="dark:bg-slate-800">
                 <TableRow>
                   <TableHead className="w-1/4">Project</TableHead>
                   <TableHead>Total</TableHead>
                   {currentWeek.map((day, index) => (
                     <TableHead
                       key={index}
-                      className={day.dayName === "THU" ? "bg-amber-50" : ""}
+                      className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                     >
                       {day.dayName} {day.dayNumber}
                     </TableHead>
@@ -430,7 +430,7 @@ function WeeklyUserReport() {
                   .map((project) => (
                     <TableRow
                       key={project.id}
-                      className="hover:bg-gray-50"
+                      className="hover:bg-gray-50 dark:hover:bg-slate-800"
                     >
                       <TableCell className="font-medium">
                         <div className="flex items-center">
@@ -442,7 +442,7 @@ function WeeklyUserReport() {
                       {currentWeek.map((day, dayIndex) => (
                         <TableCell
                           key={dayIndex}
-                          className={day.dayName === "THU" ? "bg-amber-50" : ""}
+                          className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                         >
                           {getTimeForProjectAndDay(project.id, day.date)}
                         </TableCell>
@@ -455,7 +455,7 @@ function WeeklyUserReport() {
                   {currentWeek.map((day, dayIndex) => (
                     <TableCell
                       key={dayIndex}
-                      className={day.dayName === "THU" ? "bg-amber-50" : ""}
+                      className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                     >
                       {getDayTotal(day.date)}
                     </TableCell>

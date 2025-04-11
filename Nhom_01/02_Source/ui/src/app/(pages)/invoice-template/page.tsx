@@ -8,6 +8,7 @@ import { useTranslation } from "@/lib/i18n/useTranslation";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Role } from "@/type_schema/role";
 import { InvoiceTemplate } from "@/type_schema/invoice";
+import { Button } from "@/components/ui/button";
 
 function InvoiceTemplatePage() {
   const { t } = useTranslation();
@@ -121,16 +122,16 @@ function InvoiceTemplatePage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Invoice Templates</h1>
-        <button
+        <Button
           onClick={() => setIsCreateDialogOpen(true)}
-          className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-md"
+          className="flex items-center gap-1 bg-lime-500 hover:bg-lime-600 text-white"
         >
           <Plus className="h-4 w-4" />
           Create Template
-        </button>
+        </Button>
       </div>
 
       <InvoiceTemplateList
@@ -143,7 +144,7 @@ function InvoiceTemplatePage() {
         onClose={() => setIsCreateDialogOpen(false)}
         onSave={handleCreateTemplate}
       />
-    </div>
+    </>
   );
 }
 

@@ -4,6 +4,28 @@ import { ProjectType } from "@/type_schema/project";
 import { z } from "zod";
 
 // Invoice history item type
+export type InvoiceHistoryItemType = {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  date?: string;
+};
+
+export type InvoiceHistoryType = {
+  id: string;
+  customer: CustomerType;
+  date: string;
+  dueDate?: string;
+  status: string;
+  totalPrice: string;
+  currency: string;
+  notes?: string;
+  createdBy: string;
+  createdAt: string;
+  items: InvoiceHistoryItemType[];
+};
+
 export interface InvoiceHistoryItem {
   id: string;
   customer: string;
@@ -96,4 +118,19 @@ export type InvoiceType = {
   customer: CustomerType;
   project: ProjectType;
   activities: ActivityType[];
+};
+
+export const UpdateInvoiceRequestSchema = z.object({
+  description: z.string(),
+  status: z.string().nonempty({
+    message: "Please select a status"
+  }),
+  paymentDate: z.string()
+});
+
+export type UpdateInvoiceValidation = z.infer<typeof UpdateInvoiceRequestSchema>;
+export type UpdateInvoiceRequestDTO = {
+  description: string;
+  status: string;
+  paymentDate: string;
 };

@@ -38,13 +38,14 @@ export function ActivityCreateDialog({
   const createActivityForm = useForm<CreateActivityValidation>({
     resolver: zodResolver(CreateActivityRequestSchema),
     defaultValues: {
-      name: "John Doe",
+      name: "Design UI/UX",
       color: "#FF5733",
-      description: "VIP customer",
+      description: "Initial phase for designing UI/UX",
       budget: "1000",
       activity_number: "100",
       project_id: "",
-      team_id: ""
+      team_id: "",
+      quota: ""
     }
   });
   async function onSubmit(values: CreateActivityValidation) {
@@ -52,13 +53,15 @@ export function ActivityCreateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { project_id, team_id, budget, activity_number, ...rest } = values;
+      const { project_id, team_id, budget, activity_number, quota, ...rest } = values;
+      localStorage.setItem("activity_quota", quota);
       const payload: CreateActivityRequestDTO = {
         ...rest,
         project_id: parseInt(project_id),
         budget: parseInt(budget),
         activity_number: parseInt(activity_number),
-        team_id: parseInt(team_id)
+        team_id: parseInt(team_id),
+        quota: parseInt(quota)
       };
       const response = await addNewActivity(payload);
       if (response == 201) {
@@ -280,12 +283,30 @@ export function ActivityCreateDialog({
                 control={createActivityForm.control}
                 name="budget"
                 render={({ field }) => (
-                  <FormItem className="col-span-6">
-                    <FormLabel>Budget</FormLabel>
+                  <FormItem className="col-span-4">
+                    <FormLabel>Budget ($)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="Enter the budget"
+                        className="!mt-0 border-gray-200"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createActivityForm.control}
+                name="quota"
+                render={({ field }) => (
+                  <FormItem className="col-span-4">
+                    <FormLabel>Quota (hours)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter the quota"
                         className="!mt-0 border-gray-200"
                         {...field}
                       />

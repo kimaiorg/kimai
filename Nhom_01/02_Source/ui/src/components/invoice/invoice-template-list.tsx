@@ -68,7 +68,7 @@ export function InvoiceTemplateList({ templates, setTemplates }: InvoiceTemplate
           {templates.map((template) => (
             <TableRow
               key={template.id}
-              className="hover:bg-gray-50"
+              className="hover:bg-gray-50 dark:hover:bg-slate-800"
             >
               <TableCell className="font-medium">{template.name}</TableCell>
               <TableCell>

@@ -5,6 +5,7 @@ import { getAllCustomers } from "@/api/customer.api";
 import { filterInvoices } from "@/api/invoice.api";
 import { getAllProjects } from "@/api/project.api";
 import ActivityViewDialog from "@/app/(pages)/activity/activity-view-dialog";
+import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
@@ -12,20 +13,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatabaseProvider, useDatabase } from "@/db/DatabaseContext";
-import { InvoiceService } from "@/db/invoiceService"; // Sửa đường dẫn import
 import { handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
 import { CustomerType } from "@/type_schema/customer";
 import {
   FilterInvoiceRequestSchema,
   FilterInvoiceValidation,
-  InvoiceHistoryItem,
+  InvoiceHistoryType,
   InvoiceType
 } from "@/type_schema/invoice";
 import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { formatDate } from "date-fns";
 import { Eye, MoreHorizontal, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,16 +34,17 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 function InvoiceContent() {
-  const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
-  const { invoices, customers, updateInvoiceStatus } = useDatabase();
-  const [filteredInvoices, setFilteredInvoices] = useState<InvoiceHistoryItem[]>([]);
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceType>();
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceType | null>(null);
+
+  const [invoiceHistory, setInvoiceHistory] = useState<InvoiceHistoryType | null>(null);
 
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [projectList, setProjectList] = useState<ProjectType[]>([]);
   const [activityList, setActivityList] = useState<ActivityType[]>([]);
+
+  const router = useRouter();
+  const { user: currentUser } = useUser();
 
   const activityOptions = activityList.map((activity) => ({
     label: `${activity.name}`,
@@ -79,13 +81,33 @@ function InvoiceContent() {
         ),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!
       });
+      const exportableInvoices: InvoiceHistoryType = {
+        id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
+        customer: customerList.find((customer) => customer.id === payload.customer_id)!,
+        date: formatDate(new Date(), "dd.MM.yyyy"),
+        dueDate: new Date().toISOString(),
+        status: "NEW",
+        totalPrice: "14200",
+        currency: "$",
+        notes: "No notes",
+        createdBy: currentUser!.sub!,
+        createdAt: "",
+        items: activityList.map((activity) => ({
+          description: activity.name,
+          quantity: 1,
+          unitPrice: Math.round(Math.random() * 95) + 5,
+          taxRate: 0.1,
+          date: new Date().toISOString()
+        }))
+      };
+      localStorage.setItem("invoiceHistory", JSON.stringify(exportableInvoices));
+      setInvoiceHistory(exportableInvoices);
       if (response == 201 || response == 200) {
         toast("Success", {
           description: "Add new customer successfully",
           duration: 2000,
           className: "!bg-lime-500 !text-white"
         });
-        setFilteredInvoices(invoices);
       } else {
         toast("Failed", {
           description: "Failed to add customer. Please try again!",
@@ -103,70 +125,12 @@ function InvoiceContent() {
     }
   }
 
-  // Handle preview invoice
-  const handlePreviewInvoice = (invoiceId: string) => {
-    router.push(`/invoice-preview/${invoiceId}`);
-  };
-
   // Handle save invoice status
-  const handleSaveInvoice = (invoiceId: string) => {
-    try {
-      // Tìm invoice cần lưu
-      const invoiceToSave = invoices.find((inv) => inv.id === invoiceId);
-
-      if (!invoiceToSave) {
-        console.error("Invoice not found");
-        return;
-      }
-
-      // Tạo một bản sao của invoice với ID mới để lưu vào history
-      const today = new Date();
-
-      // Format ngày theo định dạng DD.MM.YYYY để phù hợp với hiển thị trong invoice-history
-      const day = today.getDate().toString().padStart(2, "0");
-      const month = (today.getMonth() + 1).toString().padStart(2, "0");
-      const year = today.getFullYear();
-      const formattedDate = `${day}.${month}.${year}`;
-
-      const historyInvoice = {
-        ...invoiceToSave,
-        id: `INV-${Date.now().toString().slice(-8)}`, // Tạo ID mới
-        status: "New",
-        date: formattedDate, // Cập nhật ngày tạo thành ngày hiện tại với định dạng DD.MM.YYYY
-        createdAt: today.toISOString()
-      };
-
-      // Lưu invoice mới vào danh sách invoices (sẽ xuất hiện trong invoice-history)
-      InvoiceService.addInvoiceToHistory(historyInvoice);
-
-      // Show success message
-      setSaveSuccess(invoiceId);
-
-      // Xóa invoice khỏi danh sách kết quả tìm kiếm sau một khoảng thời gian ngắn
-      setTimeout(() => {
-        // Cập nhật danh sách hiển thị bằng cách loại bỏ invoice đã lưu
-        setFilteredInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
-        setSaveSuccess(null);
-      }, 1500);
-    } catch (error) {
-      console.error("Error saving invoice:", error);
-    }
-  };
-
-  // Get color class for customer dot
-  const getCustomerColorClass = (customer: string) => {
-    // Generate a consistent color based on the first character of customer name
-    const colors = [
-      "bg-red-500",
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-yellow-500",
-      "bg-purple-500",
-      "bg-pink-500",
-      "bg-indigo-500"
-    ];
-    const index = customer.charCodeAt(0) % colors.length;
-    return colors[index];
+  const handleSaveInvoice = () => {
+    const invoiceHistories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
+    invoiceHistories.push(invoiceHistory!);
+    localStorage.setItem("invoiceHistoryList", JSON.stringify(invoiceHistories));
+    router.push("/invoice-history");
   };
 
   const fetchCustomerData = async () => {
@@ -218,8 +182,6 @@ function InvoiceContent() {
   }, [selectedProjectId]);
 
   function handleSelectActivities(activityIds: string[]): void {
-    // const chosenActivities = activityList.filter((activity) => activityIds.includes(activity.id.toString()));
-    // setSelectedActivities(chosenActivities);
     filterInvoiceForm.setValue("activities", [...activityIds]);
   }
 
@@ -398,6 +360,24 @@ function InvoiceContent() {
 
         <div className="mt-6">
           <h2 className="text-lg font-medium mb-4">Preview</h2>
+          {selectedInvoice && selectedInvoice.activities && selectedInvoice.activities.length > 0 && (
+            <div className="flex justify-end gap-3">
+              <InvoicePreviewDialog invoice={invoiceHistory!}>
+                <Button
+                  variant="outline"
+                  className=" cursor-pointer text-sky-600 dark:text-sky-400"
+                >
+                  Preview
+                </Button>
+              </InvoicePreviewDialog>
+              <Button
+                onClick={handleSaveInvoice}
+                className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
+              >
+                Export
+              </Button>
+            </div>
+          )}
           <div className="rounded-md border bg-white dark:bg-slate-900 my-5">
             <table className="w-full border-collapse border border-gray-200">
               <thead className="bg-gray-100 dark:bg-slate-800">
@@ -406,7 +386,6 @@ function InvoiceContent() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Budget</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Project</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Team</th>
                   <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
                 </tr>
               </thead>
@@ -429,7 +408,6 @@ function InvoiceContent() {
                       </td>
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.budget}</td>
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.project.name}</td>
-                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.team.name}</td>
                       <td className="px-4 py-2 text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -455,86 +433,97 @@ function InvoiceContent() {
                       </td>
                     </tr>
                   ))}
+                {(!selectedInvoice || !selectedInvoice?.activities?.length) && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="border-t dark:border-slate-700 text-center py-1"
+                    >
+                      Please select an invoice
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          {/* {filteredInvoices.length >= 0 && (  
-          <div className="bg-white rounded-md shadow-sm overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"
-                  ></th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Customer
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Duration
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Total Price
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  ></th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredInvoices.length > 0 ? (
-                  filteredInvoices.map((invoice) => (
-                    <tr
-                      key={invoice.id}
-                      className="hover:bg-gray-50"
+
+          {/* {filteredInvoices.length >= 0 && (
+            <div className="bg-white rounded-md shadow-sm overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"
+                    ></th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <button className="text-gray-400 hover:text-gray-600">
-                            <svg
-                              className="h-5 w-5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 9l-7 7-7-7"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className={`h-3 w-3 rounded-full mr-2 ${getCustomerColorClass(invoice.customer)}`}></div>
-                          <div className="text-sm font-medium text-gray-900">{invoice.customer}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {Math.floor(Math.random() * 200) + 1}.{Math.floor(Math.random() * 60)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {invoice.totalPrice} {invoice.currency}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
+                      Customer
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Duration
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Total Price
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    ></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredInvoices.length > 0 ? (
+                    filteredInvoices.map((invoice) => (
+                      <tr
+                        key={invoice.id}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <button className="text-gray-400 hover:text-gray-600">
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className={`h-3 w-3 rounded-full mr-2 ${invoice.customer}`}></div>
+                            <div className="text-sm font-medium text-gray-900">{invoice.customer}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {Math.floor(Math.random() * 200) + 1}.{Math.floor(Math.random() * 60)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {invoice.totalPrice} {invoice.currency}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
                           onClick={() => handlePreviewInvoice(invoice.id)}
                           className="text-blue-600 hover:text-blue-900 mr-3"
                         >
@@ -550,52 +539,52 @@ function InvoiceContent() {
                             Save
                           </button>
                         )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-6 py-4 text-center text-sm text-gray-500"
+                      >
+                        No invoices found matching your criteria.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-4 text-center text-sm text-gray-500"
-                    >
-                      No invoices found matching your criteria.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div> 
-        )} */}
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )} */}
         </div>
       </div>
     </>
   );
 }
 
-export function Invoice() {
-  const [isClientSide, setIsClientSide] = useState(false);
+// export function Invoice() {
+//   const [isClientSide, setIsClientSide] = useState(false);
 
-  useEffect(() => {
-    setIsClientSide(true);
-  }, []);
+//   useEffect(() => {
+//     setIsClientSide(true);
+//   }, []);
 
-  if (!isClientSide) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+//   if (!isClientSide) {
+//     return (
+//       <div className="flex justify-center items-center h-screen">
+//         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+//       </div>
+//     );
+//   }
 
-  return (
-    <DatabaseProvider>
-      <InvoiceContent />
-    </DatabaseProvider>
-  );
-}
+//   return (
+//     <DatabaseProvider>
+//       <InvoiceContent />
+//     </DatabaseProvider>
+//   );
+// }
 
 // Sử dụng AuthenticatedRoute như một Higher-Order Component
-const AuthenticatedInvoice = AuthenticatedRoute(Invoice, [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD]);
+const AuthenticatedInvoice = AuthenticatedRoute(InvoiceContent, [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD]);
 
 export default AuthenticatedInvoice;

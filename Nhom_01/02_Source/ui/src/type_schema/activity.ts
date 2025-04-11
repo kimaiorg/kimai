@@ -15,6 +15,7 @@ export type ActivitySimpleType = {
   deleted_at: null | string;
   project_id: number;
   team_id: number;
+  quota?: number;
 };
 
 export type ActivityType = {
@@ -31,6 +32,7 @@ export type ActivityType = {
   project: CustomerProjectType;
   team: TeamSimpleType;
   tasks: TaskSimpleType[];
+  quota?: number;
 };
 
 export const activityFilters = [
@@ -85,6 +87,9 @@ export const CreateActivityRequestSchema = z.object({
   }),
   activity_number: z.string().min(2, {
     message: "Company name is too short"
+  }),
+  quota: z.string().nonempty({
+    message: "Project is required"
   })
 });
 
@@ -98,6 +103,7 @@ export type CreateActivityRequestDTO = {
   team_id: number;
   budget: number;
   activity_number: number;
+  quota: number;
 };
 
 export type UpdateActivityRequestDTO = {
@@ -108,4 +114,5 @@ export type UpdateActivityRequestDTO = {
   team_id: number;
   budget: number;
   activity_number: number;
+  quota: number;
 };
