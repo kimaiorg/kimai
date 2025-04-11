@@ -81,21 +81,22 @@ function InvoiceContent() {
         ),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!
       });
+      console.log(activityList);
       const exportableInvoices: InvoiceHistoryType = {
         id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!,
         date: formatDate(new Date(), "dd.MM.yyyy"),
-        dueDate: Date.now().toString(),
+        dueDate: new Date().toISOString(),
         status: "NEW",
         totalPrice: `${Math.round(Math.random() * 4000) + 1000}`,
         currency: "$",
         notes: "No notes",
         createdBy: currentUser!.sub!,
-        createdAt: Date.now().toString(),
+        createdAt: new Date(2025, 4, 7).toISOString(),
         items: activityList.map((activity) => ({
           description: activity.name,
           quantity: 1,
-          unitPrice: Math.round(Math.random() * 95) + 5,
+          unitPrice: Math.round(activity.budget / (activity?.quota ? Number(activity.quota) : Math.random() * 90 + 10)),
           taxRate: 0.1,
           date: new Date().toISOString()
         }))

@@ -324,8 +324,9 @@ export function ActivityUpdateDialog({
               <Button
                 type="submit"
                 className="bg-lime-500 hover:bg-lime-600 cursor-pointer"
+                disabled={loading}
               >
-                Update
+                {loading ? "Updating..." : "Update"}
               </Button>
             </DialogFooter>
           </form>

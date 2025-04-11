@@ -321,8 +321,9 @@ export function ActivityCreateDialog({
               <Button
                 type="submit"
                 className="bg-lime-500 hover:bg-lime-600 cursor-pointer"
+                disabled={loading}
               >
-                Create
+                {loading ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>

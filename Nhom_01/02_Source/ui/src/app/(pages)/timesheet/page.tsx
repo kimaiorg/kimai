@@ -49,7 +49,6 @@ function Timesheet() {
       total: 0
     }
   });
-  console.log(currentUser);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -101,7 +100,6 @@ function Timesheet() {
       const timeStr = Math.floor(Date.now() - new Date(runningRecord.start_time).getTime()) / 1000;
       setElapsedTime(timeStr);
     }
-    setLoadingPage(false);
   };
 
   const goToPage = (page: number) => {
@@ -144,6 +142,7 @@ function Timesheet() {
       const timeStr = Math.floor(Date.now() - new Date(trackingTime.start_time).getTime()) / 1000;
       setElapsedTime(timeStr);
     }, 1000);
+    setLoadingPage(false);
     return () => {
       clearInterval(intervalId);
     };

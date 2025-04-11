@@ -285,8 +285,9 @@ export default function TeamUpdateDialog({
               <Button
                 type="submit"
                 className="bg-lime-500 hover:bg-lime-600 text-white cursor-pointer"
+                disabled={loading}
               >
-                Update
+                {loading ? "Updating..." : "Update"}
               </Button>
             </DialogFooter>
           </form>

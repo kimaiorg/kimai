@@ -30,8 +30,8 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
     resolver: zodResolver(CreateTaskRequestSchema),
     defaultValues: {
       title: "Write unit test",
-      deadline: "2023-01-02",
-      description: "VIP customer",
+      deadline: "2025-04-11",
+      description: "",
       activity_id: "",
       user_id: ""
     }
@@ -266,8 +266,9 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
               <Button
                 type="submit"
                 className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
+                disabled={loading}
               >
-                Create
+                {loading ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>

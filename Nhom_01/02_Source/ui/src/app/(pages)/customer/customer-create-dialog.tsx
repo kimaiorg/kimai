@@ -375,8 +375,9 @@ export function CustomerCreateDialog({
               <Button
                 type="submit"
                 className="mt-2 bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
+                disabled={loading}
               >
-                Create
+                {loading ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>
