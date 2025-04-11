@@ -173,7 +173,10 @@ function InvoiceHistoryContent() {
                               <SquarePen size={14} /> Edit
                             </div>
                           </InvoiceStatusUpdateDialog>
-                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <div
+                            className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md"
+                            onClick={() => handleDownloadInvoice(invoice)}
+                          >
                             <Download size={14} /> Download
                           </div>
                           <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">

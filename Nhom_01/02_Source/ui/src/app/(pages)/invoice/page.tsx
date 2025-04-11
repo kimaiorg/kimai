@@ -55,10 +55,10 @@ function InvoiceContent() {
   const filterInvoiceForm = useForm<FilterInvoiceValidation>({
     resolver: zodResolver(FilterInvoiceRequestSchema),
     defaultValues: {
-      from: new Date().toISOString(),
-      to: new Date().toISOString(),
-      customer_id: "9",
-      project_id: "16",
+      from: "",
+      to: "",
+      customer_id: "",
+      project_id: "",
       activities: []
     }
   });
@@ -85,13 +85,13 @@ function InvoiceContent() {
         id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!,
         date: formatDate(new Date(), "dd.MM.yyyy"),
-        dueDate: new Date().toISOString(),
+        dueDate: Date.now().toString(),
         status: "NEW",
-        totalPrice: "14200",
+        totalPrice: `${Math.round(Math.random() * 4000) + 1000}`,
         currency: "$",
         notes: "No notes",
         createdBy: currentUser!.sub!,
-        createdAt: "",
+        createdAt: Date.now().toString(),
         items: activityList.map((activity) => ({
           description: activity.name,
           quantity: 1,

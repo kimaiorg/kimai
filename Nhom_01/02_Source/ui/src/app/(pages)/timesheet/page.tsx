@@ -178,12 +178,12 @@ function Timesheet() {
               onClick={handleEndTimesheet}
               className="flex items-center bg-red-500 hover:bg-red-600 cursor-pointer text-white"
             >
-              <Square className="mr-2 h-4 w-4" /> {secondsToTime(elapsedTime)}
+              <Square className="h-4 w-4" /> {secondsToTime(elapsedTime)}
             </Button>
           ) : (
             <TimesheetCreateDialog fetchTimesheets={handleStartingTracking}>
               <Button className="flex items-center bg-green-500 hover:bg-green-600 cursor-pointer text-white">
-                <Play className="mr-2 h-4 w-4" /> Start
+                <Play className="h-4 w-4" /> Start
               </Button>
             </TimesheetCreateDialog>
           )}
@@ -229,7 +229,7 @@ function Timesheet() {
                     colSpan={7}
                     className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
                   >
-                    No tasks found.
+                    No timesheet records found.
                   </td>
                 </tr>
               )}

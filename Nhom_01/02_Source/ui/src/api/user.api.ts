@@ -1,5 +1,4 @@
 import { createAccessToken } from "@/api/auth.api";
-import mockUser from "@/lib/mock-users.json";
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserListType } from "@/type_schema/user.schema";
 
 export async function getAllUsers(

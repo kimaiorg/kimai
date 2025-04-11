@@ -38,10 +38,12 @@ export default function LocaleLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  console.log(user);
+  // console.log(user);
 
   // Validate locale
   useEffect(() => {
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("backend-at-token");
     if (!locales.includes(locale as Locale)) {
       router.push(`/en${pathname.replace(/^\/[^\/]+/, "")}`);
     }
@@ -49,11 +51,13 @@ export default function LocaleLayout({
 
   // Handle authentication and permissions
   useEffect(() => {
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("backend-at-token");
     if (user && !isLoading) {
       const fetchUsers = async () => {
         try {
           const userList = await getAllUsers();
-          console.log(userList);
+          // console.log(userList);
           dispatch(updateUserList(userList.users));
         } catch (error) {
           console.error(error);
