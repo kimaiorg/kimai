@@ -95,7 +95,7 @@ function InvoiceContent() {
         createdAt: new Date(2025, 4, 7).toISOString(),
         items: activityList.map((activity) => ({
           description: activity.name,
-          quantity: 1,
+          quantity: Math.round(Math.random() * 20 + 5),
           unitPrice: Math.round(activity.budget / (activity?.quota ? Number(activity.quota) : Math.random() * 90 + 10)),
           taxRate: 0.1,
           date: new Date().toISOString()
