@@ -152,7 +152,7 @@ export default function UserViewDialog({ children, user }: { children: React.Rea
                             {user.email_verified ? (
                               <Badge
                                 variant="outline"
-                                className="bg-green-50 border-green-200 text-green-700 text-xs"
+                                className="bg-secondary text-white text-xs"
                               >
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
                                 Verified

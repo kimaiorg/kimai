@@ -275,7 +275,7 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
               </Button>
               <Button
                 type="submit"
-                className="bg-lime-500 hover:bg-lime-600 text-white cursor-pointer"
+                className="bg-main text-white cursor-pointer"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create"}

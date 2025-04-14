@@ -5,8 +5,8 @@ import { getAllUsers } from "@/api/user.api";
 import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
 import { TaskUpdateDialog } from "@/app/(pages)/task/task-update-dialog";
 import TaskViewDialog from "@/app/(pages)/task/task-view-dialog";
-import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -33,15 +33,7 @@ function Task() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const [taskList, setTaskList] = useState<Pagination<TaskType>>({
-    metadata: {
-      page: 1,
-      limit: 10,
-      totalPages: 0,
-      total: 0
-    },
-    data: []
-  });
+  const [taskList, setTaskList] = useState<Pagination<TaskType> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchTasks = async (
@@ -105,10 +97,6 @@ function Task() {
     updateQueryParams("page", page.toString());
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -131,7 +119,7 @@ function Task() {
             <Filter className="h-4 w-4" />
           </Button>
           <TaskCreateDialog fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}>
-            <Button className="flex items-center justify-center gap-2 cursor-pointer">
+            <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer">
               Create <Plus />
             </Button>
           </TaskCreateDialog>
@@ -162,8 +150,9 @@ function Task() {
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
             </tr>
           </thead>
+          {isLoading && <TableSkeleton columns={6} />}
           <tbody>
-            {taskList.data.length === 0 && (
+            {taskList && taskList.data.length === 0 && (
               <tr className="h-48 text-center">
                 <td
                   colSpan={6}
@@ -173,69 +162,72 @@ function Task() {
                 </td>
               </tr>
             )}
-            {taskList.data.map((task, index) => (
-              <tr
-                key={index}
-                className={`border-t dark:border-slate-700 `}
-              >
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.id}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                  <span className="ml-2">{task.title}</span>
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.activity.name}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.user?.name}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                  {format(task.deadline, "dd/MM/yyyy HH:mm")}
-                </td>
-                <td className="px-4 py-2 text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-0 cursor-pointer"
+            {taskList &&
+              taskList.data.map((task, index) => (
+                <tr
+                  key={index}
+                  className={`border-t dark:border-slate-700 `}
+                >
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="ml-2">{task.title}</span>
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.activity.name}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.user?.name}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    {format(task.deadline, "dd/MM/yyyy HH:mm")}
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0 cursor-pointer"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="border border-gray-200"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="border border-gray-200"
-                    >
-                      <TaskViewDialog task={task}>
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <Eye size={14} /> Show
+                        <TaskViewDialog task={task}>
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <Eye size={14} /> Show
+                          </div>
+                        </TaskViewDialog>
+                        <TaskUpdateDialog
+                          targetTask={task}
+                          fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}
+                        >
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <SquarePen size={14} /> Edit
+                          </div>
+                        </TaskUpdateDialog>
+                        <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Trash2
+                            size={14}
+                            stroke="red"
+                          />{" "}
+                          Delete
                         </div>
-                      </TaskViewDialog>
-                      <TaskUpdateDialog
-                        targetTask={task}
-                        fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}
-                      >
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <SquarePen size={14} /> Edit
-                        </div>
-                      </TaskUpdateDialog>
-                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                        <Trash2
-                          size={14}
-                          stroke="red"
-                        />{" "}
-                        Delete
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
-      <PaginationWithLinks
-        page={taskList.metadata.page}
-        pageSize={taskList.metadata.limit}
-        totalCount={taskList.metadata.total}
-        callback={goToPage}
-      />
+      {taskList && (
+        <PaginationWithLinks
+          page={taskList.metadata.page}
+          pageSize={taskList.metadata.limit}
+          totalCount={taskList.metadata.total}
+          callback={goToPage}
+        />
+      )}
     </>
   );
 }

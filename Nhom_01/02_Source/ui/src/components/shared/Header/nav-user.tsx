@@ -38,7 +38,7 @@ export function NavUser() {
       <div className="flex items-center gap-3">
         <LanguageSwitcher />
         <Button
-          className="px-6 py-3 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition"
+          className="px-6 py-3 text-white bg-main rounded-md transition"
           onClick={() => (window.location.href = "/api/auth/login")}
         >
           Login

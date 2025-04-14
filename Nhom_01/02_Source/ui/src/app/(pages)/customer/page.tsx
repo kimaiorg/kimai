@@ -17,6 +17,7 @@ import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2,
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CustomerCreateDialog } from "./customer-create-dialog";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 
 function CustomerPage() {
   const queryParams = useSearchParams();
@@ -27,15 +28,7 @@ function CustomerPage() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const [customerList, setCustomerList] = useState<Pagination<CustomerType>>({
-    metadata: {
-      page: 1,
-      limit: 5,
-      totalPages: 1,
-      total: 0
-    },
-    data: []
-  });
+  const [customerList, setCustomerList] = useState<Pagination<CustomerType> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchCustomers = async (
@@ -136,8 +129,9 @@ function CustomerPage() {
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
             </tr>
           </thead>
+          {!customerList && <TableSkeleton />}
           <tbody>
-            {customerList.data.length === 0 && (
+            {customerList && customerList.data.length === 0 && (
               <tr className="h-48 text-center">
                 <td
                   colSpan={6}
@@ -147,71 +141,74 @@ function CustomerPage() {
                 </td>
               </tr>
             )}
-            {customerList.data.map((customer) => (
-              <tr
-                key={customer.id}
-                className={`border-t dark:border-slate-700`}
-              >
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.id}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                  <div className="flex items-center">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: customer.color || "#FF5733" }}
-                    ></div>
-                    <span className="ml-2">{customer.name}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.country}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.email}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.phone}</td>
-                <TableCell>
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-0 cursor-pointer text-center"
+            {customerList &&
+              customerList.data.map((customer) => (
+                <tr
+                  key={customer.id}
+                  className={`border-t dark:border-slate-700`}
+                >
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: customer.color || "#FF5733" }}
+                      ></div>
+                      <span className="ml-2">{customer.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.country}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.email}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{customer.phone}</td>
+                  <TableCell>
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0 cursor-pointer text-center"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-28 border border-gray-200 rounded-md bg-white dark:bg-slate-800"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-28 border border-gray-200 rounded-md bg-white dark:bg-slate-800"
-                    >
-                      <CustomerViewDialog customer={customer}>
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <Eye size={14} /> Show
+                        <CustomerViewDialog customer={customer}>
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <Eye size={14} /> Show
+                          </div>
+                        </CustomerViewDialog>
+                        <CustomerUpdateDialog
+                          targetCustomer={customer}
+                          fetchCustomers={() => handleFetchCustomers(1)}
+                        >
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <SquarePen size={14} />
+                            Edit
+                          </div>
+                        </CustomerUpdateDialog>
+                        <div className="text-red-500 items-center flex gap-2 cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Trash2 size={14} />
+                          Delete
                         </div>
-                      </CustomerViewDialog>
-                      <CustomerUpdateDialog
-                        targetCustomer={customer}
-                        fetchCustomers={() => handleFetchCustomers(1)}
-                      >
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <SquarePen size={14} />
-                          Edit
-                        </div>
-                      </CustomerUpdateDialog>
-                      <div className="text-red-500 items-center flex gap-2 cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                        <Trash2 size={14} />
-                        Delete
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </tr>
-            ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
-      <PaginationWithLinks
-        page={customerList.metadata.page}
-        pageSize={customerList.metadata.limit}
-        totalCount={customerList.metadata.total}
-        callback={goToPage}
-      />
+      {customerList && (
+        <PaginationWithLinks
+          page={customerList.metadata.page}
+          pageSize={customerList.metadata.limit}
+          totalCount={customerList.metadata.total}
+          callback={goToPage}
+        />
+      )}
     </>
   );
 }

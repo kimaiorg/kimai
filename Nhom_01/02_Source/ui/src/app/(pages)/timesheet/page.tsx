@@ -9,6 +9,7 @@ import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-
 import TimesheetViewDialog from "@/app/(pages)/timesheet/timesheet-view-dialog";
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -39,16 +40,8 @@ function Timesheet() {
   const [loadingPage, setLoadingPage] = useState(false);
   const [trackingTime, setTrackingTime] = useState<TimesheetType | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
-
-  const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetType>>({
-    data: [],
-    metadata: {
-      page: 1,
-      limit: 5,
-      totalPages: 1,
-      total: 0
-    }
-  });
+  const [shouldShowActionButtons, setShouldShowActionButtons] = useState(false);
+  const [timesheetList, setTimesheetList] = useState<Pagination<TimesheetType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -100,6 +93,7 @@ function Timesheet() {
       const timeStr = Math.floor(Date.now() - new Date(runningRecord.start_time).getTime()) / 1000;
       setElapsedTime(timeStr);
     }
+    setShouldShowActionButtons(true);
   };
 
   const goToPage = (page: number) => {
@@ -172,25 +166,29 @@ function Timesheet() {
           >
             <Filter className="h-4 w-4" />
           </Button>
-          {elapsedTime ? (
-            <Button
-              onClick={handleEndTimesheet}
-              className="flex items-center bg-red-500 hover:bg-red-600 cursor-pointer text-white"
-            >
-              <Square className="h-4 w-4" /> {secondsToTime(elapsedTime)}
-            </Button>
-          ) : (
-            <TimesheetCreateDialog fetchTimesheets={handleStartingTracking}>
-              <Button className="flex items-center bg-green-500 hover:bg-green-600 cursor-pointer text-white">
-                <Play className="h-4 w-4" /> Start
-              </Button>
-            </TimesheetCreateDialog>
+          {shouldShowActionButtons && (
+            <>
+              {elapsedTime ? (
+                <Button
+                  onClick={handleEndTimesheet}
+                  className="flex items-center bg-red-500 hover:bg-red-600 cursor-pointer text-white"
+                >
+                  <Square className="h-4 w-4" /> {secondsToTime(elapsedTime)}
+                </Button>
+              ) : (
+                <TimesheetCreateDialog fetchTimesheets={handleStartingTracking}>
+                  <Button className="flex items-center bg-main cursor-pointer text-white">
+                    <Play className="h-4 w-4" /> Start
+                  </Button>
+                </TimesheetCreateDialog>
+              )}
+              <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
+                <Button className="flex items-center bg-main gap-2 cursor-pointer">
+                  Create <Plus />
+                </Button>
+              </ManualTimesheetCreateDialog>
+            </>
           )}
-          <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
-            <Button className="flex items-center gap-2 cursor-pointer">
-              Create <Plus />
-            </Button>
-          </ManualTimesheetCreateDialog>
           <Button
             variant="outline"
             size="icon"
@@ -221,8 +219,9 @@ function Timesheet() {
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
               </tr>
             </thead>
+            {!timesheetList && <TableSkeleton columns={6} />}
             <tbody>
-              {timesheetList.data.length === 0 && (
+              {timesheetList && timesheetList.data.length === 0 && (
                 <tr className="h-48 text-center">
                   <td
                     colSpan={7}
@@ -232,65 +231,68 @@ function Timesheet() {
                   </td>
                 </tr>
               )}
-              {timesheetList.data.map((timesheet, index) => (
-                <tr
-                  key={index}
-                  className={`border-t dark:border-slate-700 `}
-                >
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.task?.title}</td>
+              {timesheetList &&
+                timesheetList.data.map((timesheet, index) => (
+                  <tr
+                    key={index}
+                    className={`border-t dark:border-slate-700 `}
+                  >
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.task?.title}</td>
 
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    {format(timesheet.start_time, "dd/MM/yyyy HH:mm")}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    {timesheet.end_time ? format(timesheet.end_time, "dd/MM/yyyy HH:mm") : "N/A"}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    {secondsToTime(timesheet.duration)}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.status}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                      {format(timesheet.start_time, "dd/MM/yyyy HH:mm")}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                      {timesheet.end_time ? format(timesheet.end_time, "dd/MM/yyyy HH:mm") : "N/A"}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                      {secondsToTime(timesheet.duration)}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.status}</td>
 
-                  <td className="px-4 py-2 text-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 p-0 cursor-pointer"
+                    <td className="px-4 py-2 text-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-0 cursor-pointer"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="border border-gray-200"
                         >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="border border-gray-200"
-                      >
-                        <TimesheetViewDialog timesheet={timesheet}>
-                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                            <Eye size={14} /> Show
+                          <TimesheetViewDialog timesheet={timesheet}>
+                            <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                              <Eye size={14} /> Show
+                            </div>
+                          </TimesheetViewDialog>
+                          <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <Trash2
+                              size={14}
+                              stroke="red"
+                            />{" "}
+                            Delete
                           </div>
-                        </TimesheetViewDialog>
-                        <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <Trash2
-                            size={14}
-                            stroke="red"
-                          />{" "}
-                          Delete
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
-        <PaginationWithLinks
-          page={timesheetList.metadata.page}
-          pageSize={timesheetList.metadata.limit}
-          totalCount={timesheetList.metadata.total}
-          callback={goToPage}
-        />
+        {timesheetList && (
+          <PaginationWithLinks
+            page={timesheetList.metadata.page}
+            pageSize={timesheetList.metadata.limit}
+            totalCount={timesheetList.metadata.total}
+            callback={goToPage}
+          />
+        )}
       </div>
     </>
   );

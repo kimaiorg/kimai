@@ -333,7 +333,7 @@ export function ProjectCreateDialog({
             <DialogFooter>
               <Button
                 type="submit"
-                className="bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
+                className="bg-main cursor-pointer text-white"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create"}

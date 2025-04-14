@@ -54,7 +54,7 @@ export function NavMain({
   const locale = useCurrentLocale();
   const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
   const currentPath = usePathname();
-  const activeClassname = "!bg-violet-600 !text-white !hover:text-white";
+  const activeClassname = "bg-main !text-white !hover:text-white";
 
   // Function to get the localized URL
   const getLocalizedUrl = (url: string) => {

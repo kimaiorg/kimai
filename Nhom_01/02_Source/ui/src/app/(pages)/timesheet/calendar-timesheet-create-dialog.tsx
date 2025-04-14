@@ -24,14 +24,21 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export function ManualTimesheetCreateDialog({
+export function CalendarManualTimesheetCreateDialog({
   children,
+  openDialog,
+  setOpenDialog,
+  startTime,
+  endTime,
   fetchTimesheets
 }: {
   children: React.ReactNode;
+  startTime: string;
+  endTime: string;
+  openDialog: boolean;
+  setOpenDialog: (open: boolean) => void;
   fetchTimesheets: () => void;
 }) {
-  const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [taskList, setTaskList] = useState<TaskResponseType[]>([]);
   const { user: currentUser, isLoading } = useUser();
@@ -43,8 +50,8 @@ export function ManualTimesheetCreateDialog({
     defaultValues: {
       task_id: "",
       description: "Description about your task here",
-      from: "",
-      end: ""
+      from: startTime,
+      end: endTime
     }
   });
   async function onSubmit(values: CreateManualTimesheetValidation) {
@@ -69,7 +76,7 @@ export function ManualTimesheetCreateDialog({
         });
         fetchTimesheets();
         createTimesheetForm.reset();
-        setOpen(false);
+        setOpenDialog(false);
       } else {
         toast("Failed", {
           description: "Failed to add task. Please try again!",
@@ -111,8 +118,8 @@ export function ManualTimesheetCreateDialog({
     return (
       <>
         <Dialog
-          open={open}
-          onOpenChange={setOpen}
+          open={openDialog}
+          onOpenChange={setOpenDialog}
         >
           <DialogTrigger asChild>{children}</DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
@@ -127,13 +134,13 @@ export function ManualTimesheetCreateDialog({
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={setOpen}
+      open={openDialog}
+      onOpenChange={setOpenDialog}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
         <DialogHeader>
-          <DialogTitle>Create timesheet</DialogTitle>
+          <DialogTitle>Create timesheet request</DialogTitle>
         </DialogHeader>
 
         <Form {...createTimesheetForm}>

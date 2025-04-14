@@ -22,7 +22,6 @@ import {
   User,
   Users
 } from "lucide-react";
-import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -33,17 +32,17 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TimesheetType } from "@/type_schema/timesheet";
 
-export default function TimesheetViewDialog({
+export default function CalendarTimesheetViewDialog({
   children,
-  defaultOpen,
+  open,
+  setOpen,
   timesheet
 }: {
   children: React.ReactNode;
-  defaultOpen?: boolean;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   timesheet: TimesheetType;
 }) {
-  const [open, setOpen] = useState(defaultOpen || false);
-
   // Format date
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";

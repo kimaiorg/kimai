@@ -290,7 +290,7 @@ export default function TimeTrackingSettings() {
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-lime-500 hover:bg-lime-600 text-white"
+              className="bg-main text-white"
             >
               Save
             </Button>

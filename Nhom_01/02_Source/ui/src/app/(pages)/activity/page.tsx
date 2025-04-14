@@ -7,6 +7,7 @@ import ActivityViewDialog from "@/app/(pages)/activity/activity-view-dialog";
 import FilterActivityModal from "@/app/(pages)/activity/filter-modal";
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -31,15 +32,7 @@ function Activity() {
   const teamId = queryParams.get("teamId") || "";
   const budgetFrom = queryParams.get("budgetFrom") || "";
   const budgetTo = queryParams.get("budgetTo") || "";
-  const [activityList, setActivityList] = useState<Pagination<ActivityType>>({
-    metadata: {
-      page: 1,
-      limit: 5,
-      totalPages: 1,
-      total: 0
-    },
-    data: []
-  });
+  const [activityList, setActivityList] = useState<Pagination<ActivityType> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchActivities = async (
@@ -116,10 +109,6 @@ function Activity() {
     updateQueryParams("page", page.toString());
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -185,8 +174,9 @@ function Activity() {
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
             </tr>
           </thead>
+          {!activityList && <TableSkeleton />}
           <tbody>
-            {activityList.data.length === 0 && (
+            {activityList && activityList.data.length === 0 && (
               <tr className="h-48 text-center">
                 <td
                   colSpan={6}
@@ -196,73 +186,76 @@ function Activity() {
                 </td>
               </tr>
             )}
-            {activityList.data.map((activity, index) => (
-              <tr
-                key={index}
-                className={`border-t dark:border-slate-700 `}
-              >
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.id}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                  <div className="flex items-center">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: activity.color || "#FF5733" }}
-                    ></div>
-                    <span className="ml-2">{activity.name}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.budget}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.project.name}</td>
-                <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.team.name}</td>
-                <td className="px-4 py-2 text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-0 cursor-pointer"
+            {activityList &&
+              activityList.data.map((activity, index) => (
+                <tr
+                  key={index}
+                  className={`border-t dark:border-slate-700 `}
+                >
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: activity.color || "#FF5733" }}
+                      ></div>
+                      <span className="ml-2">{activity.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.budget}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.project.name}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.team.name}</td>
+                  <td className="px-4 py-2 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0 cursor-pointer"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="border border-gray-200"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="border border-gray-200"
-                    >
-                      <ActivityViewDialog activity={activity}>
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <Eye size={14} /> Show
+                        <ActivityViewDialog activity={activity}>
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <Eye size={14} /> Show
+                          </div>
+                        </ActivityViewDialog>
+                        <ActivityUpdateDialog
+                          targetActivity={activity}
+                          fetchActivities={handleFetchActivities}
+                        >
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <SquarePen size={14} /> Edit
+                          </div>
+                        </ActivityUpdateDialog>
+                        <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Trash2
+                            size={14}
+                            stroke="red"
+                          />{" "}
+                          Delete
                         </div>
-                      </ActivityViewDialog>
-                      <ActivityUpdateDialog
-                        targetActivity={activity}
-                        fetchActivities={handleFetchActivities}
-                      >
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <SquarePen size={14} /> Edit
-                        </div>
-                      </ActivityUpdateDialog>
-                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                        <Trash2
-                          size={14}
-                          stroke="red"
-                        />{" "}
-                        Delete
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
-      <PaginationWithLinks
-        page={activityList.metadata.page}
-        pageSize={activityList.metadata.limit}
-        totalCount={activityList.metadata.total}
-        callback={goToPage}
-      />
+      {activityList && (
+        <PaginationWithLinks
+          page={activityList.metadata.page}
+          pageSize={activityList.metadata.limit}
+          totalCount={activityList.metadata.total}
+          callback={goToPage}
+        />
+      )}
     </>
   );
 }

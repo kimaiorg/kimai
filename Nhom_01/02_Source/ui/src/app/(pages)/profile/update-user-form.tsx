@@ -187,7 +187,7 @@ export function UpdateUserForm({ user, back }: { user: UserProfile; back: () => 
           </Button>
           <Button
             type="submit"
-            className="block bg-lime-500 hover:bg-lime-600"
+            className="block main"
           >
             Update {loading ? <span className="animate-spin">⌛</span> : ""}
           </Button>
