@@ -65,20 +65,25 @@
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --chart-1: #6e44ff;
+  --chart-2: #936bff;
+  --chart-3: #b892ff;
+  --chart-4: #dcaaf1;
+  --chart-5: #ffc2e2;
   --radius: 0.625rem;
   --sidebar: oklch(0.984 0.003 247.858);
   --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary: #6e44ff;
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
   --sidebar-accent: oklch(0.968 0.007 247.896);
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Big Calendar CSS */
+  --fc-border-color: black;
+  --fc-page-bg-color: #fff;
+  --fc-daygrid-event-dot-width: 5px;
 }
 
 .dark {
@@ -101,19 +106,23 @@
   --border: oklch(0.279 0.041 260.031);
   --input: oklch(0.279 0.041 260.031);
   --ring: oklch(0.446 0.043 257.281);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
+  --chart-1: #6e44ff;
+  --chart-2: #936bff;
+  --chart-3: #b892ff;
+  --chart-4: #dcaaf1;
+  --chart-5: #ffc2e2;
   --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: #6e44ff;
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
   --sidebar-accent: oklch(0.279 0.041 260.031);
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(0.279 0.041 260.031);
   --sidebar-ring: oklch(0.446 0.043 257.281);
+
+  /* Big Calendar CSS */
+  --fc-border-color: white;
+  --fc-page-bg-color: #222222;
+  --fc-daygrid-event-dot-width: 5px;
 }
 
 @layer base {
@@ -125,6 +134,27 @@
   }
 }
 
+.color-main {
+  color: #6e44ff;
+}
+.color-secondary {
+  color: #b892ff;
+}
+.color-sub {
+  color: #ffc2e2;
+}
+.bg-main {
+  background-color: #6e44ff !important;
+}
+.bg-secondary {
+  background-color: #936bff;
+}
+.bg-sub {
+  background-color: #ffc2e2;
+}
+.border-main {
+  border-color: #6e44ff !important;
+}
 /* background wave */
 .my-section {
   position: relative;
@@ -196,7 +226,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  color: #00aa25;
+  color: #6e44ff;
   box-shadow:
     calc(1 * var(--d)) calc(0 * var(--d)) 0 0,
     calc(0.707 * var(--d)) calc(0.707 * var(--d)) 0 1px,
@@ -211,6 +241,11 @@
   100% {
     transform: rotate(1turn);
   }
+}
+
+/* Big Calendar CSS */
+.fc-license-message {
+  display: none !important;
 }
 
 /* customizable snowflake falling style */

@@ -8,6 +8,7 @@ import TeamUpdateDialog from "@/app/(pages)/team/team-update-dialog";
 import TeamViewDialog from "@/app/(pages)/team/team-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import DefaultAvatar from "@/components/shared/default-avatar";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ function Team() {
   const queryParams = useSearchParams();
   const dispatch = useAppDispatch();
   const pathname = usePathname();
+  const [loadingData, setLoadingData] = useState(true);
   const { replace } = useRouter();
   const users: UserType[] = useAppSelector((state) => state.userListState.users);
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
@@ -36,15 +38,7 @@ function Team() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
-  const [teamList, setTeamList] = useState<Pagination<TeamType>>({
-    metadata: {
-      page: 1,
-      limit: 10,
-      total: 0,
-      totalPages: 0
-    },
-    data: []
-  });
+  const [teamList, setTeamList] = useState<Pagination<TeamType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -75,6 +69,7 @@ function Team() {
         metadata: metadata,
         data: currentTeamList
       });
+      setLoadingData(false);
     } catch (error) {
       console.error("Error fetching teams:", error);
     }
@@ -145,14 +140,16 @@ function Team() {
       </div>
 
       <Table className="bg-white dark:bg-slate-700 border border-gray-200 rounded-md select-none">
-        <TableCaption>
-          <PaginationWithLinks
-            page={teamList.metadata.page}
-            pageSize={teamList.metadata.limit}
-            totalCount={teamList.metadata.total}
-            callback={goToPage}
-          />
-        </TableCaption>
+        {teamList && (
+          <TableCaption>
+            <PaginationWithLinks
+              page={teamList.metadata.page}
+              pageSize={teamList.metadata.limit}
+              totalCount={teamList.metadata.total}
+              callback={goToPage}
+            />
+          </TableCaption>
+        )}
         <TableHeader className="bg-gray-100 dark:bg-slate-800 border border-gray-200">
           <TableRow className="rounded-lg">
             <TableHead className="w-[100px]">No.</TableHead>
@@ -163,65 +160,34 @@ function Team() {
             <TableHead className="w-[4rem]">Action</TableHead>
           </TableRow>
         </TableHeader>
+        {loadingData && <TableSkeleton columns={6} />}
         <TableBody>
-          {teamList.data.map((team, index) => (
-            <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
+          {teamList &&
+            teamList.data.map((team, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
 
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: team.color || "#FF5733" }}
-                  ></div>
-                  <span className="font-medium">{team.name}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <MemberHoverCard
-                  member={team.lead}
-                  lead={team.lead}
-                >
-                  <div className="relative h-10 w-10 cursor-pointer group">
-                    <div className="absolute inset-0 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 group-hover:shadow-[0_0_10px_rgba(139,92,246,0.6)] transition-shadow duration-300">
-                      <div className="bg-white rounded-full w-full h-full flex items-center justify-center">
-                        {team.lead?.picture ? (
-                          <Image
-                            src={team.lead.picture}
-                            alt={team.lead.name}
-                            width={36}
-                            height={36}
-                            className="rounded-full"
-                            priority
-                          />
-                        ) : (
-                          <DefaultAvatar
-                            name={team.lead?.name || ""}
-                            size={35}
-                            className="rounded-full"
-                          />
-                        )}
-                      </div>
-                    </div>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: team.color || "#FF5733" }}
+                    ></div>
+                    <span className="font-medium">{team.name}</span>
                   </div>
-                </MemberHoverCard>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center justify-between">
-                  <div className="flex -space-x-2 mr-4">
-                    {team.users.map((member, idx) => (
-                      <MemberHoverCard
-                        member={member}
-                        lead={team.lead}
-                        key={idx}
-                      >
-                        <div
-                          className={`flex items-center justify-center h-9 w-9 cursor-pointer hover:ring-indigo-600 hover:ring-2 rounded-full`}
-                        >
-                          {member.picture ? (
+                </TableCell>
+                <TableCell>
+                  <MemberHoverCard
+                    member={team.lead}
+                    lead={team.lead}
+                  >
+                    <div className="relative h-10 w-10 cursor-pointer group">
+                      <div className="absolute inset-0 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 group-hover:shadow-[0_0_10px_rgba(139,92,246,0.6)] transition-shadow duration-300">
+                        <div className="bg-white rounded-full w-full h-full flex items-center justify-center">
+                          {team.lead?.picture ? (
                             <Image
-                              src={member.picture}
-                              alt={member?.name || "Member"}
+                              src={team.lead.picture}
+                              alt={team.lead.name}
                               width={36}
                               height={36}
                               className="rounded-full"
@@ -229,59 +195,92 @@ function Team() {
                             />
                           ) : (
                             <DefaultAvatar
-                              name={member?.name}
+                              name={team.lead?.name || ""}
                               size={35}
-                              className="border-gray-200"
-                              index={idx}
+                              className="rounded-full"
                             />
                           )}
                         </div>
-                      </MemberHoverCard>
-                    ))}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>{formatDate(team.created_at, "dd/MM/yyyy HH:mm")}</TableCell>
-              <TableCell className="cursor-pointer">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 p-0 cursor-pointer"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="border border-gray-200"
-                  >
-                    <TeamViewDialog team={team}>
-                      <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                        <Eye size={14} /> Show
                       </div>
-                    </TeamViewDialog>
-                    <TeamUpdateDialog
-                      targetTeam={team}
-                      refetchTeams={() => handleFetchTeams(1, limit, keyword, sortBy, sortOrder)}
-                    >
-                      <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                        <SquarePen size={14} /> Edit
-                      </div>
-                    </TeamUpdateDialog>
-                    <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                      <Trash2
-                        size={14}
-                        stroke="red"
-                      />{" "}
-                      Delete
                     </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+                  </MemberHoverCard>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-between">
+                    <div className="flex -space-x-2 mr-4">
+                      {team.users.map((member, idx) => (
+                        <MemberHoverCard
+                          member={member}
+                          lead={team.lead}
+                          key={idx}
+                        >
+                          <div
+                            className={`flex items-center justify-center h-9 w-9 cursor-pointer hover:ring-indigo-600 hover:ring-2 rounded-full`}
+                          >
+                            {member.picture ? (
+                              <Image
+                                src={member.picture}
+                                alt={member?.name || "Member"}
+                                width={36}
+                                height={36}
+                                className="rounded-full"
+                                priority
+                              />
+                            ) : (
+                              <DefaultAvatar
+                                name={member?.name}
+                                size={35}
+                                className="border-gray-200"
+                                index={idx}
+                              />
+                            )}
+                          </div>
+                        </MemberHoverCard>
+                      ))}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{formatDate(team.created_at, "dd/MM/yyyy HH:mm")}</TableCell>
+                <TableCell className="cursor-pointer">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 p-0 cursor-pointer"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="border border-gray-200"
+                    >
+                      <TeamViewDialog team={team}>
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Eye size={14} /> Show
+                        </div>
+                      </TeamViewDialog>
+                      <TeamUpdateDialog
+                        targetTeam={team}
+                        refetchTeams={() => handleFetchTeams(1, limit, keyword, sortBy, sortOrder)}
+                      >
+                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <SquarePen size={14} /> Edit
+                        </div>
+                      </TeamUpdateDialog>
+                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                        <Trash2
+                          size={14}
+                          stroke="red"
+                        />{" "}
+                        Delete
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </>

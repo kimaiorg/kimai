@@ -127,7 +127,7 @@ function InvoiceTemplatePage() {
         <h1 className="text-2xl font-bold">Invoice Templates</h1>
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
-          className="flex items-center gap-1 bg-lime-500 hover:bg-lime-600 text-white"
+          className="flex items-center gap-1 bg-main text-white"
         >
           <Plus className="h-4 w-4" />
           Create Template

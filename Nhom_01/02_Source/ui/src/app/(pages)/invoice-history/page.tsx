@@ -70,7 +70,7 @@ function InvoiceHistoryContent() {
         <h1 className="text-2xl font-bold">Invoice History</h1>
         <Button
           onClick={() => router.push("/invoice")}
-          className="bg-lime-500 hover:bg-lime-600 text-white cursor-pointer"
+          className="bg-main text-white cursor-pointer"
         >
           Create Invoice
         </Button>

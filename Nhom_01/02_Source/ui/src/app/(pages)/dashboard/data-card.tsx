@@ -31,7 +31,7 @@ export default function DataCard({
         <dl>
           <icon.icon
             size={72}
-            stroke="#3b82f6"
+            stroke="#6e44ff"
           />
         </dl>
       </div>

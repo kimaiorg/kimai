@@ -166,7 +166,7 @@ export default function InvoiceStatusUpdateDialog({
                 <div className="mt-3 flex items-center justify-end">
                   <Button
                     type="submit"
-                    className="mt-2 bg-lime-500 hover:bg-lime-600 cursor-pointer text-white"
+                    className="mt-2 bg-main cursor-pointer text-white"
                   >
                     Update
                   </Button>

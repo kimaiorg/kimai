@@ -5,6 +5,7 @@ import { ProjectCreateDialog } from "@/app/(pages)/project/project-create-dialog
 import { ProjectUpdateDialog } from "@/app/(pages)/project/project-update-dialog";
 import ProjectViewDialog from "@/app/(pages)/project/project-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -27,15 +28,7 @@ function ProjectPage() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
-  const [projectList, setProjectList] = useState<Pagination<ProjectType>>({
-    metadata: {
-      page: 1,
-      limit: 5,
-      total: 0,
-      totalPages: 1
-    },
-    data: []
-  });
+  const [projectList, setProjectList] = useState<Pagination<ProjectType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -118,14 +111,16 @@ function ProjectPage() {
 
       <div className="select-none">
         <Table className="rounded-lg border border-slate-200 bg-white dark:bg-slate-700">
-          <TableCaption>
-            <PaginationWithLinks
-              page={projectList.metadata.page}
-              pageSize={projectList.metadata.limit}
-              totalCount={projectList.metadata.total}
-              callback={goToPage}
-            />
-          </TableCaption>
+          {projectList && (
+            <TableCaption>
+              <PaginationWithLinks
+                page={projectList.metadata.page}
+                pageSize={projectList.metadata.limit}
+                totalCount={projectList.metadata.total}
+                callback={goToPage}
+              />
+            </TableCaption>
+          )}
           <TableHeader className="rounded-lg border border-slate-200 bg-gray-100 dark:bg-slate-800">
             <TableRow>
               <TableHead className="w-[5%] text-center">No</TableHead>
@@ -136,64 +131,66 @@ function ProjectPage() {
               <TableHead className="w-[5%]">Action</TableHead>
             </TableRow>
           </TableHeader>
+          {!projectList && <TableSkeleton />}
           <TableBody>
-            {projectList.data.map((project, index) => (
-              <TableRow key={index}>
-                <TableCell className="text-center">{index + 1}</TableCell>
-                <TableCell className="font-medium">
-                  <div className="flex items-center">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: project.color || "#6C757D" }}
-                    ></div>
-                    <span className="ml-2 text-muted-foreground">{project.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="">{project.customer?.name}</TableCell>
-                <TableCell className="">{project.budget ? `$${project.budget}` : "-"}</TableCell>
-                <TableCell className="">
-                  {formatDate(project.start_date!, "dd/MM/yyyy")}
-                  <span> - </span>
-                  {project.end_date ? formatDate(project.end_date, "dd/MM/yyyy") : "N/A"}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-0 cursor-pointer"
+            {projectList &&
+              projectList.data.map((project, index) => (
+                <TableRow key={index}>
+                  <TableCell className="text-center">{index + 1}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: project.color || "#6C757D" }}
+                      ></div>
+                      <span className="ml-2 text-muted-foreground">{project.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="">{project.customer?.name}</TableCell>
+                  <TableCell className="">{project.budget ? `$${project.budget}` : "-"}</TableCell>
+                  <TableCell className="">
+                    {formatDate(project.start_date!, "dd/MM/yyyy")}
+                    <span> - </span>
+                    {project.end_date ? formatDate(project.end_date, "dd/MM/yyyy") : "N/A"}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0 cursor-pointer"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="border border-gray-200"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="border border-gray-200"
-                    >
-                      <ProjectViewDialog project={project}>
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <Eye size={14} /> Show
+                        <ProjectViewDialog project={project}>
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <Eye size={14} /> Show
+                          </div>
+                        </ProjectViewDialog>
+                        <ProjectUpdateDialog
+                          targetProject={project}
+                          refetchProjects={handleReloadProjects}
+                        >
+                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <SquarePen size={14} />
+                            Edit
+                          </div>
+                        </ProjectUpdateDialog>
+                        <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                          <Trash2 size={14} />
+                          Delete
                         </div>
-                      </ProjectViewDialog>
-                      <ProjectUpdateDialog
-                        targetProject={project}
-                        refetchProjects={handleReloadProjects}
-                      >
-                        <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                          <SquarePen size={14} />
-                          Edit
-                        </div>
-                      </ProjectUpdateDialog>
-                      <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                        <Trash2 size={14} />
-                        Delete
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>

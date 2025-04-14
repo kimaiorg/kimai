@@ -4,6 +4,7 @@ import { NavMain } from "@/components/shared/nav-main";
 import { Separator } from "@/components/ui/separator";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import Link from "next/link";
+import KimaiLogo from "@/components/shared/assets/kimai.png";
 
 export function MySidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -15,9 +16,9 @@ export function MySidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Link href="/dashboard">
           <div className="flex items-center justify-center">
             <img
-              src="https://demo.kimai.org/touch-icon-192x192.png"
+              src={KimaiLogo.src}
               alt="Kimai"
-              className="w-10 h-10"
+              className="h-15"
             />
           </div>
         </Link>

@@ -320,7 +320,7 @@ export function ActivityCreateDialog({
             <DialogFooter>
               <Button
                 type="submit"
-                className="bg-lime-500 hover:bg-lime-600 cursor-pointer"
+                className="bg-main cursor-pointer"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create"}
