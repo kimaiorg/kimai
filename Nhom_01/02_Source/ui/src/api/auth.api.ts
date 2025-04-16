@@ -10,8 +10,9 @@ type AccessTokenResponse = {
 };
 
 // Create an access token for calling apis
-export async function createAccessToken(audience: string): Promise<string> {
+export async function createAccessToken(audience: string, count: number = 3): Promise<string> {
   try {
+    if (count == 0) return "";
     if (sessionStorage.getItem("token")) return sessionStorage.getItem("token")!;
     const issuerBaseURL = `${process.env.AUTH0_ISSUER_BASE_URL}/oauth/token`;
     const response = await axios.post<AccessTokenResponse>(
@@ -30,12 +31,14 @@ export async function createAccessToken(audience: string): Promise<string> {
     );
     sessionStorage.setItem("token", response.data.access_token);
     return response.data.access_token;
-  } catch (error) {
-    throw new Error("Failed to get Auth0 management token", { cause: error });
+  } catch (error: any) {
+    sessionStorage.removeItem("token");
+    return createAccessToken(audience, count - 1);
   }
 }
 
-export async function getManagementAccessToken(): Promise<string> {
+export async function getManagementAccessToken(count: number = 3): Promise<string> {
+  if (count == 0) return "";
   try {
     if (sessionStorage.getItem("backend-at-token")) return sessionStorage.getItem("backend-at-token")!;
     const response = await axios.get<{ accessToken: string }>("/api/token/api-server");
@@ -43,7 +46,8 @@ export async function getManagementAccessToken(): Promise<string> {
     sessionStorage.setItem("backend-at-token", response.data.accessToken);
     return response.data.accessToken;
   } catch (error) {
-    throw new Error("Failed to get Auth0 management token", { cause: error });
+    sessionStorage.removeItem("backend-at-token");
+    return getManagementAccessToken(count - 1);
   }
 }
 

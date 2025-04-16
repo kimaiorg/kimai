@@ -52,7 +52,7 @@ export async function getAllMyTimesheets(
   sortOrder?: string
 ): Promise<Pagination<TimesheetResponseType>> {
   const token = await getManagementAccessToken();
-  console.log(token);
+
   const params = new URLSearchParams();
   if (page) params.append("page", page.toString());
   if (limit) params.append("limit", limit.toString());

@@ -6,7 +6,7 @@ import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 function Calendar() {
   return (
     <>
-      <h1>Calendar</h1>
+      <h1 className="text-2xl font-bold mb-3">Calendar</h1>
       <MyCalendar />
     </>
   );

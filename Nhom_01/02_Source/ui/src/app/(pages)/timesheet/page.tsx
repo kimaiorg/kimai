@@ -183,7 +183,7 @@ function Timesheet() {
                 </TimesheetCreateDialog>
               )}
               <ManualTimesheetCreateDialog fetchTimesheets={() => handleFetchTimesheets(1)}>
-                <Button className="flex items-center bg-main gap-2 cursor-pointer">
+                <Button className="flex items-center bg-main gap-2 cursor-pointer text-white">
                   Create <Plus />
                 </Button>
               </ManualTimesheetCreateDialog>

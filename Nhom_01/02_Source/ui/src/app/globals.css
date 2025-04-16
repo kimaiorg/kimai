@@ -82,6 +82,11 @@
 
   /* Big Calendar CSS */
   --fc-border-color: black;
+  --fc-button-bg-color: #936bff;
+  --fc-button-border-color: #936bff;
+  --fc-button-hover-bg-color: #6e44ff;
+  --fc-button-active-bg-color: #6e44ff;
+  --fc-button-active-border-color: #6e44ff;
   --fc-page-bg-color: #fff;
   --fc-daygrid-event-dot-width: 5px;
 }
