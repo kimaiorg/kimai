@@ -404,18 +404,7 @@ function WeeklyAllUsersReport() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex items-center mb-4">
-        <Link
-          href="/reporting"
-          className="text-blue-500 hover:underline mr-2"
-        >
-          {t("page.reporting.title")}
-        </Link>
-        <span className="mx-2">›</span>
-        <span>Weekly view for all users</span>
-      </div>
-
+    <>
       <div className="bg-white dark:bg-slate-800 rounded-md shadow mb-6">
         <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
@@ -520,8 +509,8 @@ function WeeklyAllUsersReport() {
           <div className="p-8 text-center">Loading report data...</div>
         ) : (
           <div className="overflow-x-auto">
-            <Table className="bg-slate-700">
-              <TableHeader className="bg-slate-800">
+            <Table>
+              <TableHeader>
                 <TableRow>
                   <TableHead className="w-1/6">User</TableHead>
                   <TableHead className="w-1/6">Project</TableHead>
@@ -628,7 +617,7 @@ function WeeklyAllUsersReport() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 

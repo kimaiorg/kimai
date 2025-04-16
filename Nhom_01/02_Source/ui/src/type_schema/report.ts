@@ -1,3 +1,5 @@
+import { ComponentType } from "react";
+
 export interface WeeklyReportEntry {
   id: number;
   project_id: number;
@@ -107,3 +109,9 @@ export interface WeeklyAllUsersReportResponse {
     byUser: Record<number, number>;
   };
 }
+
+export type ReportViewType = {
+  title: string;
+  icon: React.ReactNode;
+  component: ComponentType<any>;
+};

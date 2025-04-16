@@ -261,18 +261,7 @@ function ProjectOverviewReport() {
   }, [projects, selectedCustomer]);
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex items-center mb-4">
-        <Link
-          href="/reporting"
-          className="text-blue-500 hover:underline mr-2"
-        >
-          {t("page.reporting.title")}
-        </Link>
-        <span className="mx-2">›</span>
-        <span>Project overview</span>
-      </div>
-
+    <>
       <div className="bg-white dark:bg-slate-700 rounded-md shadow mb-6">
         <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
@@ -447,7 +436,7 @@ function ProjectOverviewReport() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 
