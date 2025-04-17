@@ -12,6 +12,7 @@ export const createTaskSchema = z.object({
   description: z.string().min(1).max(255),
   activity_id: z.number(),
   user_id: z.string(),
+  expense_id: z.number(),
 });
 
 export type CreateTaskDto = z.infer<typeof createTaskSchema>;

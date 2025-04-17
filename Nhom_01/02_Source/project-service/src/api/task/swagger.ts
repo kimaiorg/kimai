@@ -34,6 +34,12 @@ export class CreateTaskSwagger {
     description: 'User ID assigned to the task',
   })
   user_id: string;
+
+  @ApiPropertyOptional({
+    example: 'expense123',
+    description: 'Expense ID',
+  })
+  expense_id: string;
 }
 
 export class UpdateTaskSwagger {
@@ -70,6 +76,12 @@ export class UpdateTaskSwagger {
     description: 'User ID assigned to the task',
   })
   user_id?: string;
+
+  @ApiPropertyOptional({
+    example: 'expense123',
+    description: 'Expense ID',
+  })
+  expense_id: string;
 }
 
 export class ListTaskSwaggerDto {

@@ -11,6 +11,7 @@ export const updateTaskSchema = z.object({
     .transform((val) => (val ? new Date(val) : undefined)),
   activity_id: z.number().optional(),
   user_id: z.string().optional(),
+  expense_id: z.number().optional(),
 });
 
 export type UpdateTaskDto = z.infer<typeof updateTaskSchema>;

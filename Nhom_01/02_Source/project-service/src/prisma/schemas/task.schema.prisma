@@ -8,6 +8,9 @@ model Task {
   activity_id Int
   activity    Activity @relation(fields: [activity_id], references: [id])
 
+  expense_id Int?
+  expense    Expense? @relation(fields: [expense_id], references: [id])
+
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?

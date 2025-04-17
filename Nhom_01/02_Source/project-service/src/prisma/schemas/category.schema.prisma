@@ -1,0 +1,13 @@
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+
+  expenses Expense[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("categories")
+}
