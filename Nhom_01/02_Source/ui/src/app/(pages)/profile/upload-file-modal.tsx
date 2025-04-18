@@ -38,8 +38,8 @@ export default function UploadFileModal({
       onOpenChange={setOpen}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="bg-white dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw] min-h-72">
-        <DialogTitle>{preview ? "Preview" : "Upload File"}</DialogTitle>
+      <DialogContent className="bg-white dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw] min-h-72 md:w-[40rem] md:min-h-[20rem]">
+        <DialogTitle className="text-2xl font-semibold">{preview ? "Preview" : "Upload File"}</DialogTitle>
         <div
           {...getRootProps()}
           className="h-fit outline-none"

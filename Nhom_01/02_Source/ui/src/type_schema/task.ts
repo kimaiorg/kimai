@@ -1,5 +1,4 @@
 import { ActivityType } from "@/type_schema/activity";
-import { TeamSimpleType } from "@/type_schema/team";
 import { UserType } from "@/type_schema/user.schema";
 import { z } from "zod";
 
@@ -13,6 +12,8 @@ export type TaskSimpleType = {
   description: string;
   updated_at: string;
   user_id: string;
+  status: string;
+  billable: boolean;
 };
 
 export type TaskResponseType = {
@@ -25,6 +26,8 @@ export type TaskResponseType = {
   updated_at: string;
   activity: ActivityType;
   user_id: string;
+  status: string;
+  billable: boolean;
 };
 
 export type TaskType = {
@@ -37,6 +40,8 @@ export type TaskType = {
   updated_at: string;
   activity: ActivityType;
   user: UserType;
+  status: string;
+  billable: boolean;
 };
 
 export const CreateTaskRequestSchema = z

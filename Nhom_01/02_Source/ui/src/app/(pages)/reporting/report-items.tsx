@@ -4,12 +4,15 @@ import { ReportViewType } from "@/type_schema/report";
 import dynamic from "next/dynamic";
 
 const ProjectOverview = dynamic(() => import("@/app/(pages)/reporting/project-overview"), {
+  ssr: false,
   loading: () => <TimesheetTableSkeleton />
 });
 const WeeklyAll = dynamic(() => import("@/app/(pages)/reporting/weekly-all"), {
+  ssr: false,
   loading: () => <TimesheetTableSkeleton />
 });
 const WeeklyUser = dynamic(() => import("@/app/(pages)/reporting/weekly-user"), {
+  ssr: false,
   loading: () => <TimesheetTableSkeleton />
 });
 

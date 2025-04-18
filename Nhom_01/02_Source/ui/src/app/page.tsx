@@ -1,6 +1,7 @@
 "use client";
 import ErrorPage from "@/app/error";
 import Loading from "@/app/loading";
+import OnBoarding from "@/components/shared/OnBoarding/on-boarding";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -17,7 +18,7 @@ export default function Home() {
         window.location.href = "/api/auth/login";
       }
     }
-  }, [user, error, isLoading, router]);
+  }, [user, error, isLoading]);
 
   if (isLoading) {
     return <Loading />;
