@@ -85,6 +85,7 @@ export const FilterInvoiceRequestSchema = z
     project_id: z.string().nonempty({
       message: "Please select a project"
     }),
+    period: z.string(),
     activities: z.string().array()
   })
   .strict()

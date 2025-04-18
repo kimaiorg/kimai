@@ -6,6 +6,7 @@ import { filterInvoices } from "@/api/invoice.api";
 import { getAllProjects } from "@/api/project.api";
 import ActivityViewDialog from "@/app/(pages)/activity/activity-view-dialog";
 import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
+import { periods } from "@/app/(pages)/invoice/period";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
@@ -59,6 +60,7 @@ function InvoiceContent() {
       to: "",
       customer_id: "",
       project_id: "",
+      period: "",
       activities: []
     }
   });
@@ -203,29 +205,11 @@ function InvoiceContent() {
             noValidate
           >
             <div className="grid grid-cols-6 gap-4 pb-3 items-start">
-              {/* Name and Color */}
-              {/* <FormField
-                control={filterInvoiceForm.control}
-                name="start"
-                render={({ field }) => (
-                  <FormItem className="col-span-5">
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your name"
-                        className="!mt-0 border-gray-200"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />  */}
               <FormField
                 control={filterInvoiceForm.control}
                 name="from"
                 render={({ field }) => (
-                  <FormItem className="col-span-3">
+                  <FormItem className="col-span-2">
                     <FormLabel>Start date</FormLabel>
                     <FormControl>
                       <DateTimePicker
@@ -241,7 +225,7 @@ function InvoiceContent() {
                 control={filterInvoiceForm.control}
                 name="to"
                 render={({ field }) => (
-                  <FormItem className="col-span-3">
+                  <FormItem className="col-span-2">
                     <FormLabel>End date</FormLabel>
                     <FormControl>
                       <DateTimePicker
@@ -249,6 +233,36 @@ function InvoiceContent() {
                         setDate={field.onChange}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={filterInvoiceForm.control}
+                name="period"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Time zone</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      {...field}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full !mt-0 border-gray-200">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {periods.map((period, index) => (
+                          <SelectItem
+                            key={index}
+                            value={period.value}
+                          >
+                            {period.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
