@@ -4,6 +4,7 @@ import { ProjectModule } from '@/domain/project/project.module';
 import { ActivityModule } from '@/domain/activity/activity.module';
 import { TaskModule } from '@/domain/task/task.module';
 import { CategoryModule } from '@/domain/category/category.module';
+import { ExpenseModule } from '@/domain/expense/expense.module';
 import { Module } from '@nestjs/common';
 
 @Module({
@@ -14,6 +15,7 @@ import { Module } from '@nestjs/common';
     ActivityModule,
     TaskModule,
     CategoryModule,
+    ExpenseModule,
   ],
   exports: [
     CustomerModule,
@@ -22,6 +24,7 @@ import { Module } from '@nestjs/common';
     ActivityModule,
     TaskModule,
     CategoryModule,
+    ExpenseModule,
   ],
 })
-export class DomainModule {}
+export class DomainModule { }

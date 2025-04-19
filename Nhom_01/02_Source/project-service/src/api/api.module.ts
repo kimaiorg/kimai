@@ -5,6 +5,7 @@ import { ProjectController } from '@/api/project/project.controller';
 import { ActivityController } from '@/api/activity/activity.controller';
 import { TaskController } from '@/api/task/task.controller';
 import { CategoryController } from '@/api/category/category.controller';
+import { ExpenseController } from '@/api/expense/expense.controller';
 import { DomainModule } from '@/domain/domain.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { DomainModule } from '@/domain/domain.module';
     ActivityController,
     TaskController,
     CategoryController,
+    ExpenseController,
   ],
 })
 export class ApiModule { }

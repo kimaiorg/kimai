@@ -6,7 +6,7 @@ export const buildListQuery = (dto: ListCategoryDto) => {
   };
 
   if (dto.keyword) {
-    where.title = {
+    where.name = {
       contains: dto.keyword,
       mode: 'insensitive',
     };

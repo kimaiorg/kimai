@@ -3,8 +3,9 @@ import { TeamModule } from '@/infrastructure/team/team.module';
 import { ProjectModule } from '@/infrastructure/project/project.module';
 import { ActivityModule } from '@/infrastructure/activity/activity.module';
 import { TaskModule } from '@/infrastructure/task/task.module';
-import { Module } from '@nestjs/common';
 import { CategoryModule } from '@/infrastructure/category/category.module';
+import { ExpenseModule } from '@/infrastructure/expense/expense.module';
+import { Module } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CategoryModule } from '@/infrastructure/category/category.module';
     ActivityModule,
     TaskModule,
     CategoryModule,
+    ExpenseModule,
   ],
   exports: [
     CustomerModule,
@@ -22,6 +24,7 @@ import { CategoryModule } from '@/infrastructure/category/category.module';
     ActivityModule,
     TaskModule,
     CategoryModule,
+    ExpenseModule,
   ],
 })
-export class InfrastructureModule {}
+export class InfrastructureModule { }

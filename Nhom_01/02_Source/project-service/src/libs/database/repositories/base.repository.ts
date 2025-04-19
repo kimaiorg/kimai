@@ -14,7 +14,7 @@ export class BaseRepository<T> implements BaseRepositoryInterface<T> {
   constructor(
     protected readonly prismaClient: PrismaClient,
     private readonly tableName: string,
-  ) {}
+  ) { }
 
   async create(entity: any, options?: CreateOptions): Promise<T> {
     return await this.prismaClient[this.tableName].create({
@@ -36,6 +36,7 @@ export class BaseRepository<T> implements BaseRepositoryInterface<T> {
     return await this.prismaClient[this.tableName].findUnique({
       where: {
         id: id,
+        deleted_at: null,
       },
       ...options,
     });
