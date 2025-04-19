@@ -142,7 +142,7 @@ function RolePage() {
             roleUsers.map((roleUser, index) => (
               <div
                 key={index}
-                className="p-4 border rounded-lg shadow-sm bg-white dark:bg-slate-800"
+                className="p-4 border rounded-lg shadow-sm bg-white dark:bg-slate-800 border-gray-200"
               >
                 <h2 className="text-lg font-semibold">{roleUser.role.name}</h2>
                 <p>Quantity: {roleUser.userCount}</p>
@@ -150,7 +150,7 @@ function RolePage() {
             ))}
         </div>
 
-        <table className="min-w-full bg-white dark:bg-slate-800 border rounded-lg shadow-sm table-layout">
+        <table className="min-w-full bg-white dark:bg-slate-800 border rounded-lg shadow-sm table-layout border-gray-200">
           <thead>
             <tr>
               <th className="py-2 px-4 w-[40%]">Name</th>

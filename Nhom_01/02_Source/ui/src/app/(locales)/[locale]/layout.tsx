@@ -46,7 +46,7 @@ export default function LocaleLayout({
     if (!locales.includes(locale as Locale)) {
       router.push(`/en${pathname.replace(/^\/[^\/]+/, "")}`);
     }
-  }, [locale, pathname, router]);
+  }, [locale]);
 
   // Handle authentication and permissions
   useEffect(() => {

@@ -1,33 +1,16 @@
-import { ActivitySimpleType, ActivityType } from "@/type_schema/activity";
-import { CustomerProjectType } from "@/type_schema/project";
-import { UserType } from "@/type_schema/user.schema";
 import { z } from "zod";
 
 export type CategoryType = {
   id: number;
   name: string;
   color: string;
-  lead: UserType;
-  users: UserType[];
-  created_at: string;
-  updated_at: string;
-  deleted_at: null | string;
-  projects: CustomerProjectType[];
-  activities: ActivitySimpleType[];
-};
-
-export type CategorySimpleType = {
-  id: number;
-  name: string;
-  color: string;
+  description: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  lead: string;
-  users: string[];
 };
 
-export const CreateTeamRequestSchema = z.object({
+export const CreateCategoryRequestSchema = z.object({
   name: z
     .string({
       required_error: "Name is required"
@@ -39,16 +22,19 @@ export const CreateTeamRequestSchema = z.object({
     .max(70, {
       message: "Name must not exceed 70 characters"
     }),
-  color: z.string()
+  color: z.string(),
+  description: z.string()
 });
 
-export type CreateTeamValidation = Omit<z.infer<typeof CreateTeamRequestSchema>, "members">;
-export type CreateTeamRequestDTO = z.infer<typeof CreateTeamRequestSchema> & {
-  users: string[];
-  lead: string;
+export type CreateCategoryValidation = z.infer<typeof CreateCategoryRequestSchema>;
+export type CreateCategoryRequestDTO = {
+  name: string;
+  color: string;
+  description: string;
 };
-
-export type UpdateTeamRequestDTO = z.infer<typeof CreateTeamRequestSchema> & {
-  users: string[];
-  lead: string;
+export type UpdateCategoryValidation = z.infer<typeof CreateCategoryRequestSchema>;
+export type UpdateCategoryRequestDTO = {
+  name: string;
+  color: string;
+  description: string;
 };

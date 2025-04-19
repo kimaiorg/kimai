@@ -27,12 +27,10 @@ function User() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const [loadingData, setLoadingData] = useState(true);
   const [userList, setUserList] = useState<UserListType | null>(null);
 
   const fetchUser = async (page?: number, limit?: number, keyword?: string, sortBy?: string, sortOrder?: string) => {
     const result = await getAllUsers(page, limit, keyword, sortBy, sortOrder);
-    goToPage(page || 1);
     setUserList(result);
   };
 
@@ -53,16 +51,9 @@ function User() {
     updateQueryParams(params);
   };
 
-  const handleReloadUser = () => {
-    const params = new URLSearchParams(queryParams);
-    params.set("page", "1");
-    updateQueryParams(params);
-  };
-
   useEffect(() => {
     const getUsers = async () => {
       await fetchUser(page, limit, keyword, sortBy, sortOrder);
-      setLoadingData(false);
     };
     getUsers();
   }, [page, limit, keyword, sortBy, sortOrder]);
@@ -101,7 +92,7 @@ function User() {
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
-          {loadingData && <TableSkeleton columns={6} />}
+          {!userList && <TableSkeleton columns={6} />}
           <TableBody>
             {userList &&
               userList.users.map((userItem, index) => (
