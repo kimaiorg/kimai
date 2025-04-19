@@ -1,54 +1,115 @@
-import { ActivitySimpleType } from "@/type_schema/activity";
-import { CustomerProjectType } from "@/type_schema/project";
-import { UserType } from "@/type_schema/user.schema";
+import { ActivityType } from "@/type_schema/activity";
+import { CategoryType } from "@/type_schema/category";
+import { ProjectType } from "@/type_schema/project";
+import { TaskSimpleType } from "@/type_schema/task";
 import { z } from "zod";
-
-export type ExpenseType = {
-  id: number;
-  name: string;
-  color: string;
-  lead: UserType;
-  users: UserType[];
-  created_at: string;
-  updated_at: string;
-  deleted_at: null | string;
-  projects: CustomerProjectType[];
-  activities: ActivitySimpleType[];
-};
 
 export type ExpenseSimpleType = {
   id: number;
   name: string;
   color: string;
+  description: string;
+  project_id: number;
+  activity_id: number;
+  category_id: number;
+  cost: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  lead: string;
-  users: string[];
 };
 
-export const CreateExpenseRequestSchema = z.object({
-  name: z
-    .string({
-      required_error: "Name is required"
-    })
-    .trim()
-    .min(4, {
-      message: "Name must be at least 2 characters long"
-    })
-    .max(70, {
-      message: "Name must not exceed 70 characters"
+export type ExpenseType = {
+  id: number;
+  name: string;
+  color: string;
+  description: string;
+  project_id: number;
+  activity_id: number;
+  category_id: number;
+  project: ProjectType;
+  activity: ActivityType;
+  category: CategoryType;
+  quantity: number;
+  cost: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  task: TaskSimpleType[];
+};
+
+export const CreateExpenseRequestSchema = z
+  .object({
+    name: z
+      .string()
+      .min(4, {
+        message: "Name is too short"
+      })
+      .max(255, {
+        message: "Name is too long"
+      }),
+    color: z.string(),
+    description: z.string(),
+    activity_id: z
+      .string({
+        required_error: "Activity is required"
+      })
+      .nonempty({
+        message: "Activity is required"
+      }),
+    project_id: z
+      .string({
+        required_error: "Assignee is required"
+      })
+      .nonempty({
+        message: "Assignee is required"
+      }),
+    category_id: z
+      .string({
+        required_error: "Assignee is required"
+      })
+      .nonempty({
+        message: "Assignee is required"
+      }),
+    quantity: z.string({
+      required_error: "Quantity is required"
     }),
-  color: z.string()
-});
+    cost: z.string({
+      required_error: "Cost is required"
+    })
+  })
+  .strict();
+// .refine(
+//   (datetime) => {
+//     const now = new Date().getTime();
+//     const deadlineDate = new Date(data.deadline).getTime();
+//     return now < deadlineDate;
+//   },
+//   {
+//     message: "Deadline must be in the future",
+//     path: ["deadline"]
+//   }
+// );
 
-export type CreateExpenseValidation = Omit<z.infer<typeof CreateExpenseRequestSchema>, "members">;
-export type CreateExpenseRequestDTO = z.infer<typeof CreateExpenseRequestSchema> & {
-  users: string[];
-  lead: string;
+export type CreateExpenseValidation = z.infer<typeof CreateExpenseRequestSchema>;
+export type UpdateExpenseValidation = z.infer<typeof CreateExpenseRequestSchema>;
+export type CreateExpenseRequestDTO = {
+  name: string;
+  description: string;
+  color: string;
+  activity_id: number;
+  project_id: number;
+  category_id: number;
+  quantity: number;
+  cost: number;
 };
 
-export type UpdateExpenseRequestDTO = z.infer<typeof CreateExpenseRequestSchema> & {
-  users: string[];
-  lead: string;
+export type UpdateExpenseRequestDTO = {
+  name: string;
+  description: string;
+  color: string;
+  activity_id: number;
+  project_id: number;
+  category_id: number;
+  quantity: number;
+  cost: number;
 };

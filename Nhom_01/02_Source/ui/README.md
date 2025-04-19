@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org) app project
+This is a [Next.js](https://nextjs.org) app project - Kimai solution
 
 ## Getting Started
 
@@ -13,7 +13,11 @@ This is a [Next.js](https://nextjs.org) app project
 #### Finally, run the development server to run the app:
 
 ```bash
-npm run dev
+npm i -f && npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Other tools:
+
+- Color palette: [https://coolors.co/](https://coolors.co/6e44ff-936bff-b892ff-dcaaf1)
