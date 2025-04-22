@@ -23,9 +23,6 @@ export type ExpenseType = {
   name: string;
   color: string;
   description: string;
-  project_id: number;
-  activity_id: number;
-  category_id: number;
   project: ProjectType;
   activity: ActivityType;
   category: CategoryType;

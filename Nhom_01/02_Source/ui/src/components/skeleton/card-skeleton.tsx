@@ -7,7 +7,7 @@ export function RoleCardSkeleton({ roleCount }: { roleCount: number }) {
       {Array.from({ length: roleCount }).map((_, index) => (
         <Card
           key={`role-${index}`}
-          className="p-4"
+          className="p-4 border border-gray-200"
         >
           <div className="space-y-2">
             <Skeleton className="h-5 w-24" />

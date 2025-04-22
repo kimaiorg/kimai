@@ -2,39 +2,34 @@
 
 import type React from "react";
 
-import { getAllProjects } from "@/api/project.api";
-import { getAllTeams } from "@/api/team.api";
+import { getAllActivities } from "@/api/activity.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { activityFilters } from "@/type_schema/activity";
-import { ProjectType } from "@/type_schema/project";
-import { TeamSimpleType } from "@/type_schema/team";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { activityFilters, ActivityType } from "@/type_schema/activity";
+import { UserType } from "@/type_schema/user.schema";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function FilterActivityModal({
+export default function FilterTaskModal({
   children,
   keyword,
   sortBy,
   sortOrder,
-  projectId,
-  teamId,
-  budgetFrom,
-  budgetTo,
+  activityId,
+  userId,
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
   keyword: string;
   sortBy: string;
   sortOrder: string;
-  projectId: string;
-  teamId: string;
-  budgetFrom: string;
-  budgetTo: string;
+  activityId: string;
+  userId: string;
   handleFilterChangeAction: (props: any) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -42,25 +37,22 @@ export default function FilterActivityModal({
     keyword: keyword,
     sortBy: sortBy,
     sortOrder: sortOrder,
-    projectId: projectId,
-    teamId: teamId,
-    budgetFrom: budgetFrom,
-    budgetTo: budgetTo
+    activityId: activityId,
+    userId: userId
   });
-  const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
-  const [teamList, setTeamList] = useState<TeamSimpleType[] | null>(null);
+  const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
-        const [projects, teams] = await Promise.all([getAllProjects(), getAllTeams()]);
-        setProjectList(projects.data);
-        setTeamList(teams.data);
+        const [activities] = await Promise.all([getAllActivities()]);
+        setActivityList(activities.data);
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        console.error("Error fetching activities:", error);
       }
     };
-    fetchProjects();
+    fetchData();
   }, []);
 
   const handleFilterChange = (key: string, value: string) => {
@@ -72,10 +64,8 @@ export default function FilterActivityModal({
       _keyword: filters.keyword,
       _sortBy: filters.sortBy,
       _sortOrder: filters.sortOrder,
-      _projectId: filters.projectId,
-      _teamId: filters.teamId,
-      _budgetFrom: filters.budgetFrom,
-      _budgetTo: filters.budgetTo
+      _activityId: filters.activityId,
+      _userId: filters.userId
     });
     setOpen(false);
   };
@@ -85,10 +75,8 @@ export default function FilterActivityModal({
       keyword: "",
       sortBy: "",
       sortOrder: "desc",
-      projectId: "",
-      teamId: "",
-      budgetFrom: "",
-      budgetTo: ""
+      activityId: "",
+      userId: ""
     });
   };
 
@@ -105,7 +93,7 @@ export default function FilterActivityModal({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 pl-2">
             <Filter className="h-4 w-4" />
-            <h4 className="font-medium">Filter Activities</h4>
+            <h4 className="font-medium">Filter Tasks</h4>
           </div>
           <Button
             variant="ghost"
@@ -183,31 +171,31 @@ export default function FilterActivityModal({
             </div>
           </div>
 
-          {projectList && (
+          {activityList && (
             <div className="grid gap-2">
-              <Label htmlFor="projectId">Project</Label>
+              <Label htmlFor="activityId">Activity</Label>
               <Select
-                onValueChange={(value) => handleFilterChange("projectId", value)}
-                value={filters.projectId}
+                onValueChange={(value) => handleFilterChange("activityId", value)}
+                value={filters.activityId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
+                    placeholder="Select activity"
+                    defaultValue={filters.activityId}
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {projectList.map((project, index) => (
+                  {activityList.map((activity, index) => (
                     <SelectItem
                       key={index}
-                      value={project.id.toString()}
+                      value={activity.id.toString()}
                       className="flex items-center gap-1"
                     >
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: project.color || "#FF5733" }}
+                        style={{ backgroundColor: activity.color || "#FF5733" }}
                       ></div>
-                      {project.name}
+                      {activity.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -215,62 +203,37 @@ export default function FilterActivityModal({
             </div>
           )}
 
-          {teamList && (
+          {userList && (
             <div className="grid gap-2">
-              <Label htmlFor="teamId">Team</Label>
+              <Label htmlFor="userId">User</Label>
               <Select
-                onValueChange={(value) => handleFilterChange("teamId", value)}
-                value={filters.teamId}
+                onValueChange={(value) => handleFilterChange("userId", value)}
+                value={filters.userId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
+                    placeholder="Select user"
+                    defaultValue={filters.userId}
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {teamList.map((team, index) => (
+                  {userList.map((user, index) => (
                     <SelectItem
                       key={index}
-                      value={team.id.toString()}
+                      value={user.user_id}
                       className="flex items-center gap-1"
                     >
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: team.color || "#FF5733" }}
+                        style={{ backgroundColor: "#FF5733" }}
                       ></div>
-                      {team.name}
+                      {user.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           )}
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="grid gap-2">
-              <Label htmlFor="budgetFrom">Budget From</Label>
-              <Input
-                id="budgetFrom"
-                placeholder="From"
-                type="number"
-                className="border border-gray-200"
-                value={filters.budgetFrom}
-                onChange={(e) => handleFilterChange("budgetFrom", e.target.value)}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="budgetTo">Budget To</Label>
-              <Input
-                id="budgetTo"
-                placeholder="To"
-                className="border border-gray-200"
-                value={filters.budgetTo}
-                onChange={(e) => handleFilterChange("budgetTo", e.target.value)}
-              />
-            </div>
-          </div>
         </div>
 
         <Separator className="mt-1" />
