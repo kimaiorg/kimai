@@ -2,60 +2,74 @@
 
 import type React from "react";
 
+import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
-import { getAllTeams } from "@/api/team.api";
+import { getAllTasks } from "@/api/task.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { activityFilters } from "@/type_schema/activity";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { activityFilters, ActivityType } from "@/type_schema/activity";
 import { ProjectType } from "@/type_schema/project";
-import { TeamSimpleType } from "@/type_schema/team";
+import { TaskResponseType } from "@/type_schema/task";
+import { UserType } from "@/type_schema/user.schema";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function FilterActivityModal({
+export default function FilterTimesheetModal({
   children,
   keyword,
   sortBy,
   sortOrder,
+  fromDate,
+  toDate,
   projectId,
-  teamId,
-  budgetFrom,
-  budgetTo,
+  activityId,
+  taskId,
+  userId,
+  status,
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
   keyword: string;
   sortBy: string;
   sortOrder: string;
+  fromDate: string;
+  toDate: string;
   projectId: string;
-  teamId: string;
-  budgetFrom: string;
-  budgetTo: string;
+  activityId: string;
+  taskId: string;
+  userId: string;
+  status: string;
   handleFilterChangeAction: (props: any) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
-    keyword: keyword,
     sortBy: sortBy,
     sortOrder: sortOrder,
     projectId: projectId,
-    teamId: teamId,
-    budgetFrom: budgetFrom,
-    budgetTo: budgetTo
+    activityId: activityId,
+    taskId: taskId,
+    userId: userId,
+    status: status,
+    fromDate: fromDate,
+    toDate: toDate
   });
   const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
-  const [teamList, setTeamList] = useState<TeamSimpleType[] | null>(null);
+  const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
+  const [taskList, setTaskList] = useState<TaskResponseType[] | null>(null);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const [projects, teams] = await Promise.all([getAllProjects(), getAllTeams()]);
+        const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
         setProjectList(projects.data);
-        setTeamList(teams.data);
+        setActivityList(activities.data);
+        setTaskList(tasks.data);
       } catch (error) {
         console.error("Error fetching projects:", error);
       }
@@ -69,26 +83,30 @@ export default function FilterActivityModal({
 
   const handleApplyFilters = () => {
     handleFilterChangeAction({
-      _keyword: filters.keyword,
       _sortBy: filters.sortBy,
       _sortOrder: filters.sortOrder,
       _projectId: filters.projectId,
-      _teamId: filters.teamId,
-      _budgetFrom: filters.budgetFrom,
-      _budgetTo: filters.budgetTo
+      _activityId: filters.activityId,
+      _taskId: filters.taskId,
+      _userId: filters.userId,
+      _status: filters.status,
+      _fromDate: filters.fromDate,
+      _toDate: filters.toDate
     });
     setOpen(false);
   };
 
   const handleResetFilters = () => {
     setFilters({
-      keyword: "",
       sortBy: "",
-      sortOrder: "desc",
+      sortOrder: "",
       projectId: "",
-      teamId: "",
-      budgetFrom: "",
-      budgetTo: ""
+      activityId: "",
+      taskId: "",
+      userId: "",
+      status: "",
+      fromDate: "",
+      toDate: ""
     });
   };
 
@@ -120,17 +138,6 @@ export default function FilterActivityModal({
         <Separator className="!m-0" />
 
         <div className="grid gap-4 p-2">
-          <div className="grid gap-2 md:hidden">
-            <Label htmlFor="keyword">Keyword</Label>
-            <Input
-              id="keyword"
-              placeholder="Search..."
-              className="border border-gray-200"
-              value={filters.keyword}
-              onChange={(e) => handleFilterChange("keyword", e.target.value)}
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-2">
             <div className="grid gap-2">
               <Label htmlFor="sortBy">Sort By</Label>
@@ -215,12 +222,12 @@ export default function FilterActivityModal({
             </div>
           )}
 
-          {teamList && (
+          {activityList && (
             <div className="grid gap-2">
-              <Label htmlFor="teamId">Team</Label>
+              <Label htmlFor="activityId">Activity</Label>
               <Select
-                onValueChange={(value) => handleFilterChange("teamId", value)}
-                value={filters.teamId}
+                onValueChange={(value) => handleFilterChange("activityId", value)}
+                value={filters.activityId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
@@ -229,17 +236,81 @@ export default function FilterActivityModal({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {teamList.map((team, index) => (
+                  {activityList.map((activity, index) => (
                     <SelectItem
                       key={index}
-                      value={team.id.toString()}
+                      value={activity.id.toString()}
                       className="flex items-center gap-1"
                     >
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: team.color || "#FF5733" }}
+                        style={{ backgroundColor: activity.color || "#FF5733" }}
                       ></div>
-                      {team.name}
+                      {activity.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {taskList && (
+            <div className="grid gap-2">
+              <Label htmlFor="taskId">Task</Label>
+              <Select
+                onValueChange={(value) => handleFilterChange("taskId", value)}
+                value={filters.taskId}
+              >
+                <SelectTrigger className="w-full !mt-0 border-gray-200">
+                  <SelectValue
+                    placeholder="Select project"
+                    defaultValue={filters.projectId}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {taskList.map((task, index) => (
+                    <SelectItem
+                      key={index}
+                      value={task.id.toString()}
+                      className="flex items-center gap-1"
+                    >
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "#FF5733" }}
+                      ></div>
+                      {task.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {userList && (
+            <div className="grid gap-2">
+              <Label htmlFor="userId">User</Label>
+              <Select
+                onValueChange={(value) => handleFilterChange("userId", value)}
+                value={filters.userId}
+              >
+                <SelectTrigger className="w-full !mt-0 border-gray-200">
+                  <SelectValue
+                    placeholder="Select project"
+                    defaultValue={filters.projectId}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {userList.map((user, index) => (
+                    <SelectItem
+                      key={index}
+                      value={user.user_id}
+                      className="flex items-center gap-1"
+                    >
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "#FF5733" }}
+                      ></div>
+                      {user.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -248,26 +319,24 @@ export default function FilterActivityModal({
           )}
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="grid gap-2">
-              <Label htmlFor="budgetFrom">Budget From</Label>
+            <div className="grid gap-2 md:hidden">
+              <Label htmlFor="fromDate">From Date</Label>
               <Input
-                id="budgetFrom"
-                placeholder="From"
-                type="number"
+                id="fromDate"
+                type="date"
                 className="border border-gray-200"
-                value={filters.budgetFrom}
-                onChange={(e) => handleFilterChange("budgetFrom", e.target.value)}
+                value={filters.fromDate}
+                onChange={(e) => handleFilterChange("fromDate", e.target.value)}
               />
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="budgetTo">Budget To</Label>
+            <div className="grid gap-2 md:hidden">
+              <Label htmlFor="fromDate">To Date</Label>
               <Input
-                id="budgetTo"
-                placeholder="To"
+                id="toDate"
+                type="date"
                 className="border border-gray-200"
-                value={filters.budgetTo}
-                onChange={(e) => handleFilterChange("budgetTo", e.target.value)}
+                value={filters.toDate}
+                onChange={(e) => handleFilterChange("toDate", e.target.value)}
               />
             </div>
           </div>

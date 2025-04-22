@@ -51,7 +51,7 @@ export function ExpenseUpdateDialog({
       activity_id: targetExpense.activity.id.toString(),
       project_id: targetExpense.project.id.toString(),
       category_id: targetExpense.category.id.toString(),
-      quantity: targetExpense.quantity.toString(),
+      quantity: targetExpense?.quantity?.toString() || "",
       cost: targetExpense.cost.toString()
     }
   });

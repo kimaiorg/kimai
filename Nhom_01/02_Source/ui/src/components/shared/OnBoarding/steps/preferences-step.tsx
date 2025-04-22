@@ -207,7 +207,7 @@ export function PreferencesStep({ onNext, onBack }: PreferencesStepProps) {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-violet-600!"
+                    className="data-[state=checked]:bg-[#936bff]!"
                   />
                 </FormControl>
               </FormItem>
@@ -227,7 +227,7 @@ export function PreferencesStep({ onNext, onBack }: PreferencesStepProps) {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-violet-600!"
+                    className="data-[state=checked]:bg-[#936bff]!"
                   />
                 </FormControl>
               </FormItem>

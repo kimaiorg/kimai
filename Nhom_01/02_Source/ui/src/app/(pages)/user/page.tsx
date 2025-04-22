@@ -65,7 +65,7 @@ function User() {
           <h1 className="text-2xl font-semibold">User</h1>
           <div className="flex items-center space-x-2">
             <AddUserModal fetchUsers={() => fetchUser(1, limit)}>
-              <Button className="btn btn-primary cursor-pointer">
+              <Button className="bg-main text-white cursor-pointer">
                 Create User <Plus />
               </Button>
             </AddUserModal>

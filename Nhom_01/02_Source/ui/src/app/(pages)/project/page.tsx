@@ -1,6 +1,7 @@
 "use client";
 
 import { getAllProjects } from "@/api/project.api";
+import FilterProjectModal from "@/app/(pages)/project/filter-modal";
 import { ProjectCreateDialog } from "@/app/(pages)/project/project-create-dialog";
 import { ProjectUpdateDialog } from "@/app/(pages)/project/project-update-dialog";
 import ProjectViewDialog from "@/app/(pages)/project/project-view-dialog";
@@ -28,6 +29,10 @@ function ProjectPage() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const customerId = queryParams.get("customerId") || "";
+  const teamId = queryParams.get("teamId") || "";
+  const budgetFrom = queryParams.get("budgetFrom") || "";
+  const budgetTo = queryParams.get("budgetTo") || "";
   const [projectList, setProjectList] = useState<Pagination<ProjectType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
@@ -38,7 +43,17 @@ function ProjectPage() {
   };
 
   const fetchProjects = async (page: number, limit: number, keyword: string, sortBy: string, sortOrder: string) => {
-    const result = await getAllProjects(page, limit, keyword, sortBy, sortOrder);
+    const result = await getAllProjects(
+      page,
+      limit,
+      keyword,
+      sortBy,
+      sortOrder,
+      customerId,
+      teamId,
+      budgetFrom,
+      budgetTo
+    );
     setProjectList(result);
   };
 
@@ -68,6 +83,25 @@ function ProjectPage() {
     replace(newUrl);
   };
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _keyword, _sortBy, _sortOrder, _customerId, _teamId, _budgetFrom, _budgetTo } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_customerId) params.set("customerId", _customerId);
+    if (_teamId) params.set("teamId", _teamId);
+    if (_budgetFrom) params.set("budgetFrom", _budgetFrom);
+    if (_budgetTo) params.set("budgetTo", _budgetTo);
+    if (_keyword) params.set("keyword", _keyword);
+    updateUrl(params);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -83,14 +117,26 @@ function ProjectPage() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterProjectModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            customerId={customerId}
+            teamId={teamId}
+            budgetFrom={budgetFrom}
+            budgetTo={budgetTo}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterProjectModal>
           <ProjectCreateDialog refetchProjects={handleReloadProjects}>
-            <Button className="flex items-center justify-center gap-2 cursor-pointer">
+            <Button className="flex items-center justify-center gap-2 cursor-pointer bg-main text-white">
               Create <Plus />
             </Button>
           </ProjectCreateDialog>
@@ -133,6 +179,16 @@ function ProjectPage() {
           </TableHeader>
           {!projectList && <TableSkeleton />}
           <TableBody>
+            {projectList && projectList.data.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-12"
+                >
+                  No projects found
+                </TableCell>
+              </TableRow>
+            )}
             {projectList &&
               projectList.data.map((project, index) => (
                 <TableRow key={index}>

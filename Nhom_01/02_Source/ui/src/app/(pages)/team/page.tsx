@@ -3,6 +3,7 @@
 import { getAllTeams } from "@/api/team.api";
 import { getAllUsers } from "@/api/user.api";
 import { CreateTeamModal } from "@/app/(pages)/team/create-team-modal";
+import FilterTeamModal from "@/app/(pages)/team/filter-modal";
 import { MemberHoverCard } from "@/app/(pages)/team/member-hover-card";
 import TeamUpdateDialog from "@/app/(pages)/team/team-update-dialog";
 import TeamViewDialog from "@/app/(pages)/team/team-view-dialog";
@@ -20,7 +21,7 @@ import { Pagination } from "@/type_schema/common";
 import { Role } from "@/type_schema/role";
 import { TeamType } from "@/type_schema/team";
 import { UserType } from "@/type_schema/user.schema";
-import { format, formatDate } from "date-fns";
+import { formatDate } from "date-fns";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -38,6 +39,8 @@ function Team() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const projectId = queryParams.get("projectId") || "";
+  const teamleadId = queryParams.get("teamleadId") || "";
   const [teamList, setTeamList] = useState<Pagination<TeamType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
@@ -55,7 +58,7 @@ function Team() {
         userList = fetchedUsers.users;
         dispatch(updateUserList(fetchedUsers.users));
       }
-      const result = await getAllTeams(page, limit, keyword, sortBy, sortOrder);
+      const result = await getAllTeams(page, limit, keyword, sortBy, sortOrder, projectId, teamleadId);
       const { data, metadata } = result;
       const currentTeamList: TeamType[] = data.map((teamItem) => {
         const { users: userIds, lead: leadId, ...rest } = teamItem;
@@ -98,6 +101,23 @@ function Team() {
     updateQueryParams("page", "1");
   };
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _keyword, _sortBy, _sortOrder, _projectId, _teamleadId } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_projectId) params.set("projectId", _projectId);
+    if (_teamleadId) params.set("teamleadId", _teamleadId);
+    if (_keyword) params.set("keyword", _keyword);
+    updateUrl(params);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -113,14 +133,24 @@ function Team() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterTeamModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            projectId={projectId}
+            teamleadId={teamleadId}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterTeamModal>
           <CreateTeamModal refetchTeams={handleReloadProjects}>
-            <Button className="flex items-center justify-center gap-2 text-white bg-lime-500 rounded-md hover:bg-lime-600 transition cursor-pointer">
+            <Button className="flex items-center justify-center gap-2 text-white bg-main rounded-md transition cursor-pointer">
               Create <Plus />
             </Button>
           </CreateTeamModal>
@@ -161,6 +191,16 @@ function Team() {
           </TableRow>
         </TableHeader>
         {loadingData && <TableSkeleton columns={6} />}
+        {teamList && teamList.data.length === 0 && (
+          <TableRow>
+            <TableCell
+              colSpan={6}
+              className="text-center py-12"
+            >
+              No team found
+            </TableCell>
+          </TableRow>
+        )}
         <TableBody>
           {teamList &&
             teamList.data.map((team, index) => (

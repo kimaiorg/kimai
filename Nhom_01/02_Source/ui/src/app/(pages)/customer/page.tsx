@@ -3,8 +3,10 @@
 import { getAllCustomers } from "@/api/customer.api";
 import { CustomerUpdateDialog } from "@/app/(pages)/customer/customer-edit-dialog";
 import CustomerViewDialog from "@/app/(pages)/customer/customer-view-dialog";
+import FilterCustomerModal from "@/app/(pages)/customer/filter-modal";
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
@@ -17,7 +19,6 @@ import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2,
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CustomerCreateDialog } from "./customer-create-dialog";
-import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 
 function CustomerPage() {
   const queryParams = useSearchParams();
@@ -72,6 +73,21 @@ function CustomerPage() {
     updateQueryParams("page", page.toString());
   };
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _keyword, _sortBy, _sortOrder } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_keyword) params.set("keyword", _keyword);
+    updateUrl(params);
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -91,14 +107,22 @@ function CustomerPage() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterCustomerModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterCustomerModal>
           <CustomerCreateDialog fetchCustomers={() => handleFetchCustomers(1, limit, keyword, sortBy, sortOrder)}>
-            <Button className="flex items-center justify-center gap-2 cursor-pointer">
+            <Button className="flex items-center justify-center gap-2 cursor-pointer bg-main text-white">
               Create <Plus />
             </Button>
           </CustomerCreateDialog>

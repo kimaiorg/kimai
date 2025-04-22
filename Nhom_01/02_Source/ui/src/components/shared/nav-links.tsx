@@ -210,14 +210,6 @@ export const timesheetNavMain = [
         icon: ListTodo,
         isActive: false,
         allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
-      },
-      {
-        title: "Tags",
-        translationKey: "sidebar.tag",
-        url: "/tag",
-        icon: Tag,
-        isActive: false,
-        allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
       }
     ]
   },

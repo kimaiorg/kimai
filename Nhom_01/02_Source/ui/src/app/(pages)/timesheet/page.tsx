@@ -4,6 +4,7 @@ import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTasks } from "@/api/task.api";
 import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
+import FilterTimesheetModal from "@/app/(pages)/timesheet/filter-modal";
 import { ManualTimesheetCreateDialog } from "@/app/(pages)/timesheet/manual-timesheet-create-dialog";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
 import TimesheetViewDialog from "@/app/(pages)/timesheet/timesheet-view-dialog";
@@ -36,6 +37,13 @@ function Timesheet() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
+  const projectId = queryParams.get("projectId") || "";
+  const activityId = queryParams.get("activityId") || "";
+  const taskId = queryParams.get("taskId") || "";
+  const userId = queryParams.get("userId") || "";
+  const status = queryParams.get("status") || "";
+  const fromDate = queryParams.get("fromDate") || "";
+  const toDate = queryParams.get("toDate") || "";
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const [loadingPage, setLoadingPage] = useState(false);
   const [trackingTime, setTrackingTime] = useState<TimesheetType | null>(null);
@@ -142,6 +150,27 @@ function Timesheet() {
     };
   }, [trackingTime]);
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder, _projectId, _activityId, _taskId, _userId, _status, _fromDate, _toDate } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_projectId) params.set("projectId", _projectId);
+    if (_activityId) params.set("activityId", _activityId);
+    if (_taskId) params.set("taskId", _taskId);
+    if (_userId) params.set("userId", _userId);
+    if (_status) params.set("status", _status);
+    if (_fromDate) params.set("fromDate", _fromDate);
+    if (_toDate) params.set("toDate", _toDate);
+    updateUrl(params);
+  };
+
   if (loadingPage) return <Loading />;
 
   return (
@@ -159,13 +188,27 @@ function Timesheet() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            className="border border-gray-200 cursor-pointer"
+          <FilterTimesheetModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            projectId={projectId}
+            activityId={activityId}
+            taskId={taskId}
+            userId={userId}
+            status={status}
+            fromDate={fromDate}
+            toDate={toDate}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterTimesheetModal>
           {shouldShowActionButtons && (
             <>
               {elapsedTime ? (

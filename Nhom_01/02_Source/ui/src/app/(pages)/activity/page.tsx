@@ -143,7 +143,7 @@ function Activity() {
             </Button>
           </FilterActivityModal>
           <ActivityCreateDialog fetchActivities={() => handleFetchActivities(1, limit, keyword, sortBy, sortOrder)}>
-            <Button className="flex items-center justify-center gap-2 cursor-pointer">
+            <Button className="flex items-center justify-center gap-2 cursor-pointer bg-main text-white">
               Create <Plus />
             </Button>
           </ActivityCreateDialog>

@@ -130,6 +130,7 @@ export default function TimeTrackingSettings() {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#936bff]!"
                   />
                 </FormControl>
               </FormItem>
@@ -148,6 +149,7 @@ export default function TimeTrackingSettings() {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#936bff]!"
                   />
                 </FormControl>
               </FormItem>
@@ -166,6 +168,7 @@ export default function TimeTrackingSettings() {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#936bff]!"
                   />
                 </FormControl>
               </FormItem>
@@ -184,6 +187,7 @@ export default function TimeTrackingSettings() {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#936bff]!"
                   />
                 </FormControl>
               </FormItem>

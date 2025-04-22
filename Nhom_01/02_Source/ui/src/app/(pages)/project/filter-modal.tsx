@@ -15,13 +15,15 @@ import { ProjectType } from "@/type_schema/project";
 import { TeamSimpleType } from "@/type_schema/team";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CustomerType } from "@/type_schema/customer";
+import { getAllCustomers } from "@/api/customer.api";
 
-export default function FilterActivityModal({
+export default function FilterProjectModal({
   children,
   keyword,
   sortBy,
   sortOrder,
-  projectId,
+  customerId,
   teamId,
   budgetFrom,
   budgetTo,
@@ -31,7 +33,7 @@ export default function FilterActivityModal({
   keyword: string;
   sortBy: string;
   sortOrder: string;
-  projectId: string;
+  customerId: string;
   teamId: string;
   budgetFrom: string;
   budgetTo: string;
@@ -42,19 +44,19 @@ export default function FilterActivityModal({
     keyword: keyword,
     sortBy: sortBy,
     sortOrder: sortOrder,
-    projectId: projectId,
+    customerId: customerId,
     teamId: teamId,
     budgetFrom: budgetFrom,
     budgetTo: budgetTo
   });
-  const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
+  const [customerList, setCustomerList] = useState<CustomerType[] | null>(null);
   const [teamList, setTeamList] = useState<TeamSimpleType[] | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const [projects, teams] = await Promise.all([getAllProjects(), getAllTeams()]);
-        setProjectList(projects.data);
+        const [customers, teams] = await Promise.all([getAllCustomers(), getAllTeams()]);
+        setCustomerList(customers.data);
         setTeamList(teams.data);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -72,7 +74,7 @@ export default function FilterActivityModal({
       _keyword: filters.keyword,
       _sortBy: filters.sortBy,
       _sortOrder: filters.sortOrder,
-      _projectId: filters.projectId,
+      _customerId: filters.customerId,
       _teamId: filters.teamId,
       _budgetFrom: filters.budgetFrom,
       _budgetTo: filters.budgetTo
@@ -85,7 +87,7 @@ export default function FilterActivityModal({
       keyword: "",
       sortBy: "",
       sortOrder: "desc",
-      projectId: "",
+      customerId: "",
       teamId: "",
       budgetFrom: "",
       budgetTo: ""
@@ -105,7 +107,7 @@ export default function FilterActivityModal({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 pl-2">
             <Filter className="h-4 w-4" />
-            <h4 className="font-medium">Filter Activities</h4>
+            <h4 className="font-medium">Filter Projects</h4>
           </div>
           <Button
             variant="ghost"
@@ -183,31 +185,31 @@ export default function FilterActivityModal({
             </div>
           </div>
 
-          {projectList && (
+          {customerList && (
             <div className="grid gap-2">
-              <Label htmlFor="projectId">Project</Label>
+              <Label htmlFor="customerId">Customer</Label>
               <Select
-                onValueChange={(value) => handleFilterChange("projectId", value)}
-                value={filters.projectId}
+                onValueChange={(value) => handleFilterChange("customerId", value)}
+                value={filters.customerId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
+                    placeholder="Select customer"
+                    defaultValue={filters.customerId}
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {projectList.map((project, index) => (
+                  {customerList.map((customer, index) => (
                     <SelectItem
                       key={index}
-                      value={project.id.toString()}
+                      value={customer.id.toString()}
                       className="flex items-center gap-1"
                     >
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: project.color || "#FF5733" }}
+                        style={{ backgroundColor: customer.color || "#FF5733" }}
                       ></div>
-                      {project.name}
+                      {customer.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -224,8 +226,8 @@ export default function FilterActivityModal({
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
+                    placeholder="Select team"
+                    defaultValue={filters.teamId}
                   />
                 </SelectTrigger>
                 <SelectContent>

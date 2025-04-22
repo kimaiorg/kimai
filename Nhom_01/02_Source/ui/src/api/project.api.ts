@@ -9,10 +9,10 @@ export async function getAllProjects(
   keyword?: string,
   sortBy?: string,
   sortOrder?: string,
-  customerId?: number,
-  teamId?: number,
-  budgetFrom?: number,
-  budgetTo?: number
+  customerId?: string,
+  teamId?: string,
+  budgetFrom?: string,
+  budgetTo?: string
 ): Promise<Pagination<ProjectType>> {
   const token = await getManagementAccessToken();
 

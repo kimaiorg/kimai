@@ -2,6 +2,7 @@
 
 import { getAllTasks } from "@/api/task.api";
 import { getAllUsers } from "@/api/user.api";
+import FilterTaskModal from "@/app/(pages)/task/filter-modal";
 import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
 import { TaskUpdateDialog } from "@/app/(pages)/task/task-update-dialog";
 import TaskViewDialog from "@/app/(pages)/task/task-view-dialog";
@@ -33,6 +34,8 @@ function Task() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
+  const activityId = queryParams.get("activityId") || "";
+  const userId = queryParams.get("userId") || "";
   const [taskList, setTaskList] = useState<Pagination<TaskType> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,7 +53,7 @@ function Task() {
         userList = result.users;
         dispatch(updateUserList(result.users));
       }
-      const result = await getAllTasks(page, limit, keyword, sortBy, sortOrder);
+      const result = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
       const { data, metadata } = result;
       const taskData = data.map((task) => {
         const { user_id, ...rest } = task;
@@ -97,6 +100,25 @@ function Task() {
     updateQueryParams("page", page.toString());
   };
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _keyword, _sortBy, _sortOrder, _activityId, _userId, _budgetFrom, _budgetTo } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_activityId) params.set("activityId", _activityId);
+    if (_userId) params.set("userId", _userId);
+    if (_budgetFrom) params.set("budgetFrom", _budgetFrom);
+    if (_budgetTo) params.set("budgetTo", _budgetTo);
+    if (_keyword) params.set("keyword", _keyword);
+    updateUrl(params);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -112,14 +134,24 @@ function Task() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterTaskModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            activityId={activityId}
+            userId={userId}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterTaskModal>
           <TaskCreateDialog fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}>
-            <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer">
+            <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
               Create <Plus />
             </Button>
           </TaskCreateDialog>
