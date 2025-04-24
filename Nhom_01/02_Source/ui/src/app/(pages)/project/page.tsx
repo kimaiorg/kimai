@@ -16,9 +16,10 @@ import { Pagination } from "@/type_schema/common";
 import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
 import { formatDate } from "date-fns";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function ProjectPage() {
   const queryParams = useSearchParams();
@@ -26,7 +27,8 @@ function ProjectPage() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
   const customerId = queryParams.get("customerId") || "";
@@ -58,16 +60,18 @@ function ProjectPage() {
   };
 
   useEffect(() => {
-    fetchProjects(page, limit, keyword, sortBy, sortOrder);
-  }, []);
+    fetchProjects(page, limit, searchKeyword, sortBy, sortOrder);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    setSortBy(sortBy);
-    setSortOrder("");
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const goToPage = (page: number) => {

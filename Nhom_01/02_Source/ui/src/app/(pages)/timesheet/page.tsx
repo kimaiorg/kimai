@@ -22,9 +22,10 @@ import { TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 function Timesheet() {
@@ -34,7 +35,8 @@ function Timesheet() {
   const { user: currentUser } = useUser();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const projectId = queryParams.get("projectId") || "";
@@ -59,10 +61,14 @@ function Timesheet() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const handleFetchTimesheets = async (
@@ -148,8 +154,8 @@ function Timesheet() {
   }
 
   useEffect(() => {
-    handleFetchTimesheets(page, limit, keyword, sortBy, sortOrder);
-  }, [page, limit, keyword, sortBy, sortOrder]);
+    handleFetchTimesheets(page, limit, searchKeyword, sortBy, sortOrder);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   useEffect(() => {
     if (!trackingTime) return;

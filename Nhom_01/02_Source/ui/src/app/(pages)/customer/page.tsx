@@ -15,9 +15,10 @@ import { Pagination } from "@/type_schema/common";
 import { CustomerType } from "@/type_schema/customer";
 import { Role } from "@/type_schema/role";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CustomerCreateDialog } from "./customer-create-dialog";
 
 function CustomerPage() {
@@ -26,7 +27,8 @@ function CustomerPage() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const [customerList, setCustomerList] = useState<Pagination<CustomerType> | null>(null);
@@ -50,9 +52,9 @@ function CustomerPage() {
   // Fetch customers on component mount
   useEffect(() => {
     setIsLoading(true);
-    handleFetchCustomers(page, limit, keyword, sortBy, sortOrder);
+    handleFetchCustomers(page, limit, searchKeyword, sortBy, sortOrder);
     setIsLoading(false);
-  }, []);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -62,10 +64,14 @@ function CustomerPage() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const goToPage = (page: number) => {

@@ -15,9 +15,10 @@ import { CategoryType } from "@/type_schema/category";
 import { Pagination } from "@/type_schema/common";
 import { Role } from "@/type_schema/role";
 import { format } from "date-fns";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function CategoryPage() {
   const queryParams = useSearchParams();
@@ -25,7 +26,8 @@ function CategoryPage() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const [categoryList, setCategoryList] = useState<Pagination<CategoryType> | null>(null);
@@ -48,10 +50,10 @@ function CategoryPage() {
   // Fetch Tasks on component mount
   useEffect(() => {
     const fetchNecessaryData = async () => {
-      await handleFetchCategories(page, limit, keyword, sortBy, sortOrder);
+      await handleFetchCategories(page, limit, searchKeyword, sortBy, sortOrder);
     };
     fetchNecessaryData();
-  }, [page, limit, keyword, sortBy, sortOrder]);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -61,10 +63,14 @@ function CategoryPage() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const goToPage = (page: number) => {

@@ -16,9 +16,10 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Role } from "@/type_schema/role";
 import { UserListType } from "@/type_schema/user.schema";
 import { format } from "date-fns";
+import debounce from "debounce";
 import { Eye, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function User() {
   const queryParams = useSearchParams();
@@ -26,7 +27,8 @@ function User() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const [userList, setUserList] = useState<UserListType | null>(null);
@@ -42,9 +44,17 @@ function User() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    const params = new URLSearchParams(queryParams);
+    params.set("keyword", keyword);
+    updateQueryParams(params);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
-    setKeyword(`name:${value}`);
+    setKeyword(value);
+    debounceSearchKeyword(`${value}`);
   };
 
   const goToPage = (page: number) => {
@@ -58,7 +68,7 @@ function User() {
       await fetchUser(page, limit, keyword, sortBy, sortOrder);
     };
     getUsers();
-  }, [page, limit, keyword, sortBy, sortOrder]);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   const updateUrl = (params: URLSearchParams) => {
     const newUrl = `${pathname}?${params.toString()}`;
@@ -133,8 +143,19 @@ function User() {
             </TableRow>
           </TableHeader>
           {!userList && <TableSkeleton columns={6} />}
+          {userList && userList.users.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                className="text-center py-12"
+              >
+                No user found
+              </TableCell>
+            </TableRow>
+          )}
           <TableBody>
             {userList &&
+              userList.users.length > 0 &&
               userList.users.map((userItem, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>

@@ -22,10 +22,11 @@ import { Role } from "@/type_schema/role";
 import { TeamType } from "@/type_schema/team";
 import { UserType } from "@/type_schema/user.schema";
 import { formatDate } from "date-fns";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function Team() {
   const queryParams = useSearchParams();
@@ -36,7 +37,8 @@ function Team() {
   const users: UserType[] = useAppSelector((state) => state.userListState.users);
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
   const projectId = queryParams.get("projectId") || "";
@@ -60,7 +62,7 @@ function Team() {
       }
       const result = await getAllTeams(page, limit, keyword, sortBy, sortOrder, projectId, teamleadId);
       const { data, metadata } = result;
-      const currentTeamList: TeamType[] = data.map((teamItem) => {
+      const currentTeamList: TeamType[] = (data || []).map((teamItem) => {
         const { users: userIds, lead: leadId, ...rest } = teamItem;
         return {
           ...rest,
@@ -83,12 +85,14 @@ function Team() {
     handleFetchTeams(page, limit, keyword, sortBy, sortOrder);
   }, []);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const keyword = e.target.value.toLowerCase();
-    setKeyword(keyword);
-    setSortBy(sortBy);
-    setSortOrder("");
+  const handleUpdateKeyword = (keyword: string) => {
     updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setKeyword(value);
+    debounceSearchKeyword(value);
   };
 
   const goToPage = (page: number) => {
@@ -173,9 +177,9 @@ function Team() {
         {teamList && (
           <TableCaption>
             <PaginationWithLinks
-              page={teamList.metadata.page}
-              pageSize={teamList.metadata.limit}
-              totalCount={teamList.metadata.total}
+              page={teamList.metadata?.page || page}
+              pageSize={teamList.metadata?.limit || limit}
+              totalCount={teamList.metadata?.total || 0}
               callback={goToPage}
             />
           </TableCaption>
@@ -203,6 +207,7 @@ function Team() {
         )}
         <TableBody>
           {teamList &&
+            teamList.data.length > 0 &&
             teamList.data.map((team, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
