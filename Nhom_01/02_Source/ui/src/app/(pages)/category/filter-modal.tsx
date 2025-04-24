@@ -19,44 +19,23 @@ import { UserType } from "@/type_schema/user.schema";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function FilterTimesheetModal({
+export default function FilterCategoryModal({
   children,
   keyword,
   sortBy,
   sortOrder,
-  fromDate,
-  toDate,
-  projectId,
-  activityId,
-  taskId,
-  userId,
-  status,
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
   keyword: string;
   sortBy: string;
   sortOrder: string;
-  fromDate: string;
-  toDate: string;
-  projectId: string;
-  activityId: string;
-  taskId: string;
-  userId: string;
-  status: string;
   handleFilterChangeAction: (props: any) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
     sortBy: sortBy,
-    sortOrder: sortOrder,
-    projectId: projectId,
-    activityId: activityId,
-    taskId: taskId,
-    userId: userId,
-    status: status,
-    fromDate: fromDate,
-    toDate: toDate
+    sortOrder: sortOrder
   });
   const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
   const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
@@ -71,7 +50,7 @@ export default function FilterTimesheetModal({
         setActivityList(activities.data);
         setTaskList(tasks.data);
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        console.error("Error fetching categories:", error);
       }
     };
     fetchProjects();
@@ -84,14 +63,7 @@ export default function FilterTimesheetModal({
   const handleApplyFilters = () => {
     handleFilterChangeAction({
       _sortBy: filters.sortBy,
-      _sortOrder: filters.sortOrder,
-      _projectId: filters.projectId,
-      _activityId: filters.activityId,
-      _taskId: filters.taskId,
-      _userId: filters.userId,
-      _status: filters.status,
-      _fromDate: filters.fromDate,
-      _toDate: filters.toDate
+      _sortOrder: filters.sortOrder
     });
     setOpen(false);
   };
@@ -99,14 +71,7 @@ export default function FilterTimesheetModal({
   const handleResetFilters = () => {
     setFilters({
       sortBy: "",
-      sortOrder: "",
-      projectId: "",
-      activityId: "",
-      taskId: "",
-      userId: "",
-      status: "",
-      fromDate: "",
-      toDate: ""
+      sortOrder: ""
     });
   };
 
@@ -123,7 +88,7 @@ export default function FilterTimesheetModal({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 pl-2">
             <Filter className="h-4 w-4" />
-            <h4 className="font-medium">Filter Activities</h4>
+            <h4 className="font-medium">Filter Categories</h4>
           </div>
           <Button
             variant="ghost"
@@ -190,7 +155,7 @@ export default function FilterTimesheetModal({
             </div>
           </div>
 
-          {projectList && (
+          {/* {projectList && (
             <div className="grid gap-2">
               <Label htmlFor="projectId">Project</Label>
               <Select
@@ -220,130 +185,7 @@ export default function FilterTimesheetModal({
                 </SelectContent>
               </Select>
             </div>
-          )}
-
-          {activityList && (
-            <div className="grid gap-2">
-              <Label htmlFor="activityId">Activity</Label>
-              <Select
-                onValueChange={(value) => handleFilterChange("activityId", value)}
-                value={filters.activityId}
-              >
-                <SelectTrigger className="w-full !mt-0 border-gray-200">
-                  <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {activityList.map((activity, index) => (
-                    <SelectItem
-                      key={index}
-                      value={activity.id.toString()}
-                      className="flex items-center gap-1"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: activity.color || "#FF5733" }}
-                      ></div>
-                      {activity.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {taskList && (
-            <div className="grid gap-2">
-              <Label htmlFor="taskId">Task</Label>
-              <Select
-                onValueChange={(value) => handleFilterChange("taskId", value)}
-                value={filters.taskId}
-              >
-                <SelectTrigger className="w-full !mt-0 border-gray-200">
-                  <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {taskList.map((task, index) => (
-                    <SelectItem
-                      key={index}
-                      value={task.id.toString()}
-                      className="flex items-center gap-1"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#FF5733" }}
-                      ></div>
-                      {task.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {userList && (
-            <div className="grid gap-2">
-              <Label htmlFor="userId">User</Label>
-              <Select
-                onValueChange={(value) => handleFilterChange("userId", value)}
-                value={filters.userId}
-              >
-                <SelectTrigger className="w-full !mt-0 border-gray-200">
-                  <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {userList.map((user, index) => (
-                    <SelectItem
-                      key={index}
-                      value={user.user_id}
-                      className="flex items-center gap-1"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#FF5733" }}
-                      ></div>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="grid gap-2">
-              <Label htmlFor="fromDate">From Date</Label>
-              <Input
-                id="fromDate"
-                type="date"
-                className="border border-gray-200"
-                value={filters.fromDate}
-                onChange={(e) => handleFilterChange("fromDate", e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="fromDate">To Date</Label>
-              <Input
-                id="toDate"
-                type="date"
-                className="border border-gray-200"
-                value={filters.toDate}
-                onChange={(e) => {
-                  if (e.target.value > filters.fromDate) {
-                    handleFilterChange("toDate", e.target.value);
-                  }
-                }}
-              />
-            </div>
-          </div>
+          )}  */}
         </div>
 
         <Separator className="mt-1" />

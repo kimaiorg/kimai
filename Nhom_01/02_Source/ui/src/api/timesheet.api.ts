@@ -49,7 +49,14 @@ export async function getAllMyTimesheets(
   limit?: number,
   keyword?: string,
   sortBy?: string,
-  sortOrder?: string
+  sortOrder?: string,
+  fromDate?: string,
+  toDate?: string,
+  userId?: string,
+  projectId?: string,
+  activityId?: string,
+  taskId?: string,
+  status?: string
 ): Promise<Pagination<TimesheetResponseType>> {
   const token = await getManagementAccessToken();
 
@@ -62,6 +69,13 @@ export async function getAllMyTimesheets(
     const order = sortOrder === "asc" ? "asc" : "desc";
     params.append("sort_order", order);
   }
+  if (fromDate) params.append("from_date", fromDate);
+  if (toDate) params.append("to_date", toDate);
+  if (userId) params.append("user_id", userId);
+  if (projectId) params.append("project_id", projectId);
+  if (activityId) params.append("activity_id", activityId);
+  if (taskId) params.append("task_id", taskId);
+  if (status) params.append("status", status);
 
   const response = await axios.get<Pagination<TimesheetResponseType>>(
     `${TIMESHEET_BACKEND_URL}/api/v1/timesheets/me?${params.toString()}`,

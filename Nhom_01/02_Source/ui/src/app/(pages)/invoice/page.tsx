@@ -41,13 +41,13 @@ function InvoiceContent() {
   const [invoiceHistory, setInvoiceHistory] = useState<InvoiceHistoryType | null>(null);
 
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
-  const [projectList, setProjectList] = useState<ProjectType[]>([]);
-  const [activityList, setActivityList] = useState<ActivityType[]>([]);
+  const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
+  const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
 
   const router = useRouter();
   const { user: currentUser } = useUser();
 
-  const activityOptions = activityList.map((activity) => ({
+  const activityOptions = (activityList || []).map((activity) => ({
     label: `${activity.name}`,
     value: activity.id.toString(),
     icon: Star
@@ -77,9 +77,9 @@ function InvoiceContent() {
       };
       const response = await filterInvoices(payload);
       setSelectedInvoice({
-        project: projectList.find((project) => project.id === payload.project_id)!,
+        project: (projectList || []).find((project) => project.id === payload.project_id)!,
         activities: payload.activities.map(
-          (activityId) => activityList.find((activity) => activity.id === activityId)!
+          (activityId) => (activityList || []).find((activity) => activity.id === activityId)!
         ),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!
       });
@@ -95,7 +95,7 @@ function InvoiceContent() {
         notes: "No notes",
         createdBy: currentUser!.sub!,
         createdAt: new Date(2025, 4, 7).toISOString(),
-        items: activityList.map((activity) => ({
+        items: (activityList || []).map((activity) => ({
           description: activity.name,
           quantity: Math.round(Math.random() * 20 + 5),
           unitPrice: Math.round(activity.budget / (activity?.quota ? Number(activity.quota) : Math.random() * 90 + 10)),
@@ -146,7 +146,14 @@ function InvoiceContent() {
   };
   const fetchProjectData = async (customerId: number) => {
     try {
-      const projects = await getAllProjects(undefined, undefined, undefined, undefined, undefined, customerId);
+      const projects = await getAllProjects(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        customerId.toString()
+      );
       setProjectList(projects.data);
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -221,6 +228,38 @@ function InvoiceContent() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={filterInvoiceForm.control}
+                name="period"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Period time</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      {...field}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full !mt-0 border border-gray-200">
+                          <SelectValue placeholder="Select a period" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="border border-gray-200">
+                        {periods.map((period, index) => (
+                          <SelectItem
+                            key={index}
+                            value={period.value}
+                          >
+                            {period.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={filterInvoiceForm.control}
                 name="to"
@@ -237,36 +276,7 @@ function InvoiceContent() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={filterInvoiceForm.control}
-                name="period"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Time zone</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      {...field}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full !mt-0 border-gray-200">
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {periods.map((period, index) => (
-                          <SelectItem
-                            key={index}
-                            value={period.value}
-                          >
-                            {period.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={filterInvoiceForm.control}
                 name="customer_id"
@@ -308,8 +318,9 @@ function InvoiceContent() {
                 render={({ field }) => (
                   <FormItem className="col-span-6">
                     <FormLabel>Project</FormLabel>
+                    {!projectList && <p className="text-center text-sm">Please select a customer</p>}
                     <FormControl>
-                      {projectList.length > 0 ? (
+                      {projectList && projectList.length > 0 && (
                         <Select
                           onValueChange={field.onChange}
                           {...field}
@@ -328,10 +339,11 @@ function InvoiceContent() {
                             ))}
                           </SelectContent>
                         </Select>
-                      ) : (
-                        <p className="text-center text-sm">No projects were found</p>
                       )}
                     </FormControl>
+                    {projectList && projectList.length === 0 && (
+                      <p className="text-center text-sm">No projects were found</p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -343,8 +355,9 @@ function InvoiceContent() {
                 render={({ field }) => (
                   <FormItem className="col-span-6">
                     <FormLabel>Activities</FormLabel>
+                    {!activityList && <p className="text-center text-sm">Please select a project</p>}
                     <FormControl>
-                      {activityList.length > 0 ? (
+                      {activityList && activityList.length > 0 && (
                         <MultiSelect
                           options={activityOptions}
                           onValueChange={handleSelectActivities}
@@ -353,10 +366,11 @@ function InvoiceContent() {
                           variant="secondary"
                           className="border border-gray-200 cursor-pointer"
                         />
-                      ) : (
-                        <p className="text-center text-sm">No activities were found</p>
                       )}
                     </FormControl>
+                    {activityList && activityList.length === 0 && (
+                      <p className="text-center text-sm">No activities were found</p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

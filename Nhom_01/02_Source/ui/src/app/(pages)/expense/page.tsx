@@ -5,6 +5,7 @@ import { getAllProjects } from "@/api/project.api";
 import { ExpenseCreateDialog } from "@/app/(pages)/expense/expense-create-dialog";
 import { ExpenseUpdateDialog } from "@/app/(pages)/expense/expense-update-dialog";
 import ExpenseViewDialog from "@/app/(pages)/expense/expense-view-dialog";
+import FilterExpenseModal from "@/app/(pages)/expense/filter-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,9 @@ function ExpensePage() {
   const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
+  const projectId = queryParams.get("projectId") || "";
+  const activityId = queryParams.get("activityId") || "";
+  const categoryId = queryParams.get("categoryId") || "";
   const [expenseList, setExpenseList] = useState<Pagination<ExpenseType> | null>(null);
 
   const handleFetchExpenses = async (
@@ -85,6 +89,23 @@ function ExpensePage() {
     updateQueryParams("page", page.toString());
   };
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder, _projectId, _activityId, _categoryId } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_projectId) params.set("projectId", _projectId);
+    if (_activityId) params.set("activityId", _activityId);
+    if (_categoryId) params.set("categoryId", _categoryId);
+    updateUrl(params);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -100,12 +121,23 @@ function ExpensePage() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterExpenseModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            projectId={projectId}
+            activityId={activityId}
+            categoryId={categoryId}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterExpenseModal>
           <ExpenseCreateDialog fetchExpenses={() => handleFetchExpenses(1, limit, keyword, sortBy, sortOrder)}>
             <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
               Create <Plus />

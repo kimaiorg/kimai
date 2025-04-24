@@ -74,7 +74,20 @@ function Timesheet() {
   ) => {
     // Start all fetch requests concurrently
     const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
-    const result = await getAllMyTimesheets(page, limit, keyword, sortBy, sortOrder);
+    const result = await getAllMyTimesheets(
+      page,
+      limit,
+      keyword,
+      sortBy,
+      sortOrder,
+      fromDate,
+      toDate,
+      userId,
+      projectId,
+      activityId,
+      taskId,
+      status
+    );
     const { data, metadata } = result;
     const timesheets: TimesheetType[] = data
       .map((timesheet) => {
@@ -183,7 +196,7 @@ function Timesheet() {
             <Input
               type="search"
               placeholder="Search..."
-              className="pl-8 w-[200px] border border-gray-200"
+              className="pl-8 w-[200px] border border-gray-200 bg-white dark:bg-slate-700"
               value={keyword}
               onChange={handleSearchChange}
             />

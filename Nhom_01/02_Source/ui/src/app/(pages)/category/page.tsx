@@ -4,7 +4,7 @@ import { getAllCategories } from "@/api/category.api";
 import { CategoryCreateDialog } from "@/app/(pages)/category/category-create-dialog";
 import { CategoryUpdateDialog } from "@/app/(pages)/category/category-update-dialog";
 import CategoryViewDialog from "@/app/(pages)/category/category-view-dialog";
-import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
+import FilterCategoryModal from "@/app/(pages)/category/filter-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,20 @@ function CategoryPage() {
     updateQueryParams("page", page.toString());
   };
 
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    updateUrl(params);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -87,12 +101,20 @@ function CategoryPage() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterCategoryModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterCategoryModal>
           <CategoryCreateDialog fetchCategories={() => handleFetchCategories(1, limit, keyword, sortBy, sortOrder)}>
             <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
               Create <Plus />

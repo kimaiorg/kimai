@@ -114,7 +114,7 @@ function Activity() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Activity</h1>
         <div className="flex items-center space-x-2">
-          <div className="relative block md:hidden">
+          <div className="relative block">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
