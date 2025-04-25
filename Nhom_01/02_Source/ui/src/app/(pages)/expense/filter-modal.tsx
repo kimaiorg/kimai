@@ -3,47 +3,36 @@
 import type React from "react";
 
 import { getAllActivities } from "@/api/activity.api";
+import { getAllCategories } from "@/api/category.api";
 import { getAllProjects } from "@/api/project.api";
-import { getAllTasks } from "@/api/task.api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { activityFilters, ActivityType } from "@/type_schema/activity";
+import { CategoryType } from "@/type_schema/category";
 import { ProjectType } from "@/type_schema/project";
-import { TaskResponseType } from "@/type_schema/task";
-import { UserType } from "@/type_schema/user.schema";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function FilterTimesheetModal({
+export default function FilterExpenseModal({
   children,
   keyword,
   sortBy,
   sortOrder,
-  fromDate,
-  toDate,
   projectId,
   activityId,
-  taskId,
-  userId,
-  status,
+  categoryId,
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
   keyword: string;
   sortBy: string;
   sortOrder: string;
-  fromDate: string;
-  toDate: string;
   projectId: string;
   activityId: string;
-  taskId: string;
-  userId: string;
-  status: string;
+  categoryId: string;
   handleFilterChangeAction: (props: any) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -52,24 +41,23 @@ export default function FilterTimesheetModal({
     sortOrder: sortOrder,
     projectId: projectId,
     activityId: activityId,
-    taskId: taskId,
-    userId: userId,
-    status: status,
-    fromDate: fromDate,
-    toDate: toDate
+    categoryId: categoryId
   });
   const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
   const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
-  const [taskList, setTaskList] = useState<TaskResponseType[] | null>(null);
-  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+  const [categoryList, setCategoryList] = useState<CategoryType[] | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
+        const [projects, activities, categories] = await Promise.all([
+          getAllProjects(),
+          getAllActivities(),
+          getAllCategories()
+        ]);
         setProjectList(projects.data);
         setActivityList(activities.data);
-        setTaskList(tasks.data);
+        setCategoryList(categories.data);
       } catch (error) {
         console.error("Error fetching projects:", error);
       }
@@ -87,11 +75,7 @@ export default function FilterTimesheetModal({
       _sortOrder: filters.sortOrder,
       _projectId: filters.projectId,
       _activityId: filters.activityId,
-      _taskId: filters.taskId,
-      _userId: filters.userId,
-      _status: filters.status,
-      _fromDate: filters.fromDate,
-      _toDate: filters.toDate
+      _categoryId: filters.categoryId
     });
     setOpen(false);
   };
@@ -102,11 +86,7 @@ export default function FilterTimesheetModal({
       sortOrder: "",
       projectId: "",
       activityId: "",
-      taskId: "",
-      userId: "",
-      status: "",
-      fromDate: "",
-      toDate: ""
+      categoryId: ""
     });
   };
 
@@ -123,7 +103,7 @@ export default function FilterTimesheetModal({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 pl-2">
             <Filter className="h-4 w-4" />
-            <h4 className="font-medium">Filter Activities</h4>
+            <h4 className="font-medium">Filter Expenses</h4>
           </div>
           <Button
             variant="ghost"
@@ -254,12 +234,12 @@ export default function FilterTimesheetModal({
             </div>
           )}
 
-          {taskList && (
+          {categoryList && (
             <div className="grid gap-2">
-              <Label htmlFor="taskId">Task</Label>
+              <Label htmlFor="categoryId">Category</Label>
               <Select
-                onValueChange={(value) => handleFilterChange("taskId", value)}
-                value={filters.taskId}
+                onValueChange={(value) => handleFilterChange("categoryId", value)}
+                value={filters.categoryId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
@@ -268,82 +248,23 @@ export default function FilterTimesheetModal({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {taskList.map((task, index) => (
+                  {categoryList.map((category, index) => (
                     <SelectItem
                       key={index}
-                      value={task.id.toString()}
+                      value={category.id.toString()}
                       className="flex items-center gap-1"
                     >
                       <div
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: "#FF5733" }}
                       ></div>
-                      {task.title}
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           )}
-
-          {userList && (
-            <div className="grid gap-2">
-              <Label htmlFor="userId">User</Label>
-              <Select
-                onValueChange={(value) => handleFilterChange("userId", value)}
-                value={filters.userId}
-              >
-                <SelectTrigger className="w-full !mt-0 border-gray-200">
-                  <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {userList.map((user, index) => (
-                    <SelectItem
-                      key={index}
-                      value={user.user_id}
-                      className="flex items-center gap-1"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: "#FF5733" }}
-                      ></div>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="grid gap-2">
-              <Label htmlFor="fromDate">From Date</Label>
-              <Input
-                id="fromDate"
-                type="date"
-                className="border border-gray-200"
-                value={filters.fromDate}
-                onChange={(e) => handleFilterChange("fromDate", e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="fromDate">To Date</Label>
-              <Input
-                id="toDate"
-                type="date"
-                className="border border-gray-200"
-                value={filters.toDate}
-                onChange={(e) => {
-                  if (e.target.value > filters.fromDate) {
-                    handleFilterChange("toDate", e.target.value);
-                  }
-                }}
-              />
-            </div>
-          </div>
         </div>
 
         <Separator className="mt-1" />

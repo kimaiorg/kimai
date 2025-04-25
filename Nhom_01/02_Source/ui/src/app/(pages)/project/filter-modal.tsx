@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { getAllProjects } from "@/api/project.api";
+import { getAllCustomers } from "@/api/customer.api";
 import { getAllTeams } from "@/api/team.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { activityFilters } from "@/type_schema/activity";
-import { ProjectType } from "@/type_schema/project";
+import { CustomerType } from "@/type_schema/customer";
 import { TeamSimpleType } from "@/type_schema/team";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CustomerType } from "@/type_schema/customer";
-import { getAllCustomers } from "@/api/customer.api";
 
 export default function FilterProjectModal({
   children,

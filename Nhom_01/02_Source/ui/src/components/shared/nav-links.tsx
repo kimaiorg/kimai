@@ -59,14 +59,14 @@ export const timesheetNavMain = [
         isActive: false,
         allowRoles: []
       },
-      {
-        title: "Export",
-        translationKey: "sidebar.export",
-        url: "/export",
-        icon: ClipboardPlus,
-        isActive: false,
-        allowRoles: []
-      },
+      // {
+      //   title: "Export",
+      //   translationKey: "sidebar.export",
+      //   url: "/export",
+      //   icon: ClipboardPlus,
+      //   isActive: false,
+      //   allowRoles: []
+      // },
       {
         title: "Request",
         translationKey: "sidebar.request",

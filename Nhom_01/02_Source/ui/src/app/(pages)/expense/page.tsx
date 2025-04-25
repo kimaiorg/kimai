@@ -5,6 +5,7 @@ import { getAllProjects } from "@/api/project.api";
 import { ExpenseCreateDialog } from "@/app/(pages)/expense/expense-create-dialog";
 import { ExpenseUpdateDialog } from "@/app/(pages)/expense/expense-update-dialog";
 import ExpenseViewDialog from "@/app/(pages)/expense/expense-view-dialog";
+import FilterExpenseModal from "@/app/(pages)/expense/filter-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
@@ -14,9 +15,10 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { Pagination } from "@/type_schema/common";
 import { ExpenseType } from "@/type_schema/expense";
 import { Role } from "@/type_schema/role";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function ExpensePage() {
   const queryParams = useSearchParams();
@@ -24,9 +26,13 @@ function ExpensePage() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
+  const projectId = queryParams.get("projectId") || "";
+  const activityId = queryParams.get("activityId") || "";
+  const categoryId = queryParams.get("categoryId") || "";
   const [expenseList, setExpenseList] = useState<Pagination<ExpenseType> | null>(null);
 
   const handleFetchExpenses = async (
@@ -61,10 +67,10 @@ function ExpensePage() {
   // Fetch Expenses on component mount
   useEffect(() => {
     const fetchNecessaryData = async () => {
-      await handleFetchExpenses(page, limit, keyword, sortBy, sortOrder);
+      await handleFetchExpenses(page, limit, searchKeyword, sortBy, sortOrder);
     };
     fetchNecessaryData();
-  }, [page, limit, keyword, sortBy, sortOrder]);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -74,15 +80,36 @@ function ExpensePage() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const goToPage = (page: number) => {
     handleFetchExpenses(page, limit, keyword, sortBy, sortOrder);
     updateQueryParams("page", page.toString());
+  };
+
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder, _projectId, _activityId, _categoryId } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_projectId) params.set("projectId", _projectId);
+    if (_activityId) params.set("activityId", _activityId);
+    if (_categoryId) params.set("categoryId", _categoryId);
+    updateUrl(params);
   };
 
   return (
@@ -100,12 +127,23 @@ function ExpensePage() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterExpenseModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            projectId={projectId}
+            activityId={activityId}
+            categoryId={categoryId}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterExpenseModal>
           <ExpenseCreateDialog fetchExpenses={() => handleFetchExpenses(1, limit, keyword, sortBy, sortOrder)}>
             <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
               Create <Plus />

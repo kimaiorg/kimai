@@ -4,7 +4,7 @@ import { getAllCategories } from "@/api/category.api";
 import { CategoryCreateDialog } from "@/app/(pages)/category/category-create-dialog";
 import { CategoryUpdateDialog } from "@/app/(pages)/category/category-update-dialog";
 import CategoryViewDialog from "@/app/(pages)/category/category-view-dialog";
-import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
+import FilterCategoryModal from "@/app/(pages)/category/filter-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,10 @@ import { CategoryType } from "@/type_schema/category";
 import { Pagination } from "@/type_schema/common";
 import { Role } from "@/type_schema/role";
 import { format } from "date-fns";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function CategoryPage() {
   const queryParams = useSearchParams();
@@ -25,7 +26,8 @@ function CategoryPage() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const [categoryList, setCategoryList] = useState<Pagination<CategoryType> | null>(null);
@@ -48,10 +50,10 @@ function CategoryPage() {
   // Fetch Tasks on component mount
   useEffect(() => {
     const fetchNecessaryData = async () => {
-      await handleFetchCategories(page, limit, keyword, sortBy, sortOrder);
+      await handleFetchCategories(page, limit, searchKeyword, sortBy, sortOrder);
     };
     fetchNecessaryData();
-  }, [page, limit, keyword, sortBy, sortOrder]);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -61,15 +63,33 @@ function CategoryPage() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const goToPage = (page: number) => {
     handleFetchCategories(page, limit, keyword, sortBy, sortOrder);
     updateQueryParams("page", page.toString());
+  };
+
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    updateUrl(params);
   };
 
   return (
@@ -87,12 +107,20 @@ function CategoryPage() {
               onChange={handleSearchChange}
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
+          <FilterCategoryModal
+            handleFilterChangeAction={handleFilterChange}
+            keyword={keyword}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
           >
-            <Filter className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterCategoryModal>
           <CategoryCreateDialog fetchCategories={() => handleFetchCategories(1, limit, keyword, sortBy, sortOrder)}>
             <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
               Create <Plus />

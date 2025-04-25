@@ -5,7 +5,6 @@ import { ActivityCreateDialog } from "@/app/(pages)/activity/activity-create-dia
 import { ActivityUpdateDialog } from "@/app/(pages)/activity/activity-update-dialog";
 import ActivityViewDialog from "@/app/(pages)/activity/activity-view-dialog";
 import FilterActivityModal from "@/app/(pages)/activity/filter-modal";
-import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
@@ -15,9 +14,10 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { ActivityType } from "@/type_schema/activity";
 import { Pagination } from "@/type_schema/common";
 import { Role } from "@/type_schema/role";
+import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function Activity() {
   const queryParams = useSearchParams();
@@ -25,7 +25,8 @@ function Activity() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const projectId = queryParams.get("projectId") || "";
@@ -68,7 +69,7 @@ function Activity() {
   // Fetch Tasks on component mount
   useEffect(() => {
     setIsLoading(true);
-    handleFetchActivities(page, limit, keyword, sortBy, sortOrder, projectId, teamId, budgetFrom, budgetTo);
+    handleFetchActivities(page, limit, searchKeyword, sortBy, sortOrder, projectId, teamId, budgetFrom, budgetTo);
     setIsLoading(false);
   }, [page, limit, keyword, sortBy, sortOrder, projectId, teamId, budgetFrom, budgetTo]);
 
@@ -84,10 +85,14 @@ function Activity() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase();
     setKeyword(keyword);
-    updateQueryParams("keyword", keyword);
+    debounceSearchKeyword(keyword);
   };
 
   const handleFilterChange = (props: any) => {
@@ -114,7 +119,7 @@ function Activity() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Activity</h1>
         <div className="flex items-center space-x-2">
-          <div className="relative block md:hidden">
+          <div className="relative block">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"

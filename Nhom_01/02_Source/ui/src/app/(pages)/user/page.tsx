@@ -1,6 +1,7 @@
 "use client";
 
 import { getAllUsers } from "@/api/user.api";
+import FilterUserModal from "@/app/(pages)/user/filter-modal";
 import AddUserModal from "@/app/(pages)/user/user-add-dialog";
 import UserUpdateDialog from "@/app/(pages)/user/user-update-dialog";
 import UserViewDialog from "@/app/(pages)/user/user-view-dialog";
@@ -9,14 +10,16 @@ import DefaultAvatar from "@/components/shared/default-avatar";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Role } from "@/type_schema/role";
 import { UserListType } from "@/type_schema/user.schema";
 import { format } from "date-fns";
-import { Eye, MoreHorizontal, Plus, SquarePen, Trash2 } from "lucide-react";
+import debounce from "debounce";
+import { Eye, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function User() {
   const queryParams = useSearchParams();
@@ -24,7 +27,8 @@ function User() {
   const { replace } = useRouter();
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
-  const [keyword, setKeyword] = useState<string>(queryParams.get("keyword") || "");
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const [userList, setUserList] = useState<UserListType | null>(null);
@@ -40,9 +44,17 @@ function User() {
   };
 
   // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    const params = new URLSearchParams(queryParams);
+    params.set("keyword", keyword);
+    updateQueryParams(params);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
-    setKeyword(`name:${value}`);
+    setKeyword(value);
+    debounceSearchKeyword(`${value}`);
   };
 
   const goToPage = (page: number) => {
@@ -56,7 +68,21 @@ function User() {
       await fetchUser(page, limit, keyword, sortBy, sortOrder);
     };
     getUsers();
-  }, [page, limit, keyword, sortBy, sortOrder]);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
+
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    updateUrl(params);
+  };
 
   return (
     <>
@@ -64,6 +90,30 @@ function User() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">User</h1>
           <div className="flex items-center space-x-2">
+            <div className="relative block">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="pl-8 w-[200px] bg-white dark:bg-slate-700 border border-gray-200"
+                value={keyword}
+                onChange={handleSearchChange}
+              />
+            </div>
+            <FilterUserModal
+              handleFilterChangeAction={handleFilterChange}
+              keyword={keyword}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+            >
+              <Button
+                variant="outline"
+                size="icon"
+                className="flex items-center justify-center cursor-pointer border border-gray-200"
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+            </FilterUserModal>
             <AddUserModal fetchUsers={() => fetchUser(1, limit)}>
               <Button className="bg-main text-white cursor-pointer">
                 Create User <Plus />
@@ -93,8 +143,19 @@ function User() {
             </TableRow>
           </TableHeader>
           {!userList && <TableSkeleton columns={6} />}
+          {userList && userList.users.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                className="text-center py-12"
+              >
+                No user found
+              </TableCell>
+            </TableRow>
+          )}
           <TableBody>
             {userList &&
+              userList.users.length > 0 &&
               userList.users.map((userItem, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
