@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  invoiceNumber String        @unique
+  customerId    Int
+  userId        Int
+  total         Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @db.Decimal(10, 2)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  vat           Decimal       @db.Decimal(5, 2) @default(0)
+  status        InvoiceStatus @default(NEW)
+  comment       String?
+  dueDays       Int           @default(14)
+  dueDate       DateTime
+  paymentDate   DateTime?
+  timesheetIds  Int[]
+  items         InvoiceItem[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model InvoiceItem {
+  id          Int       @id @default(autoincrement())
+  description String
+  amount      Decimal   @db.Decimal(10, 2)
+  rate        Decimal   @db.Decimal(10, 2)
+  total       Decimal   @db.Decimal(10, 2)
+  timesheetId Int?
+  projectId   Int
+  activityId  Int?
+  begin       DateTime
+  end         DateTime
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model InvoiceTemplate {
+  id            Int      @id @default(autoincrement())
+  name          String
+  title         String
+  company       String?
+  address       String?
+  vatId         String?
+  vatRate       Decimal? @db.Decimal(5, 2)
+  currency      String   @default("USD")
+  dueDays       Int      @default(14)
+  paymentTerms  String?
+  paymentDetails String?
+  template      String?
+  numberFormat  String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum InvoiceStatus {
+  NEW
+  PENDING
+  PAID
+  CANCELED
+  OVERDUE
+}
