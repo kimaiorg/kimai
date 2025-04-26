@@ -2,6 +2,7 @@ model Expense {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
+  color       String?
 
   project_id Int?
 

@@ -1,6 +1,7 @@
 model Category {
   id          Int     @id @default(autoincrement())
   name        String
+  color       String?
   description String?
 
   expenses Expense[]

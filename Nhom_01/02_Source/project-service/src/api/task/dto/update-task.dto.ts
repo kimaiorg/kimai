@@ -12,6 +12,11 @@ export const updateTaskSchema = z.object({
   activity_id: z.number().optional(),
   user_id: z.string().optional(),
   expense_id: z.number().optional(),
+  quantity: z.number().optional(),
+  status: z.string().optional(),
+  billable: z.boolean().optional(),
+  is_paid: z.boolean().optional(),
+  color: z.string().optional(),
 });
 
 export type UpdateTaskDto = z.infer<typeof updateTaskSchema>;

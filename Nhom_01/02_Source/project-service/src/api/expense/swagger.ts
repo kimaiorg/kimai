@@ -36,6 +36,12 @@ export class CreateExpenseSwagger {
     description: 'Cost of the expense',
   })
   cost: number;
+
+  @ApiPropertyOptional({
+    example: '#000000',
+    description: 'Color of the expense',
+  })
+  color?: string;
 }
 
 export class UpdateExpenseSwagger {
@@ -74,6 +80,12 @@ export class UpdateExpenseSwagger {
     description: 'Cost of the expense',
   })
   cost?: number;
+
+  @ApiPropertyOptional({
+    example: '#000000',
+    description: 'Color of the expense',
+  })
+  color?: string;
 }
 
 export class ListExpenseSwaggerDto {

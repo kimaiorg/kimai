@@ -22,6 +22,7 @@ export class TaskService {
       },
       include: {
         activity: true,
+        expense: true,
       },
     });
   }
@@ -41,6 +42,7 @@ export class TaskService {
             team: true,
           },
         },
+        expense: true,
       },
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,

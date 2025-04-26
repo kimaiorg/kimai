@@ -12,6 +12,12 @@ export class CreateCategorySwagger {
     description: 'Description of the category',
   })
   description: string | null;
+
+  @ApiPropertyOptional({
+    example: '#000000',
+    description: 'Color of the category',
+  })
+  color: string | null;
 }
 
 export class UpdateCategorySwagger {
@@ -26,6 +32,12 @@ export class UpdateCategorySwagger {
     description: 'Description of the category',
   })
   description?: string;
+
+  @ApiPropertyOptional({
+    example: '#000000',
+    description: 'Color of the category',
+  })
+  color?: string;
 }
 
 export class ListCategorySwaggerDto {

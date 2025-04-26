@@ -36,10 +36,22 @@ export class CreateTaskSwagger {
   user_id: string;
 
   @ApiPropertyOptional({
-    example: 'expense123',
+    example: 1,
     description: 'Expense ID',
   })
-  expense_id: string;
+  expense_id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Quantity of the task',
+  })
+  quantity?: number;
+
+  @ApiPropertyOptional({
+    example: '#000000',
+    description: 'Color of the task',
+  })
+  color?: string;
 }
 
 export class UpdateTaskSwagger {
@@ -78,10 +90,40 @@ export class UpdateTaskSwagger {
   user_id?: string;
 
   @ApiPropertyOptional({
-    example: 'expense123',
+    example: 1,
     description: 'Expense ID',
   })
-  expense_id: string;
+  expense_id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Quantity of the task',
+  })
+  quantity?: number;
+
+  @ApiPropertyOptional({
+    example: 'PROCESSING',
+    description: 'Status of the task',
+  })
+  status?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Billable status of the task',
+  })
+  billable?: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Paid status of the task',
+  })
+  is_paid?: boolean;
+
+  @ApiPropertyOptional({
+    example: '#000000',
+    description: 'Color of the task',
+  })
+  color?: string;
 }
 
 export class ListTaskSwaggerDto {
@@ -90,6 +132,12 @@ export class ListTaskSwaggerDto {
     description: 'Filter activities by Activity ID',
   })
   activity_id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Filter activities by Expense ID',
+  })
+  expense_id?: number;
 
   @ApiPropertyOptional({
     example: 'user123',

@@ -4,12 +4,18 @@ model Task {
   deadline    DateTime?
   description String
   user_id     String
+  color       String?
+  status      String    @default("PROCESSING")
+  billable    Boolean   @default(false)
+  is_paid     Boolean   @default(false)
 
   activity_id Int
   activity    Activity @relation(fields: [activity_id], references: [id])
 
   expense_id Int?
   expense    Expense? @relation(fields: [expense_id], references: [id])
+
+  quantity Int?
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
