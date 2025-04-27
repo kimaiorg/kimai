@@ -1,17 +1,21 @@
 "use client";
 
+import { requestCards } from "@/app/(pages)/request/request-items";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, Clock3, Home, Stethoscope } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+import { RequestViewType } from "@/type_schema/request";
+import { Clock3, Home, Stethoscope } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 function RequestPage() {
-  const [absenceType, setAbsenceType] = useState<"holiday" | "timeoff" | "sickness" | "other">("holiday");
+  const { t } = useTranslation();
+  const [selectedRequest, setSelectedRequest] = useState<RequestViewType | null>(null);
 
-  const handleRequestClick = (type: "holiday" | "timeoff" | "sickness" | "other") => {
-    setAbsenceType(type);
+  const handleSelectingRequest = (component: RequestViewType) => {
+    setSelectedRequest(component);
   };
 
   return (
@@ -80,12 +84,7 @@ function RequestPage() {
             </CardHeader>
             <CardContent className="pt-2">
               <div className="flex items-center">
-                <Button
-                  className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
-                  onClick={() => handleRequestClick("other")}
-                >
-                  Report
-                </Button>
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer">Report</Button>
               </div>
             </CardContent>
             <div className="absolute right-0 top-0 h-full w-1/3 flex items-center justify-center opacity-10">
@@ -99,6 +98,42 @@ function RequestPage() {
           </div>
         </Card>
       </div>
+      <h1 className="text-2xl font-bold mb-4">{t("page.reporting.title")}</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {requestCards.map((request, index) => (
+          <Card
+            className="overflow-hidden border border-gray-200"
+            key={index}
+          >
+            <div className="relative">
+              <CardHeader>
+                <CardTitle className="text-2xl text-amber-800">{request.title}</CardTitle>
+                <CardDescription className="text-amber-700">{request.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                  onClick={() => handleSelectingRequest(request)}
+                >
+                  Expense
+                </Button>
+              </CardContent>
+              <div className="absolute right-0 top-0 h-full w-1/3 flex items-center justify-center opacity-10">
+                <div className={`${request.background || "bg-amber-200"} rounded-full p-12`}>{request.icon}</div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+      {selectedRequest && (
+        <>
+          <div className="py-6">
+            <h2 className="text-lg font-bold mb-2">{selectedRequest.title}</h2>
+            <selectedRequest.component />
+          </div>
+        </>
+      )}
     </div>
   );
 }

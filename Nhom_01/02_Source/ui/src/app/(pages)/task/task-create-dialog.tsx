@@ -1,8 +1,8 @@
 "use client";
 
 import { getAllActivities } from "@/api/activity.api";
+import { getAllExpenses } from "@/api/expense.api";
 import { addNewTask } from "@/api/task.api";
-import { getAllUsers } from "@/api/user.api";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
+import { ExpenseType } from "@/type_schema/expense";
 import { CreateTaskRequestDTO, CreateTaskRequestSchema, CreateTaskValidation } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +26,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
   const [loading, setLoading] = useState<boolean>(false);
   const [activityList, setActivityList] = useState<ActivityType[]>([]);
   const [userList, setUserList] = useState<UserType[]>([]);
+  const [expenseList, setExpenseList] = useState<ExpenseType[] | null>(null);
 
   const createTaskForm = useForm<CreateTaskValidation>({
     resolver: zodResolver(CreateTaskRequestSchema),
@@ -33,6 +35,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
       deadline: "2025-04-11",
       description: "",
       activity_id: "",
+      expense_id: "",
       user_id: ""
     }
   });
@@ -40,9 +43,10 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
     if (loading) return;
     setLoading(true);
     try {
-      const { activity_id, ...rest } = values;
+      const { activity_id, expense_id, ...rest } = values;
       const payload: CreateTaskRequestDTO = {
         activity_id: Number(activity_id),
+        expense_id: Number(expense_id),
         ...rest
       };
       console.log(payload);
@@ -77,10 +81,9 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
   useEffect(() => {
     const fetchUsersAndActivities = async () => {
       try {
-        const users = await getAllUsers();
-        setUserList(users.users);
-        const activities = await getAllActivities();
+        const [activities, expenses] = await Promise.all([getAllActivities(), getAllExpenses()]);
         setActivityList(activities.data);
+        setExpenseList(expenses.data);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
@@ -250,6 +253,40 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                                 value={user.user_id.toString()}
                               >
                                 {user.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {expenseList && (
+                <FormField
+                  control={createTaskForm.control}
+                  name="expense_id"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormLabel>Expense</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          {...field}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full !mt-0 border-gray-200">
+                              <SelectValue placeholder="Select an assignee" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {expenseList.map((expense, index) => (
+                              <SelectItem
+                                key={index}
+                                value={expense.id.toString()}
+                              >
+                                {expense.name}
                               </SelectItem>
                             ))}
                           </SelectContent>

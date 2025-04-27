@@ -1,43 +1,13 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
-import { Pagination } from "@/type_schema/common";
 import { FilterInvoiceRequestDTO, InvoiceHistoryType, UpdateInvoiceRequestDTO } from "@/type_schema/invoice";
-import { CreateProjectRequestDTO, ProjectType } from "@/type_schema/project";
+import axios from "axios";
 
-export async function getAllProjects(
-  page?: number,
-  perPage?: number,
-  keyword?: string,
-  sortBy?: string,
-  sortOrder?: string
-): Promise<Pagination<ProjectType>> {
+const INVOICE_BACKEND_URL = process.env.INVOICE_BACKEND_URL;
+
+export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<any> {
   const token = await getManagementAccessToken();
-
-  const params = new URLSearchParams();
-  if (page) params.append("page", page.toString());
-  if (perPage) params.append("limit", perPage.toString());
-  if (keyword) params.append("keyword", keyword);
-  if (sortBy) {
-    params.append("sort_by", sortBy);
-    const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sort_order", order);
-  }
-  const response = await myAxios.get<Pagination<ProjectType>>(`/api/v1/projects?${params.toString()}`, {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  const data = response.data;
-  return data;
-}
-
-export async function addNewProject(request: CreateProjectRequestDTO): Promise<number> {
-  const token = await getManagementAccessToken();
-  const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/projects`, payload, {
+    const response = await axios.post(`${INVOICE_BACKEND_URL}/api/v1/invoices/filter`, request, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -48,12 +18,44 @@ export async function addNewProject(request: CreateProjectRequestDTO): Promise<n
   }
 }
 
-export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<any> {
+// BE trước khi return => lưu tạm => Invoice id temp. => save invoice => invoice id real
+// const invoiceFilterResponse = {
+//   data: {
+//     invoice_id_temp: "id",
+//     totalMoney: 1110,
+//     totalDuration: 129,
+//     customer: CustomerType,
+//     activities: [
+//       {
+//         name: "",
+//         // Activity Type
+//         tasks: [
+//           // Task Type
+//         ]
+//       },
+//       {
+//         name: "",
+//         // Activity Type
+//         tasks: [
+//           // Task Type
+//         ]
+//       }
+//     ]
+//   }
+// };
+
+// invoice/generate
+// Client
+const payload = {
+  invoice_id: "invoice_id_temp",
+  notes: ""
+};
+
+export async function saveInvoice(invoice: InvoiceHistoryType): Promise<any> {
   const token = await getManagementAccessToken();
 
-  return 200;
   try {
-    const response = await myAxios.post(`/api/v1/invoices`, request, {
+    const response = await axios.post(`${INVOICE_BACKEND_URL}/api/v1/invoices/generate`, invoice, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -67,18 +69,18 @@ export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<
 export async function updateInvoiceStatus(request: UpdateInvoiceRequestDTO, invoiceId: string): Promise<any> {
   const token = await getManagementAccessToken();
 
-  const invoiceHistories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
-  const invoiceHistory = invoiceHistories.findIndex((item) => item.id === invoiceId);
-  if (invoiceHistory !== -1) {
-    invoiceHistories[invoiceHistory].status = request.status;
-    invoiceHistories[invoiceHistory].dueDate = request.paymentDate;
-    invoiceHistories[invoiceHistory].notes = request.description;
-  }
-  localStorage.setItem("invoiceHistoryList", JSON.stringify(invoiceHistories));
+  // const invoiceHistories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
+  // const invoiceHistory = invoiceHistories.findIndex((item) => item.id === invoiceId);
+  // if (invoiceHistory !== -1) {
+  //   invoiceHistories[invoiceHistory].status = request.status;
+  //   invoiceHistories[invoiceHistory].dueDate = request.paymentDate;
+  //   invoiceHistories[invoiceHistory].notes = request.description;
+  // }
+  // localStorage.setItem("invoiceHistoryList", JSON.stringify(invoiceHistories));
 
-  return 200;
+  // return 200;
   try {
-    const response = await myAxios.post(`/api/v1/invoices`, request, {
+    const response = await axios.post(`/api/v1/invoices/generate`, request, {
       headers: {
         Authorization: `Bearer ${token}`
       }

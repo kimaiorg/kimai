@@ -2,7 +2,7 @@
 
 import { getAllActivities } from "@/api/activity.api";
 import { getAllCustomers } from "@/api/customer.api";
-import { filterInvoices } from "@/api/invoice.api";
+import { filterInvoices, saveInvoice } from "@/api/invoice.api";
 import { getAllProjects } from "@/api/project.api";
 import ActivityViewDialog from "@/app/(pages)/activity/activity-view-dialog";
 import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
@@ -83,7 +83,7 @@ function InvoiceContent() {
         ),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!
       });
-      console.log(activityList);
+
       const exportableInvoices: InvoiceHistoryType = {
         id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!,
@@ -129,11 +129,33 @@ function InvoiceContent() {
   }
 
   // Handle save invoice status
-  const handleSaveInvoice = () => {
-    const invoiceHistories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
-    invoiceHistories.push(invoiceHistory!);
-    localStorage.setItem("invoiceHistoryList", JSON.stringify(invoiceHistories));
-    router.push("/invoice-history");
+  const handleSaveInvoice = async () => {
+    // const invoiceHistories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
+    // invoiceHistories.push(invoiceHistory!);
+    // localStorage.setItem("invoiceHistoryList", JSON.stringify(invoiceHistories));
+    try {
+      const result = await saveInvoice(invoiceHistory!);
+      if (result == 201 || result == 200) {
+        toast("Success", {
+          description: "Invoice saved successfully",
+          duration: 2000,
+          className: "!bg-lime-500 !text-white"
+        });
+        router.push("/invoice-history");
+      } else {
+        toast("Failed", {
+          description: "Failed to save invoice. Please try again!",
+          duration: 2000,
+          className: "!bg-red-500 !text-white"
+        });
+      }
+    } catch (error: unknown) {
+      toast("Error", {
+        description: "Failed to save invoice. Please try again!",
+        duration: 2000,
+        className: "!bg-red-500 !text-white"
+      });
+    }
   };
 
   const fetchCustomerData = async () => {
@@ -144,6 +166,7 @@ function InvoiceContent() {
       console.error("Error fetching customers:", error);
     }
   };
+
   const fetchProjectData = async (customerId: number) => {
     try {
       const projects = await getAllProjects(
@@ -208,7 +231,7 @@ function InvoiceContent() {
         <Form {...filterInvoiceForm}>
           <form
             onSubmit={filterInvoiceForm.handleSubmit(handleSubmitFilterInvoice)}
-            className="p-2 md:p-4 border border-gray-200 rounded-md mx-20"
+            className="p-2 md:p-4 border border-gray-200 rounded-md lg:mx-20"
             noValidate
           >
             <div className="grid grid-cols-6 gap-4 pb-3 items-start">
@@ -475,143 +498,11 @@ function InvoiceContent() {
               </tbody>
             </table>
           </div>
-
-          {/* {filteredInvoices.length >= 0 && (
-            <div className="bg-white rounded-md shadow-sm overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"
-                    ></th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Customer
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Duration
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Total Price
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    ></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredInvoices.length > 0 ? (
-                    filteredInvoices.map((invoice) => (
-                      <tr
-                        key={invoice.id}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <button className="text-gray-400 hover:text-gray-600">
-                              <svg
-                                className="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 9l-7 7-7-7"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className={`h-3 w-3 rounded-full mr-2 ${invoice.customer}`}></div>
-                            <div className="text-sm font-medium text-gray-900">{invoice.customer}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {Math.floor(Math.random() * 200) + 1}.{Math.floor(Math.random() * 60)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {invoice.totalPrice} {invoice.currency}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                          onClick={() => handlePreviewInvoice(invoice.id)}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
-                        >
-                          Preview
-                        </button>
-                        {saveSuccess === invoice.id ? (
-                          <span className="text-green-600 px-3 py-1">Saved ✓</span>
-                        ) : (
-                          <button
-                            onClick={() => handleSaveInvoice(invoice.id)}
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                          >
-                            Save
-                          </button>
-                        )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="px-6 py-4 text-center text-sm text-gray-500"
-                      >
-                        No invoices found matching your criteria.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )} */}
         </div>
       </div>
     </>
   );
 }
-
-// export function Invoice() {
-//   const [isClientSide, setIsClientSide] = useState(false);
-
-//   useEffect(() => {
-//     setIsClientSide(true);
-//   }, []);
-
-//   if (!isClientSide) {
-//     return (
-//       <div className="flex justify-center items-center h-screen">
-//         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <DatabaseProvider>
-//       <InvoiceContent />
-//     </DatabaseProvider>
-//   );
-// }
 
 // Sử dụng AuthenticatedRoute như một Higher-Order Component
 const AuthenticatedInvoice = AuthenticatedRoute(InvoiceContent, [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD]);
