@@ -17,6 +17,7 @@ import { Bell, LogOut, UserRoundSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "./language-switcher";
+import Notification from "@/components/shared/Header/notification";
 
 export function NavUser() {
   const { user, isLoading } = useUser();
@@ -51,6 +52,14 @@ export function NavUser() {
       <SidebarMenuItem>
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
+          <Notification>
+            <div className="flex justify-center items-center cursor-pointer">
+              <Bell
+                size={22}
+                strokeWidth={2}
+              />
+            </div>
+          </Notification>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-2 flex-row-reverse cursor-pointer">
@@ -99,7 +108,7 @@ export function NavUser() {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => router.push("/notification")}
+                  onClick={() => router.push("/notifications")}
                 >
                   <Bell />
                   Notifications

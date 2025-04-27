@@ -121,9 +121,9 @@ function InvoiceHistoryContent() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {invoiceHistories.length > 0 ? (
-                invoiceHistories.map((invoice) => (
+                invoiceHistories.map((invoice, index) => (
                   <tr
-                    key={invoice.id}
+                    key={index}
                     className="hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.date}</td>

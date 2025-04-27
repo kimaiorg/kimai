@@ -15,6 +15,7 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { Pagination } from "@/type_schema/common";
+import { ExpenseType } from "@/type_schema/expense";
 import { Role } from "@/type_schema/role";
 import { TaskType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
@@ -39,6 +40,7 @@ function Task() {
   const activityId = queryParams.get("activityId") || "";
   const userId = queryParams.get("userId") || "";
   const [taskList, setTaskList] = useState<Pagination<TaskType> | null>(null);
+  const [expenseList, setExpenseList] = useState<ExpenseType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchTasks = async (
@@ -208,7 +210,13 @@ function Task() {
                 >
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.id}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    <span className="ml-2">{task.title}</span>
+                    <div className="flex items-center">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: task.color || "#6C757D" }}
+                      ></div>
+                      <span className="ml-2">{task.title}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.activity.name}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.user?.name}</td>

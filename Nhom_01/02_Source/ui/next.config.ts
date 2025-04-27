@@ -11,7 +11,9 @@ const nextConfig: NextConfig = {
     AUTH0_KIMAI_API_AUDIENCE: process.env.AUTH0_KIMAI_API_AUDIENCE,
     AUTH0_KIMAI_API_ID: process.env.AUTH0_KIMAI_API_ID,
     BACKEND_URL: process.env.BACKEND_URL,
-    TIMESHEET_BACKEND_URL: process.env.TIMESHEET_BACKEND_URL
+    TIMESHEET_BACKEND_URL: process.env.TIMESHEET_BACKEND_URL,
+    NOTIFICATION_BACKEND_URL: process.env.NOTIFICATION_BACKEND_URL,
+    INVOICE_BACKEND_URL: process.env.INVOICE_BACKEND_URL
   },
   typescript: {
     // Temporarily ignore TypeScript errors during build

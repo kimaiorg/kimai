@@ -196,7 +196,13 @@ function ExpensePage() {
                 >
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{expense.id}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                    <span className="ml-2">{expense.name}</span>
+                    <div className="flex items-center">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: expense.color || "#6C757D" }}
+                      ></div>
+                      <span className="ml-2">{expense.name}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{expense.project.name}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{expense.activity.name}</td>

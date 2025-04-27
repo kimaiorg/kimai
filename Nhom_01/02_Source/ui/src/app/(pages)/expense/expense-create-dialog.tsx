@@ -241,7 +241,15 @@ export function ExpenseCreateDialog({
                   </p>
                 </>
               )}
-              {activityList && (
+              {activityList && activityList.length === 0 && (
+                <>
+                  <FormLabel>Activity</FormLabel>
+                  <p className="col-span-12 text-center text-sm text-gray-700 dark:text-white">
+                    There is no activity in this project
+                  </p>
+                </>
+              )}
+              {activityList && activityList.length > 0 && (
                 <FormField
                   control={createExpenseForm.control}
                   name="activity_id"

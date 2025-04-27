@@ -2,7 +2,7 @@
 
 import { getAllActivities } from "@/api/activity.api";
 import { getAllCategories } from "@/api/category.api";
-import { addNewExpense, updateExpense } from "@/api/expense.api";
+import { updateExpense } from "@/api/expense.api";
 import { getAllProjects } from "@/api/project.api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,11 +14,10 @@ import { handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
 import { CategoryType } from "@/type_schema/category";
 import {
-  CreateExpenseRequestDTO,
   CreateExpenseRequestSchema,
-  UpdateExpenseValidation,
   ExpenseType,
-  UpdateExpenseRequestDTO
+  UpdateExpenseRequestDTO,
+  UpdateExpenseValidation
 } from "@/type_schema/expense";
 import { ProjectType } from "@/type_schema/project";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,7 +70,7 @@ export function ExpenseUpdateDialog({
       console.log(payload);
       const response = await updateExpense(payload, targetExpense.id);
 
-      if (response == 201) {
+      if (response == 201 || response == 200) {
         toast("Success", {
           description: "Update expense successfully",
           duration: 2000,
