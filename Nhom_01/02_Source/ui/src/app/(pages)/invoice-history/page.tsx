@@ -2,6 +2,7 @@
 
 import InvoiceStatusUpdateDialog from "@/app/(pages)/invoice-history/invoice-history-status-dialog";
 import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
+import { generateInvoiceTemplatePDF } from "@/components/invoice/templates/invoice-pdf-generator";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -48,9 +49,6 @@ function InvoiceHistoryContent() {
   // Handle download invoice
   const handleDownloadInvoice = async (invoiceHistory: InvoiceHistoryType) => {
     try {
-      // Import downloadInvoicePDF từ invoice-pdf
-      const { downloadInvoicePreviewPDF } = await import("@/components/invoice/invoice-pdf-preview");
-
       // Tải xuống PDF trực tiếp
       const filename = `invoice-${invoiceHistory.customer.name}.pdf`;
       const success = downloadInvoicePreviewPDF(invoiceHistory, filename);
@@ -126,7 +124,7 @@ function InvoiceHistoryContent() {
                     key={index}
                     className="hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.customer.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -253,5 +251,24 @@ export const getStatusColorClass = (status: string) => {
       return colors[2];
     default:
       return colors[3];
+  }
+};
+
+const downloadInvoicePreviewPDF = (invoice: InvoiceHistoryType, filename?: string) => {
+  try {
+    // Import trực tiếp từ pdf-generator để tránh lỗi
+    const doc = generateInvoiceTemplatePDF(invoice);
+
+    // Set filename
+    const defaultFilename = `Invoice-${invoice.id || "INV-2025-0001"}.pdf`;
+    const finalFilename = filename || defaultFilename;
+
+    // Download PDF
+    doc.save(finalFilename);
+
+    return true;
+  } catch (error) {
+    console.error("Error downloading PDF:", error);
+    return false;
   }
 };

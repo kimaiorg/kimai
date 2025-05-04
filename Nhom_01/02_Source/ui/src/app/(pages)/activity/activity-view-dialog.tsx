@@ -28,8 +28,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { ActivityType } from "@/type_schema/activity";
 import { UserType } from "@/type_schema/user.schema";
+import { ActivityType } from "@/type_schema/activity";
 
 export default function ActivityViewDialog({
   children,

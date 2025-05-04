@@ -7,27 +7,29 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { activityFilters } from "@/type_schema/activity";
 import { Filter, X } from "lucide-react";
 import { useState } from "react";
 
-export default function FilterCategoryModal({
+export default function FilterInvoiceTemplateModal({
   children,
-  keyword,
   sortBy,
   sortOrder,
+  isActive,
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
-  keyword: string;
   sortBy: string;
   sortOrder: string;
+  isActive: boolean;
   handleFilterChangeAction: (props: any) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
     sortBy: sortBy,
-    sortOrder: sortOrder
+    sortOrder: sortOrder,
+    isActive: isActive
   });
 
   const handleFilterChange = (key: string, value: string) => {
@@ -37,7 +39,8 @@ export default function FilterCategoryModal({
   const handleApplyFilters = () => {
     handleFilterChangeAction({
       _sortBy: filters.sortBy,
-      _sortOrder: filters.sortOrder
+      _sortOrder: filters.sortOrder,
+      _isActive: isActive
     });
     setOpen(false);
   };
@@ -45,7 +48,8 @@ export default function FilterCategoryModal({
   const handleResetFilters = () => {
     setFilters({
       sortBy: "",
-      sortOrder: ""
+      sortOrder: "",
+      isActive: true
     });
   };
 
@@ -127,39 +131,15 @@ export default function FilterCategoryModal({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          {/* {projectList && (
             <div className="grid gap-2">
-              <Label htmlFor="projectId">Project</Label>
-              <Select
-                onValueChange={(value) => handleFilterChange("projectId", value)}
-                value={filters.projectId}
-              >
-                <SelectTrigger className="w-full !mt-0 border-gray-200">
-                  <SelectValue
-                    placeholder="Select project"
-                    defaultValue={filters.projectId}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {projectList.map((project, index) => (
-                    <SelectItem
-                      key={index}
-                      value={project.id.toString()}
-                      className="flex items-center gap-1"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: project.color || "#FF5733" }}
-                      ></div>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="sortOrder">Is active:</Label>
+              <Switch
+                checked={isActive}
+                onCheckedChange={(value) => handleFilterChange("isActive", String(value))}
+              />
             </div>
-          )}  */}
+          </div>
         </div>
 
         <Separator className="mt-1" />

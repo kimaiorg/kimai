@@ -1,29 +1,32 @@
 import { ActivityType } from "@/type_schema/activity";
 import { CustomerType } from "@/type_schema/customer";
 import { ProjectType } from "@/type_schema/project";
+import { TaskType } from "@/type_schema/task";
 import { z } from "zod";
 
 // Invoice history item type
-export type InvoiceHistoryItemType = {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  taxRate: number;
-  date?: string;
+export type InvoiceHistoryItemType = Omit<ActivityType, "tasks"> & {
+  totalPrice: number;
+  tasks: TaskType[];
 };
 
 export type InvoiceHistoryType = {
   id: string;
   customer: CustomerType;
-  date: string;
-  dueDate?: string;
+  project: ProjectType;
+  fromDate: string;
+  toDate: string;
   status: string;
-  totalPrice: string;
+  totalPrice: number;
+  taxRate: number;
+  taxPrice: number;
+  finalPrice: number;
   currency: string;
   notes?: string;
   createdBy: string;
   createdAt: string;
-  items: InvoiceHistoryItemType[];
+  templateId: null | number;
+  activities: InvoiceHistoryItemType[];
 };
 
 export interface InvoiceHistoryItem {
@@ -50,7 +53,7 @@ export interface InvoiceHistoryItem {
 export const INVOICE_STATUS_OPTIONS = ["New", "Sent", "Paid", "Cancelled", "Overdue", "Saved"];
 
 // Invoice template type
-export interface InvoiceTemplate {
+export type InvoiceTemplate = {
   id: string;
   name: string;
   format: string;
@@ -69,7 +72,7 @@ export interface InvoiceTemplate {
   grouping?: string;
   createdAt: string;
   updatedAt?: string;
-}
+};
 
 export const FilterInvoiceRequestSchema = z
   .object({

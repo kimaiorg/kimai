@@ -1,16 +1,15 @@
 "use client";
 
-import { InvoicePDFPreview } from "@/components/invoice/templates/invoice-pdf-preview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { InvoiceHistoryType } from "@/type_schema/invoice";
+import { InvoiceHistoryItemType } from "@/type_schema/invoice";
 import { useState } from "react";
 
-export default function InvoicePreviewDialog({
+export default function InvoiceActivityViewDialog({
   children,
-  invoice
+  invoiceActivity
 }: {
   children: React.ReactNode;
-  invoice: InvoiceHistoryType;
+  invoiceActivity: InvoiceHistoryItemType;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -24,8 +23,8 @@ export default function InvoicePreviewDialog({
           <DialogHeader>
             <DialogTitle>Preview</DialogTitle>
           </DialogHeader>
-          {invoice && invoice.templateId && invoice.templateId === 1 && <InvoicePDFPreview invoice={invoice} />}
-          {!invoice && (
+
+          {!invoiceActivity && (
             <div className="h-full flex items-center justify-center">
               <p className="text-center">No invoice found</p>
             </div>

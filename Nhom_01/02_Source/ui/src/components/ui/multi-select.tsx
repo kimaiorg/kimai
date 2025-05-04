@@ -196,7 +196,10 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                     return (
                       <Badge
                         key={value}
-                        className={cn(isAnimating ? "animate-bounce" : "", multiSelectVariants({ variant }))}
+                        className={cn(
+                          isAnimating ? "animate-bounce !text-white" : "!text-white",
+                          multiSelectVariants({ variant })
+                        )}
                         style={{ animationDuration: `${animation}s` }}
                       >
                         {IconComponent && <IconComponent className="h-4 w-4 mr-2" />}
@@ -214,7 +217,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                   {selectedValues.length > maxCount && (
                     <Badge
                       className={cn(
-                        "bg-transparent text-foreground border-foreground/1 hover:bg-transparent",
+                        "bg-transparent !text-white border-foreground/1 hover:bg-transparent",
                         isAnimating ? "animate-bounce" : "",
                         multiSelectVariants({ variant })
                       )}

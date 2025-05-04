@@ -18,7 +18,7 @@ export default function Notification({ children }: { children: React.ReactNode }
 
   const getNotifications = async () => {
     const result = await getAllNotifications(1, 3);
-    console.log(result.data);
+    // console.log(result.data);
     setNotifications(result.data.slice(0, 3));
   };
 
