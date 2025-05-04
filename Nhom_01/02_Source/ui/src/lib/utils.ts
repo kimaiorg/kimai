@@ -108,3 +108,9 @@ export function formatCurrency(amount: number, currency: string = "USD"): string
     minimumFractionDigits: 2
   }).format(amount);
 }
+
+export const currencyFormat = (value: number, currency: string) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: currency
+  }).format(value);

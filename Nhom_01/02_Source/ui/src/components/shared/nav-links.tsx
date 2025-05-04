@@ -77,32 +77,32 @@ export const timesheetNavMain = [
       }
     ]
   },
-  {
-    title: "Employment contract",
-    translationKey: "sidebar.workingTime",
-    url: "/working-time",
-    icon: Scale,
-    isActive: false,
-    allowRoles: [],
-    items: [
-      {
-        title: "Working time",
-        translationKey: "sidebar.workingTime",
-        url: "/working-time",
-        icon: Calculator,
-        isActive: false,
-        allowRoles: []
-      },
-      {
-        title: "Absence",
-        translationKey: "sidebar.absence",
-        url: "/absence",
-        icon: PersonStanding,
-        isActive: false,
-        allowRoles: []
-      }
-    ]
-  },
+  // {
+  //   title: "Employment contract",
+  //   translationKey: "sidebar.workingTime",
+  //   url: "/working-time",
+  //   icon: Scale,
+  //   isActive: false,
+  //   allowRoles: [],
+  //   items: [
+  //     {
+  //       title: "Working time",
+  //       translationKey: "sidebar.workingTime",
+  //       url: "/working-time",
+  //       icon: Calculator,
+  //       isActive: false,
+  //       allowRoles: []
+  //     },
+  //     {
+  //       title: "Absence",
+  //       translationKey: "sidebar.absence",
+  //       url: "/absence",
+  //       icon: PersonStanding,
+  //       isActive: false,
+  //       allowRoles: []
+  //     }
+  //   ]
+  // },
   {
     title: "Reporting",
     translationKey: "sidebar.reporting",

@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTranslation } from "@/lib/i18n/useTranslation";
-import { InvoiceTemplate } from "@/type_schema/invoice";
+import { useState } from "react";
 
-interface CreateTemplateDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (template: Omit<InvoiceTemplate, "id" | "createdAt" | "updatedAt">) => void;
-}
-
-export function CreateTemplateDialog({ isOpen, onClose, onSave }: CreateTemplateDialogProps) {
+export function InvoiceTemplateCreateDialog({
+  children,
+  fetchInvoiceTemplates
+}: {
+  children: React.ReactNode;
+  fetchInvoiceTemplates: () => void;
+}) {
   const { t } = useTranslation();
   const [templateName, setTemplateName] = useState("");
   const [templateFormat, setTemplateFormat] = useState("PDF");
@@ -29,50 +28,19 @@ export function CreateTemplateDialog({ isOpen, onClose, onSave }: CreateTemplate
   const [invoiceTemplate, setInvoiceTemplate] = useState("Invoice");
   const [grouping, setGrouping] = useState("Default (one row per entry)");
 
-  const handleSave = () => {
-    onSave({
-      name: templateName,
-      format: templateFormat,
-      title,
-      companyName,
-      vatId,
-      address,
-      contact,
-      termsOfPayment,
-      bankAccount,
-      paymentTerm,
-      taxRate,
-      language,
-      invoiceNumberGenerator,
-      invoiceTemplate,
-      grouping
-    });
-    resetForm();
-  };
+  const [open, setOpen] = useState(false);
 
-  const resetForm = () => {
-    setTemplateName("");
-    setTemplateFormat("PDF");
-    setTitle("");
-    setCompanyName("");
-    setVatId("");
-    setAddress("");
-    setContact("");
-    setTermsOfPayment("");
-    setBankAccount("");
-    setPaymentTerm("30");
-    setTaxRate("0.000");
-    setLanguage("English");
-    setInvoiceNumberGenerator("Configured format");
-    setInvoiceTemplate("Invoice");
-    setGrouping("Default (one row per entry)");
+  const handleCreateNewInvoiceTemplate = () => {
+    setOpen(false);
+    fetchInvoiceTemplates();
   };
 
   return (
     <Dialog
-      open={isOpen}
-      onOpenChange={onClose}
+      open={open}
+      onOpenChange={setOpen}
     >
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("invoiceTemplate.CREATE_INVOICE_TEMPLATE")}</DialogTitle>
@@ -272,13 +240,7 @@ export function CreateTemplateDialog({ isOpen, onClose, onSave }: CreateTemplate
         </div>
         <DialogFooter>
           <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium"
-          >
-            {t("invoiceTemplate.CANCEL")}
-          </button>
-          <button
-            onClick={handleSave}
+            onClick={handleCreateNewInvoiceTemplate}
             className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium"
             disabled={!templateName || !title || !companyName}
           >

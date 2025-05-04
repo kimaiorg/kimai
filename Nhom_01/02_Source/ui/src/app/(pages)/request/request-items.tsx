@@ -1,39 +1,67 @@
-import { UsersIcon } from "@/components/shared/icons";
 import { TimesheetTableSkeleton } from "@/components/skeleton/table-skeleton";
 import { RequestViewType } from "@/type_schema/request";
-import { Stethoscope } from "lucide-react";
+import { Clock3, Home, Stethoscope } from "lucide-react";
 import dynamic from "next/dynamic";
 
-const TimesheetRequest = dynamic(() => import("@/app/(pages)/request/timesheet-request"), {
+const TimesheetRequest = dynamic(() => import("@/app/(pages)/request/timesheet/page"), {
   ssr: false,
   loading: () => <TimesheetTableSkeleton />
 });
-const ExpenseRequest = dynamic(() => import("@/app/(pages)/request/expense-request"), {
+const ExpenseRequest = dynamic(() => import("@/app/(pages)/request/expense/page"), {
+  ssr: false,
+  loading: () => <TimesheetTableSkeleton />
+});
+const AbsenceRequest = dynamic(() => import("@/app/(pages)/request/absence/page"), {
   ssr: false,
   loading: () => <TimesheetTableSkeleton />
 });
 
 const requestCards: RequestViewType[] = [
   {
+    id: "timesheet",
     title: "Timesheet requests",
     icon: (
-      <Stethoscope
-        className="h-24 w-24 text-amber-600"
+      <Clock3
+        className="h-24 w-24 text-violet-600"
         strokeWidth={1}
       />
     ),
     component: TimesheetRequest,
-    background: "bg-amber-100",
-    description: "Timesheet requests"
+    background: "bg-violet-100",
+    description: "Manage timesheet requests",
+    textColor: "text-violet-600"
+  },
+  {
+    id: "expense",
+    title: "Expense requests",
+    icon: (
+      <Stethoscope
+        className="h-24 w-24 text-sky-600"
+        strokeWidth={1}
+      />
+    ),
+    component: ExpenseRequest,
+    background: "bg-sky-100",
+    description: "Manage expense requests",
+    textColor: "text-sky-600"
   },
 
   {
-    title: "Expense requests",
-    icon: <UsersIcon className="h-6 w-6 text-pink-500" />,
-    component: ExpenseRequest,
-    background: "bg-pink-100",
-    description: "Expense requests"
+    id: "absence",
+    title: "Absence requests",
+    icon: (
+      <Home
+        className="h-24 w-24 text-amber-600"
+        strokeWidth={1}
+      />
+    ),
+    component: AbsenceRequest,
+    background: "bg-amber-100",
+    description: "Manage absence requests",
+    textColor: "text-amber-600"
   }
 ];
 
-export { requestCards };
+const getRequestById = (id: string) => requestCards.find((request) => request.id === id);
+
+export { requestCards, getRequestById };

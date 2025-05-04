@@ -13,7 +13,7 @@ export async function getAllNotifications(
   sortOrder?: string
 ): Promise<Pagination<NotificationType>> {
   const token = await getManagementAccessToken();
-  console.log(token);
+
   const params = new URLSearchParams();
   if (page) params.append("page", page.toString());
   if (limit) params.append("limit", limit.toString());

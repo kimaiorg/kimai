@@ -138,41 +138,6 @@ export function CategoryCreateDialog({
                   </FormItem>
                 )}
               />
-
-              {/* <FormField
-                control={createCategoryForm.control}
-                name="cost"
-                render={({ field }) => (
-                  <FormItem className="col-span-4">
-                    <FormLabel>Cost</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        className="h-10 !mt-0 border-gray-200"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createCategoryForm.control}
-                name="visible"
-                render={({ field }) => (
-                  <FormItem className="col-span-4">
-                    <FormLabel>Visible</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-violet-600!"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />*/}
             </div>
 
             <DialogFooter>

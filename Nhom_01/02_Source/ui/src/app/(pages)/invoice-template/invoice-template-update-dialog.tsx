@@ -1,153 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { MoreHorizontal, Pencil, Trash2, FileText, FileCode } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTranslation } from "@/lib/i18n/useTranslation";
-import { Template } from "@/app/(pages)/invoice-template/page";
+import { InvoiceTemplate } from "@/type_schema/invoice";
+import { useState } from "react";
 
-interface InvoiceTemplateListProps {
-  templates: Template[];
-  setTemplates: React.Dispatch<React.SetStateAction<Template[]>>;
-}
-
-export function InvoiceTemplateList({ templates, setTemplates }: InvoiceTemplateListProps) {
+export function InvoiceTemplateUpdateDialog({
+  children,
+  targetInvoiceTemplate,
+  refetchInvoiceTemplates
+}: {
+  children: React.ReactNode;
+  targetInvoiceTemplate: InvoiceTemplate;
+  refetchInvoiceTemplates: () => void;
+}) {
   const { t } = useTranslation();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<InvoiceTemplate>(targetInvoiceTemplate);
 
-  const handleEdit = (template: Template) => {
-    setSelectedTemplate(template);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleDelete = (template: Template) => {
-    setSelectedTemplate(template);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (selectedTemplate) {
-      setTemplates(templates.filter((t) => t.id !== selectedTemplate.id));
-      setIsDeleteDialogOpen(false);
-    }
-  };
-
-  const saveTemplate = (updatedTemplate: Template) => {
-    setTemplates(templates.map((t) => (t.id === updatedTemplate.id ? updatedTemplate : t)));
+  const saveTemplate = () => {
+    refetchInvoiceTemplates();
     setIsEditDialogOpen(false);
-  };
-
-  const getFormatIcon = (format: string) => {
-    return format === "PDF" ? (
-      <FileText className="h-4 w-4 text-red-500" />
-    ) : (
-      <FileCode className="h-4 w-4 text-blue-500" />
-    );
   };
 
   return (
     <div className="rounded-md">
-      <Table className="rounded-lg border border-slate-200 bg-white dark:bg-slate-700">
-        <TableHeader className="rounded-lg border border-slate-200 bg-gray-100 dark:bg-slate-800">
-          <TableRow>
-            <TableHead className="font-semibold">{t("invoiceTemplate.NAME")}</TableHead>
-            <TableHead className="font-semibold">{t("invoiceTemplate.FORMAT")}</TableHead>
-            <TableHead className="w-[80px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {templates.map((template) => (
-            <TableRow
-              key={template.id}
-              className="hover:bg-gray-50 dark:hover:bg-slate-800"
-            >
-              <TableCell className="font-medium">{template.name}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  {getFormatIcon(template.format)}
-                  <span>{template.format}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEdit(template)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      <span>{t("invoiceTemplate.EDIT")}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(template)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>{t("invoiceTemplate.DELETE")}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-          {templates.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={3}
-                className="text-center py-6 text-gray-500"
-              >
-                {t("invoiceTemplate.NO_TEMPLATES_FOUND")}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("invoiceTemplate.CONFIRM_DELETION")}</DialogTitle>
-          </DialogHeader>
-          <p className="py-4">
-            Are you sure you want to delete the template "{selectedTemplate?.name}"? This action cannot be undone.
-          </p>
-          <DialogFooter>
-            <button
-              onClick={() => setIsDeleteDialogOpen(false)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium"
-            >
-              {t("invoiceTemplate.CANCEL")}
-            </button>
-            <button
-              onClick={confirmDelete}
-              className="ml-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium"
-            >
-              {t("invoiceTemplate.DELETE")}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Edit Template Dialog */}
       <Dialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogTrigger asChild>{children}</DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
           <DialogHeader>
             <DialogTitle>{t("invoiceTemplate.EDIT_TEMPLATE")}</DialogTitle>
           </DialogHeader>
@@ -380,7 +264,7 @@ export function InvoiceTemplateList({ templates, setTemplates }: InvoiceTemplate
               {t("invoiceTemplate.CANCEL")}
             </button>
             <button
-              onClick={() => selectedTemplate && saveTemplate(selectedTemplate)}
+              onClick={saveTemplate}
               className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium"
             >
               {t("invoiceTemplate.SAVE")}

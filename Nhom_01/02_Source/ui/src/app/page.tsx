@@ -10,13 +10,13 @@ export default function Home() {
   const { user, error, isLoading } = useUser();
 
   useEffect(() => {
-    // if (!isLoading) {
-    //   if (user) {
-    //     router.replace("/dashboard");
-    //   } else if (!error) {
-    //     window.location.href = "/api/auth/login";
-    //   }
-    // }
+    if (!isLoading) {
+      if (user) {
+        router.replace("/dashboard");
+      } else if (!error) {
+        window.location.href = "/api/auth/login";
+      }
+    }
   }, [user, error, isLoading]);
 
   if (isLoading) {
