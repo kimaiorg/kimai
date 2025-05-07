@@ -58,6 +58,7 @@ function Task() {
         dispatch(updateUserList(result.users));
       }
       const result = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
+      console.log(result.data);
       const { data, metadata } = result;
       const taskData = data.map((task) => {
         const { user_id, ...rest } = task;

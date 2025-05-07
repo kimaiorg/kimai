@@ -6,8 +6,8 @@ import { z } from "zod";
 
 // Invoice history item type
 export type InvoiceHistoryItemType = Omit<ActivityType, "tasks"> & {
-  totalPrice: number;
-  tasks: TaskType[];
+  totalPrice: number; // Total price of tasks in the activity
+  tasks: TaskType[]; // Tasks in the activity
 };
 
 export type InvoiceHistoryType = {
@@ -16,45 +16,25 @@ export type InvoiceHistoryType = {
   project: ProjectType;
   fromDate: string;
   toDate: string;
-  status: string;
-  totalPrice: number;
-  taxRate: number;
-  taxPrice: number;
-  finalPrice: number;
-  currency: string;
-  notes?: string;
+  status: string; // NEW, PENDING, PAID, CANCELED
+  totalPrice: number; // Total price of the invoice
+  taxRate: number; // Tax rate
+  taxPrice: number; // Tax price: totalPrice * taxRate
+  finalPrice: number; // Total price after tax: totalPrice + taxPrice
+  currency: string; // Currency of the invoice: USD, VND, etc.
+  notes?: string; // Additional notes
   createdBy: string;
   createdAt: string;
-  templateId: null | number;
+  template: InvoiceTemplateType; // ID of the invoice template
   activities: InvoiceHistoryItemType[];
 };
-
-export interface InvoiceHistoryItem {
-  id: string;
-  customer: string;
-  date: string;
-  status: string;
-  totalPrice: string;
-  currency: string;
-  createdBy: string;
-  createdAt: string;
-  dueDate?: string;
-  notes?: string;
-  items: {
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    taxRate: number;
-    date?: string;
-  }[];
-}
 
 // Invoice status options
 export const INVOICE_STATUS_OPTIONS = ["New", "Sent", "Paid", "Cancelled", "Overdue", "Saved"];
 
 // Invoice template type
-export type InvoiceTemplate = {
-  id: string;
+export type InvoiceTemplateType = {
+  id: number;
   name: string;
   format: string;
   title: string;
@@ -137,4 +117,26 @@ export type UpdateInvoiceRequestDTO = {
   description: string;
   status: string;
   paymentDate: string;
+};
+
+export type InvoiceHistoryRequestType = {
+  customerId: number;
+  projectId: number;
+  fromDate: string;
+  toDate: string;
+  status: string; // NEW, PENDING, PAID, CANCELED
+  totalPrice: number; // Total price of the invoice
+  taxRate: number; // Tax rate
+  taxPrice: number; // Tax price: totalPrice * taxRate
+  finalPrice: number; // Total price after tax: totalPrice + taxPrice
+  currency: string; // Currency of the invoice: USD, VND, etc.
+  notes?: string; // Additional notes
+  createdBy: string;
+  createdAt: string;
+  templateId: number; // ID of the invoice template
+  activities: {
+    activityId: number; // ID of the activity
+    totalPrice: number;
+    tasks: number[]; // The list of the task ids
+  }[];
 };

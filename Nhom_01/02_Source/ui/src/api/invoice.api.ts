@@ -2,65 +2,34 @@ import { getManagementAccessToken } from "@/api/auth.api";
 import { Pagination } from "@/type_schema/common";
 import {
   FilterInvoiceRequestDTO,
+  InvoiceHistoryRequestType,
   InvoiceHistoryType,
-  InvoiceTemplate,
+  InvoiceTemplateType,
   UpdateInvoiceRequestDTO
 } from "@/type_schema/invoice";
 import axios from "axios";
 
 const INVOICE_BACKEND_URL = process.env.INVOICE_BACKEND_URL;
 
-export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<any> {
+export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<InvoiceHistoryType> {
   const token = await getManagementAccessToken();
-  console.log(request);
-  return 200;
+
   try {
     const response = await axios.post(`${INVOICE_BACKEND_URL}/api/v1/invoices/filter`, request, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
-    return response.status;
+    return response.data;
   } catch (error: any) {
-    return error.response.status;
+    return error.response;
   }
 }
 
-// BE trước khi return => lưu tạm => Invoice id temp. => save invoice => invoice id real
-// const invoiceFilterResponse = {
-//   data: {
-//     invoice_id_temp: "id",
-//     totalMoney: 1110,
-//     totalDuration: 129,
-//     customer: CustomerType,
-//     activities: [
-//       {
-//         name: "",
-//         // Activity Type
-//         tasks: [
-//           // Task Type
-//         ]
-//       },
-//       {
-//         name: "",
-//         // Activity Type
-//         tasks: [
-//           // Task Type
-//         ]
-//       }
-//     ]
-//   }
-// };
-
-// invoice/generate
-// Client
-const payload = {
-  invoice_id: "invoice_id_temp",
-  notes: ""
-};
-
-export async function saveInvoice(invoice: InvoiceHistoryType): Promise<any> {
+export async function saveInvoice(invoice: InvoiceHistoryRequestType): Promise<any> {
   const token = await getManagementAccessToken();
+
+  console.log(invoice);
   return 200;
   try {
     const response = await axios.post(`${INVOICE_BACKEND_URL}/api/v1/invoices/generate`, invoice, {
@@ -72,6 +41,54 @@ export async function saveInvoice(invoice: InvoiceHistoryType): Promise<any> {
   } catch (error: any) {
     return error.response.status;
   }
+}
+
+export async function getAllInvoiceHistories(
+  page?: number,
+  limit?: number,
+  keyword?: string,
+  sortBy?: string,
+  sortOrder?: string,
+  fromDate?: string,
+  toDate?: string,
+  customerId?: string,
+  status?: string
+): Promise<Pagination<InvoiceHistoryType>> {
+  const token = await getManagementAccessToken();
+
+  const params = new URLSearchParams();
+  if (page) params.append("page", page.toString());
+  if (limit) params.append("limit", limit.toString());
+  if (keyword) params.append("keyword", keyword);
+  if (sortBy) {
+    params.append("sort_by", sortBy);
+    const order = sortOrder === "asc" ? "asc" : "desc";
+    params.append("sort_order", order);
+  }
+  if (fromDate) params.append("from_date", fromDate);
+  if (toDate) params.append("to_date", toDate);
+  if (customerId) params.append("customer_id", customerId);
+  if (status) params.append("status", status);
+
+  return {
+    metadata: {
+      total: 4,
+      page: 1,
+      limit: 10,
+      totalPages: 1
+    },
+    data: JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[]
+  };
+
+  const response = await axios.get<Pagination<InvoiceHistoryType>>(`/api/v1/invoices?${params.toString()}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = response.data;
+  return data;
 }
 
 export async function updateInvoiceStatus(request: UpdateInvoiceRequestDTO, invoiceId: string): Promise<any> {
@@ -106,7 +123,7 @@ export async function getAllInvoiceTemplates(
   sortBy?: string,
   sortOrder?: string,
   isActive?: boolean
-): Promise<Pagination<InvoiceTemplate>> {
+): Promise<Pagination<InvoiceTemplateType>> {
   const token = await getManagementAccessToken();
 
   const params = new URLSearchParams();
@@ -130,7 +147,7 @@ export async function getAllInvoiceTemplates(
     data: fakeInvoiceTemplates()
   };
 
-  const response = await axios.get<Pagination<InvoiceTemplate>>(`/api/v1/invoice-templates?${params.toString()}`, {
+  const response = await axios.get<Pagination<InvoiceTemplateType>>(`/api/v1/invoice-templates?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -141,9 +158,9 @@ export async function getAllInvoiceTemplates(
   return data;
 }
 
-export async function getInvoiceTemplateById(invoiceTemplateId: number): Promise<InvoiceTemplate> {
+export async function getInvoiceTemplateById(invoiceTemplateId: number): Promise<InvoiceTemplateType> {
   const token = await getManagementAccessToken();
-  const response = await axios.get<InvoiceTemplate>(`/api/v1/invoice-templates/${invoiceTemplateId}`, {
+  const response = await axios.get<InvoiceTemplateType>(`/api/v1/invoice-templates/${invoiceTemplateId}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -154,10 +171,10 @@ export async function getInvoiceTemplateById(invoiceTemplateId: number): Promise
   return data;
 }
 
-const fakeInvoiceTemplates = (): InvoiceTemplate[] => {
+const fakeInvoiceTemplates = (): InvoiceTemplateType[] => {
   return [
     {
-      id: "1",
+      id: 1,
       name: "Default Template",
       format: "PDF",
       title: "Invoice",
@@ -176,7 +193,7 @@ const fakeInvoiceTemplates = (): InvoiceTemplate[] => {
       createdAt: new Date().toISOString()
     },
     {
-      id: "2",
+      id: 2,
       name: "HTML Template",
       format: "HTML",
       title: "Invoice",

@@ -23,8 +23,9 @@ import { CustomerType } from "@/type_schema/customer";
 import {
   FilterInvoiceRequestSchema,
   FilterInvoiceValidation,
+  InvoiceHistoryRequestType,
   InvoiceHistoryType,
-  InvoiceTemplate
+  InvoiceTemplateType
 } from "@/type_schema/invoice";
 import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
@@ -45,7 +46,8 @@ function InvoiceContent() {
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
   const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
-  const [invoiceTemplateList, setInvoiceTemplateList] = useState<InvoiceTemplate[] | null>(null);
+  const [invoiceTemplateList, setInvoiceTemplateList] = useState<InvoiceTemplateType[] | null>(null);
+  const [invoiceTemplateId, setInvoiceTemplateId] = useState<number>(1);
 
   const router = useRouter();
   const { user: currentUser } = useUser();
@@ -78,8 +80,8 @@ function InvoiceContent() {
         project_id: Number(project_id),
         activities: activities.map((activity) => Number(activity))
       };
-      const response = await filterInvoices(payload);
-
+      const response: InvoiceHistoryType = await filterInvoices(payload);
+      console.log(response);
       const exportableInvoices: InvoiceHistoryType = {
         id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
         customer: customerList.find((customer) => customer.id === payload.customer_id)!,
@@ -95,7 +97,7 @@ function InvoiceContent() {
         notes: "",
         createdBy: currentUser!.sub!,
         createdAt: new Date(2025, 4, 7).toISOString(),
-        templateId: 1,
+        template: invoiceTemplateList!.find((template) => template.id === invoiceTemplateId)!,
         activities: (activityList || []).map((activity) => ({
           ...activity,
           tasks: fakeTaskData(),
@@ -103,7 +105,7 @@ function InvoiceContent() {
         }))
       };
       setInvoiceHistory(exportableInvoices);
-      if (response == 201 || response == 200) {
+      if (response.hasOwnProperty("id")) {
         toast("Success", {
           description: "Filter invoice successfully",
           duration: 2000,
@@ -129,7 +131,30 @@ function InvoiceContent() {
   // Handle save invoice status
   const handleSaveInvoice = async () => {
     try {
-      const result = await saveInvoice(invoiceHistory!);
+      const payload: InvoiceHistoryRequestType = {
+        customerId: Number(invoiceHistory!.id),
+        projectId: invoiceHistory!.project!.id,
+        fromDate: invoiceHistory!.fromDate,
+        toDate: invoiceHistory!.toDate,
+        status: invoiceHistory!.status,
+        totalPrice: invoiceHistory!.totalPrice,
+        taxRate: invoiceHistory!.taxRate,
+        taxPrice: invoiceHistory!.taxPrice,
+        finalPrice: invoiceHistory!.finalPrice,
+        currency: invoiceHistory!.currency,
+        notes: invoiceHistory!.notes,
+        createdBy: invoiceHistory!.createdBy,
+        createdAt: invoiceHistory!.createdAt,
+        templateId: Number(invoiceHistory!.template.id),
+        activities: invoiceHistory!.activities.map((activity) => {
+          return {
+            activityId: activity.id,
+            totalPrice: activity.totalPrice,
+            tasks: activity.tasks.map((task) => task.id)
+          };
+        })
+      };
+      const result = await saveInvoice(payload);
       if (result == 201 || result == 200) {
         toast("Success", {
           description: "Invoice saved successfully",
@@ -230,7 +255,7 @@ function InvoiceContent() {
       {/* Filter Section */}
       <div className="bg-white dark:bg-slate-800 border border-gray-200 rounded-md p-4">
         <div className="pb-3">
-          <h2 className="text-lg font-medium">Filter invoice data</h2>
+          <h2 className="text-lg font-medium">Create invoice</h2>
         </div>
 
         <Form {...filterInvoiceForm}>
@@ -539,8 +564,8 @@ function InvoiceContent() {
                 <Label className="text-md font-semibold">Template:</Label>
                 {invoiceTemplateList && (
                   <Select
-                    onValueChange={(e) => setInvoiceHistory({ ...invoiceHistory!, templateId: Number(e) })}
-                    value={invoiceHistory.templateId?.toString() || ""}
+                    onValueChange={(e) => setInvoiceTemplateId(Number(e))}
+                    value={invoiceTemplateId.toString()}
                   >
                     <SelectTrigger className="w-full !mt-0 border-gray-200">
                       <SelectValue placeholder="Select a template" />

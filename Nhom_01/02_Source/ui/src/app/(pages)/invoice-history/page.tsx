@@ -1,18 +1,26 @@
 "use client";
 
+import { getAllInvoiceHistories } from "@/api/invoice.api";
+import FilterInvoiceHistoryModal from "@/app/(pages)/invoice-history/filter-modal";
 import InvoiceStatusUpdateDialog from "@/app/(pages)/invoice-history/invoice-history-status-dialog";
 import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
 import { generateInvoiceTemplatePDF } from "@/components/invoice/templates/invoice-pdf-generator";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { useTranslation } from "@/lib/i18n";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { Pagination } from "@/type_schema/common";
 import { InvoiceHistoryType } from "@/type_schema/invoice";
 import { Role } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
-import { Download, Eye, MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import debounce from "debounce";
+import { Download, Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 export const getCssColorClass = (status: string) => {
   // Generate a consistent color based on the first character of customer name
@@ -30,21 +38,95 @@ export const getCssColorClass = (status: string) => {
 };
 
 function InvoiceHistoryContent() {
-  const router = useRouter();
+  const { t } = useTranslation();
+  const queryParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
+  const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
+  const searchKeyword = queryParams.get("keyword") || "";
+  const [keyword, setKeyword] = useState<string>(searchKeyword);
+  const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
+  const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const [fromDate, setFromDate] = useState<string>(queryParams.get("fromDate") || "");
+  const [toDate, setToDate] = useState<string>(queryParams.get("toDate") || "");
+  const [customerId, setCustomerId] = useState<string>(queryParams.get("customerId") || "");
+  const [status, setStatus] = useState<string>(queryParams.get("status") || "");
   const [loading, setLoading] = useState(false);
 
-  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
-  const [invoiceHistories, setInvoiceHistories] = useState<InvoiceHistoryType[]>([]);
-
-  const fetchInvoiceHistories = async () => {
-    const histories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
-    setInvoiceHistories(histories);
+  const fetchInvoiceHistories = async (
+    page?: number,
+    limit?: number,
+    keyword?: string,
+    sortBy?: string,
+    sortOrder?: string,
+    fromDate?: string,
+    toDate?: string,
+    customerId?: string,
+    status?: string
+  ) => {
+    try {
+      const result = await getAllInvoiceHistories(
+        page,
+        limit,
+        keyword,
+        sortBy,
+        sortOrder,
+        fromDate,
+        toDate,
+        customerId,
+        status
+      );
+      setInvoiceHistories(result);
+    } catch (error) {
+      console.log("Error fetching invoiceHistories:", error);
+    }
   };
+
+  const updateQueryParams = (param: string, value: string) => {
+    const params = new URLSearchParams(queryParams);
+    params.set(param, value);
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  // Handle search input change
+  const handleUpdateKeyword = (keyword: string) => {
+    updateQueryParams("keyword", keyword);
+  };
+  const debounceSearchKeyword = useCallback(debounce(handleUpdateKeyword, 1000), []);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const keyword = e.target.value.toLowerCase();
+    setKeyword(keyword);
+    debounceSearchKeyword(keyword);
+  };
+
+  const goToPage = (page: number) => {
+    fetchInvoiceHistories(page, limit, keyword, sortBy, sortOrder, fromDate, toDate, customerId, status);
+    updateQueryParams("page", page.toString());
+  };
+
+  const updateUrl = (params: URLSearchParams) => {
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
+  };
+
+  const handleFilterChange = (props: any) => {
+    const params = new URLSearchParams();
+    const { _sortBy, _sortOrder } = props;
+    params.set("page", "1"); // Reset to first page when applying filters
+    if (_sortBy) params.set("sortBy", _sortBy);
+    if (_sortOrder) params.set("sortOrder", _sortOrder);
+    updateUrl(params);
+  };
+
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+  const [invoiceHistories, setInvoiceHistories] = useState<Pagination<InvoiceHistoryType> | null>(null);
 
   // Load invoices when component mounts
   useEffect(() => {
-    fetchInvoiceHistories();
-  }, []);
+    fetchInvoiceHistories(page, limit, searchKeyword, sortBy, sortOrder);
+  }, [page, limit, searchKeyword, sortBy, sortOrder]);
 
   // Handle download invoice
   const handleDownloadInvoice = async (invoiceHistory: InvoiceHistoryType) => {
@@ -65,13 +147,53 @@ function InvoiceHistoryContent() {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Invoice History</h1>
-        <Button
-          onClick={() => router.push("/invoice")}
-          className="bg-main text-white cursor-pointer"
-        >
-          Create Invoice
-        </Button>
+        <h1 className="text-2xl font-bold">Invoice template</h1>
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="pl-8 w-[200px] bg-white dark:bg-slate-700 border border-gray-200"
+              value={keyword}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <FilterInvoiceHistoryModal
+            handleFilterChangeAction={handleFilterChange}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            fromDate={fromDate}
+            toDate={toDate}
+            customerId={customerId}
+            status={status}
+          >
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex items-center justify-center cursor-pointer border border-gray-200"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </FilterInvoiceHistoryModal>
+          <Link href={"/invoice"}>
+            <Button className="flex items-center justify-center gap-2 cursor-pointer bg-main text-white">
+              Create <Plus />
+            </Button>
+          </Link>
+          <Button
+            variant="outline"
+            size="icon"
+          >
+            <FileDown className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+          >
+            <Upload className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-700 rounded-md shadow overflow-hidden">
@@ -118,8 +240,8 @@ function InvoiceHistoryContent() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {invoiceHistories.length > 0 ? (
-                invoiceHistories.map((invoice, index) => (
+              {invoiceHistories && invoiceHistories.data.length > 0 ? (
+                invoiceHistories.data.map((invoice, index) => (
                   <tr
                     key={index}
                     className="hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
@@ -203,6 +325,16 @@ function InvoiceHistoryContent() {
           </table>
         </div>
       </div>
+      {invoiceHistories && (
+        <div className="mt-4">
+          <PaginationWithLinks
+            page={invoiceHistories.metadata.page}
+            pageSize={invoiceHistories.metadata.limit}
+            totalCount={invoiceHistories.metadata.total}
+            callback={goToPage}
+          />
+        </div>
+      )}
     </>
   );
 }

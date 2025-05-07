@@ -3,7 +3,6 @@
 import { getAllActivities } from "@/api/activity.api";
 import { getAllExpenses } from "@/api/expense.api";
 import { updateTask } from "@/api/task.api";
-import { getAllUsers } from "@/api/user.api";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -42,11 +41,12 @@ export function TaskUpdateDialog({
     resolver: zodResolver(CreateTaskRequestSchema),
     defaultValues: {
       title: targetTask.title,
+      color: targetTask?.color || "#F3F4F6",
       deadline: targetTask.deadline,
       description: targetTask.description,
       activity_id: targetTask.activity.id.toString(),
       user_id: targetTask.user.user_id,
-      expense_id: targetTask.expense.id.toString()
+      expense_id: targetTask.expense?.id?.toString() || ""
     }
   });
   async function onSubmit(values: UpdateTaskValidation) {
@@ -124,12 +124,29 @@ export function TaskUpdateDialog({
                 control={updateTaskForm.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem className="col-span-12">
+                  <FormItem className="col-span-10">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter the task name"
                         className="!mt-0 border-gray-200"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={updateTaskForm.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Color</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="color"
+                        className="h-10 !mt-0 border-gray-200 cursor-pointer"
                         {...field}
                       />
                     </FormControl>

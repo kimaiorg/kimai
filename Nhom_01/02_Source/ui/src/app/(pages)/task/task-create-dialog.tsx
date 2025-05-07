@@ -32,6 +32,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
     resolver: zodResolver(CreateTaskRequestSchema),
     defaultValues: {
       title: "Write unit test",
+      color: "#FF5733",
       deadline: "2025-04-11",
       description: "",
       activity_id: "",
@@ -114,12 +115,29 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                 control={createTaskForm.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem className="col-span-12">
+                  <FormItem className="col-span-10">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter the task name"
                         className="!mt-0 border-gray-200"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createTaskForm.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Color</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="color"
+                        className="h-10 !mt-0 border-gray-200 cursor-pointer"
                         {...field}
                       />
                     </FormControl>

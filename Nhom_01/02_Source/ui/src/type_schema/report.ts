@@ -1,4 +1,55 @@
+import { TaskResponseType } from "@/type_schema/task";
+import { UserType } from "@/type_schema/user.schema";
 import { ComponentType } from "react";
+
+export type WeekOptionType = {
+  week: number;
+  label: string;
+  from: string;
+  to: string;
+};
+
+export type WeeklyOneUserReportResponseType = {
+  user_id: string;
+  fromDate: string; // Date string (Monday of the week)
+  toDate: string; // Date string (Sunday of the week)
+  entries: {
+    task: TaskResponseType;
+    duration: any[]; // String, number,... is flexible, it's up to you but must be in [Mon, Tue, Wed, Thu, Fri, Sat, Sun] (fromDate -> toDate) of the task
+    totalDuration: any; // Sum of durations from fromDate to toDate of the task
+  }[];
+};
+
+export type WeeklyOneUserReportType = WeeklyOneUserReportResponseType & {
+  user: UserType;
+  totalOfEachDay: string[];
+  totalOfDays: string; // Sum of totalOfEachDay
+};
+
+export type WeeklyAllUsersReportResponseType = {
+  fromDate: string; // Date string (Monday of the week)
+  toDate: string; // Date string (Sunday of the week)
+  entries: {
+    user_id: string;
+    user?: UserType;
+    task: TaskResponseType;
+    duration: any[]; // String, number,... is flexible, it's up to you but must be in [Mon, Tue, Wed, Thu, Fri, Sat, Sun] (fromDate -> toDate) of the task
+    totalDuration: any; // Sum of durations from fromDate to toDate of the task
+  }[];
+};
+
+export type WeeklyAllUsersReportType = WeeklyAllUsersReportResponseType & {
+  totalOfEachDay: string[];
+  totalOfDays: string; // Sum of totalOfEachDay
+};
+
+// ============================================================================
+
+export type WeekDayType = {
+  date: Date;
+  dayNumber: number;
+  dayName: string;
+};
 
 export interface WeeklyReportEntry {
   id: number;
@@ -41,12 +92,6 @@ export interface CustomerReportData {
   name: string;
   address?: string;
   contact?: string;
-}
-
-export interface WeekDay {
-  date: Date;
-  dayNumber: number;
-  dayName: string;
 }
 
 export interface ReportFilter {

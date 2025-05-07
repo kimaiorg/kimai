@@ -1,4 +1,6 @@
+import { WeekOptionType } from "@/type_schema/report";
 import { clsx, type ClassValue } from "clsx";
+import { formatDate } from "date-fns";
 import { UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
@@ -114,3 +116,42 @@ export const currencyFormat = (value: number, currency: string) =>
     style: "currency",
     currency: currency
   }).format(value);
+
+export const generateWeekOption = (): WeekOptionType[] => {
+  const currentYear = new Date().getFullYear();
+  const result: WeekOptionType[] = [];
+
+  // Find the first Monday of the year
+  const date = new Date(currentYear, 0, 1); // Jan 1st
+  while (date.getDay() !== 1) {
+    // 1 = Monday
+    date.setDate(date.getDate() + 1);
+  }
+
+  let weekNumber = 1;
+  while (date.getFullYear() === currentYear || (date.getFullYear() === currentYear + 1 && date.getDay() !== 1)) {
+    const fromDate = new Date(date);
+    const toDate = new Date(date);
+    toDate.setDate(toDate.getDate() + 6); // Sunday
+
+    result.push({
+      week: weekNumber,
+      label: `Week ${weekNumber} - ${currentYear} | ${formatDate(fromDate, "dd/MM")} - ${formatDate(toDate, "dd/MM")}`,
+      from: fromDate.toISOString(),
+      to: toDate.toISOString()
+    });
+
+    weekNumber++;
+    date.setDate(date.getDate() + 7); // Move to next Monday
+  }
+  return result;
+};
+
+export const getWeekNumber = (date: Date, weekOptions: WeekOptionType[]): number => {
+  const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
+  const currentWeekOption = weekOptions.filter((weekOption) => {
+    return currentDate >= weekOption.from && currentDate <= weekOption.to;
+  });
+  console.log(currentWeekOption);
+  return currentWeekOption![0].week;
+};

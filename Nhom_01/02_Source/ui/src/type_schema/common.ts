@@ -13,14 +13,6 @@ export type ErrorResponseType = {
   errorCode: string;
 };
 
-export type PaginationType<T> = {
-  page: number;
-  perPage: number;
-  total: number;
-  totalPages: number;
-  data: T[];
-};
-
 export type Pagination<T> = {
   metadata: {
     total: number;

@@ -92,18 +92,18 @@ export const CreateTaskRequestSchema = z
         message: "Expense is required"
       })
   })
-  .strict()
-  .refine(
-    (data) => {
-      const now = new Date().getTime();
-      const deadlineDate = new Date(data.deadline).getTime();
-      return now < deadlineDate;
-    },
-    {
-      message: "Deadline must be in the future",
-      path: ["deadline"]
-    }
-  );
+  .strict();
+// .refine(
+//   (data) => {
+//     const now = new Date().getTime();
+//     const deadlineDate = new Date(data.deadline).getTime();
+//     return now < deadlineDate;
+//   },
+//   {
+//     message: "Deadline must be in the future",
+//     path: ["deadline"]
+//   }
+// );
 
 export type CreateTaskValidation = z.infer<typeof CreateTaskRequestSchema>;
 export type UpdateTaskValidation = z.infer<typeof CreateTaskRequestSchema>;

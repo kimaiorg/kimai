@@ -5,15 +5,15 @@ import FilterInvoiceTemplateModal from "@/app/(pages)/invoice-template/filter-mo
 import { InvoiceTemplateCreateDialog } from "@/app/(pages)/invoice-template/invoice-template-create-dialog";
 import { InvoiceTemplateUpdateDialog } from "@/app/(pages)/invoice-template/invoice-template-update-dialog";
 import InvoiceTemplateViewDialog from "@/app/(pages)/invoice-template/invoice-template-view-dialog";
-import FilterProjectModal from "@/app/(pages)/project/filter-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { Pagination } from "@/type_schema/common";
-import { InvoiceTemplate } from "@/type_schema/invoice";
+import { InvoiceTemplateType } from "@/type_schema/invoice";
 import { Role } from "@/type_schema/role";
 import debounce from "debounce";
 import {
@@ -46,18 +46,7 @@ function InvoiceTemplatePage() {
     queryParams.get("isActive") ? Boolean(queryParams.get("isActive")) : true
   );
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [invoiceTemplateList, setInvoiceTemplateList] = useState<Pagination<InvoiceTemplate> | null>(null);
-
-  // const handleCreateTemplate = (newTemplate: Omit<InvoiceTemplate, "id" | "createdAt" | "updatedAt">) => {
-  //   const template: InvoiceTemplate = {
-  //     ...newTemplate,
-  //     id: Math.random().toString(36).substring(7),
-  //     createdAt: new Date().toISOString()
-  //   };
-  //   setTemplates(templates);
-  //   setIsCreateDialogOpen(false);
-  // };
+  const [invoiceTemplateList, setInvoiceTemplateList] = useState<Pagination<InvoiceTemplateType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
     const params = new URLSearchParams(queryParams);
@@ -142,7 +131,11 @@ function InvoiceTemplatePage() {
               <Filter className="h-4 w-4" />
             </Button>
           </FilterInvoiceTemplateModal>
-          <InvoiceTemplateCreateDialog refetchInvoiceTemplates={fetchInvoiceTemplates}>
+          <InvoiceTemplateCreateDialog
+            fetchInvoiceTemplates={() => {
+              fetchInvoiceTemplates();
+            }}
+          >
             <Button className="flex items-center justify-center gap-2 cursor-pointer bg-main text-white">
               Create <Plus />
             </Button>
@@ -237,6 +230,16 @@ function InvoiceTemplatePage() {
           </TableBody>
         </Table>
       </div>
+      {invoiceTemplateList && (
+        <div className="mt-4">
+          <PaginationWithLinks
+            page={invoiceTemplateList.metadata.page}
+            pageSize={invoiceTemplateList.metadata.limit}
+            totalCount={invoiceTemplateList.metadata.total}
+            callback={goToPage}
+          />
+        </div>
+      )}
     </>
   );
 }
