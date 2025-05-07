@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InvoiceRepository } from '@/infrastructure/repositories/invoice.repository';
 import { CreateInvoiceDto } from '@/api/invoice/dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '@/api/invoice/dto/update-invoice.dto';
@@ -135,9 +135,9 @@ export class InvoiceService {
           createdAt: invoice.createdAt.toISOString(),
           paymentDate: invoice.paymentDate ? invoice.paymentDate.toISOString() : undefined,
           items: (invoice.items || []).map((item: any) => ({
-            description: item.description || '',
-            quantity: Number(item.amount || 0),
-            unitPrice: Number(item.rate || 0),
+            description: item.description,
+            quantity: Number(item.amount),
+            unitPrice: Number(item.rate),
             taxRate: 10, // Mặc định 10%
             date: item.begin ? item.begin.toISOString() : new Date().toISOString(),
           })),
@@ -349,56 +349,193 @@ export class InvoiceService {
     }
   }
 
-  async filterInvoices(dto: FilterInvoiceDto): Promise<any> {
+  async filterInvoices(dto: FilterInvoiceDto, authHeader?: string): Promise<any> {
     try {
-      // Gọi timesheet-service để lấy dữ liệu timesheet
-      const timesheets = await this.fetchTimesheets(dto);
+      console.log('Filter invoice DTO:', dto);
       
-      // Nếu không có dữ liệu timesheet, trả về mảng rỗng
-      if (!timesheets || timesheets.length === 0) {
-        return {
-          success: true,
-          data: []
-        };
+      if (!dto.customer_id) {
+        throw new BadRequestException('customer_id is required');
+      }
+      if (!dto.from || !dto.to) {
+        throw new BadRequestException('from and to dates are required');
       }
       
-      // Tính toán tổng số tiền
-      const totalAmount = this.calculateTotalAmount(timesheets);
+      const customerInfo = await this.getCustomerInfo(dto.customer_id, authHeader) as any;
+      if (!customerInfo) {
+        throw new NotFoundException(`Customer with ID ${dto.customer_id} not found`);
+      }
       
-      // Tạo các invoice items từ timesheets
-      const invoiceItems = this.createInvoiceItems(timesheets);
+      let projectInfo: any = null;
+      if (dto.project_id) {
+        projectInfo = await this.getProjectInfo(dto.project_id, authHeader) as any;
+      }
       
-      // Lấy thông tin customer mẫu
-      const customerInfo = await this.getCustomerInfo(dto.customer_id);
+      const activities: any[] = [];
+      if (dto.activities && dto.activities.length > 0) {
+        for (const activityId of dto.activities) {
+          try {
+            const activityResponse = await firstValueFrom(
+              this.httpService.get(`${this.projectServiceUrl}/api/v1/activities/${activityId}`, {
+                headers: this.getHeaders(authHeader),
+                timeout: 5000
+              })
+            );
+            
+            if (activityResponse.data) {
+              activities.push(activityResponse.data as any);
+            }
+          } catch (error) {
+            console.error(`Failed to fetch activity info for ID ${activityId}:`, error.message);
+          }
+        }
+      }
       
-      // Tạo invoice history object
-      const invoiceHistory = {
+      const tasks = await this.fetchTasksByActivities(dto.activities || [], authHeader) as any[];
+      const expenses = await this.fetchExpensesFromTasks(tasks, authHeader) as any[];
+      
+      const taskToExpenseMap = new Map<number | string, any>();
+      expenses.forEach(expense => {
+        if (expense.task_id) {
+          taskToExpenseMap.set(expense.task_id, expense);
+        }
+      });
+      
+      const processedTasks: any[] = [];
+      const activityToTasksMap = new Map<number | string, any[]>();
+      tasks.forEach(task => {
+        const taskExpense = taskToExpenseMap.get(task.id);
+        const expenseAmount = taskExpense ? (parseFloat(String(taskExpense.amount)) || 100) : 100;
+        
+        const processedTask = {
+          ...task,
+          price: expenseAmount,
+          expense_id: task.expense_id || (taskExpense ? taskExpense.id : null)
+        };
+        
+        processedTasks.push(processedTask);
+        
+        if (task.activity_id) {
+          if (!activityToTasksMap.has(task.activity_id)) {
+            activityToTasksMap.set(task.activity_id, []);
+          }
+          const taskList = activityToTasksMap.get(task.activity_id);
+          if (taskList) {
+            taskList.push(processedTask);
+          }
+        }
+      });
+      
+      let totalTasksPrice = 0;
+      processedTasks.forEach(task => {
+        if (task.status === 'COMPLETED' || task.status === 'DONE') {
+          totalTasksPrice += task.price || 0;
+          console.log(`Adding task ${task.id} with price ${task.price} to total`);
+        }
+      });
+      
+      console.log(`Total tasks price: ${totalTasksPrice}`);
+    
+      const totalPrice = totalTasksPrice;
+      const taxRate = 10; // Giả sử thuế suất là 10%
+      const taxPrice = Math.round(totalPrice * taxRate / 100);
+      const finalPrice = totalPrice + taxPrice;
+
+
+      
+      // Tạo response object với định dạng chuẩn
+      const invoiceData = {
         id: `INV-${Date.now()}`,
-        customer: customerInfo,
+        customer: {
+          id: customerInfo.id,
+          name: customerInfo.name,
+          color: customerInfo.color || '#ff80d0',
+          description: customerInfo.description || '',
+          address: customerInfo.address || ''
+        },
+        project: projectInfo ? {
+          id: projectInfo.id,
+          name: projectInfo.name,
+          color: projectInfo.color || '#33ffa7',
+          project_number: projectInfo.project_number || '',
+          order_number: projectInfo.order_number || ''
+        } : null,
+        activities: activities.map((activity: any) => {
+        
+          const activityTasks = activityToTasksMap.get(activity.id) || [];
+          
+          const sortedTasks = [...activityTasks].sort((a, b) => {
+            const idA = Number(a.id) || 0;
+            const idB = Number(b.id) || 0;
+            return idB - idA;
+          });
+          
+          const activityTotalPrice = sortedTasks
+            .filter(task => task.status === 'COMPLETED' || task.status === 'DONE')
+            .reduce((total, task) => total + (task.price || 100), 0);
+          
+          return {
+            id: activity.id,
+            name: activity.name,
+            description: activity.description,
+            color: activity.color,
+            created_at: activity.created_at,
+            deleted_at: activity.deleted_at,
+            activity_number: activity.activity_number,
+            budget: activity.budget,
+            project: activity.project || (projectInfo ? {
+              id: projectInfo.id,
+              name: projectInfo.name,
+              color: projectInfo.color,
+              project_number: projectInfo.project_number,
+              order_number: projectInfo.order_number
+            } : null),
+            project_id: activity.project_id || (projectInfo ? projectInfo.id : null),
+            tasks: sortedTasks.map(task => ({
+              id: task.id,
+              title: task.title,
+              color: task.color,
+              deadline: task.deadline,
+              description: task.description,
+              created_at: task.created_at,
+              status: task.status,
+              billable: task.billable,
+              is_paid: task.is_paid,
+              quantity: task.quantity,
+              price: task.price || 100,
+              expense_id: task.expense_id
+            })),
+            team: activity.team,
+            team_id: activity.team_id,
+            totalPrice: activityTotalPrice,
+            updated_at: activity.updated_at
+          };
+        }),
+        fromDate: dto.from,
+        toDate: dto.to,
         date: new Date().toISOString(),
         dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'NEW',
-        totalPrice: totalAmount.toString(),
-        currency: 'USD',
-        notes: '',
-        createdBy: 'System',
+        status: "NEW",
+        taxPrice: taxPrice,
+        taxRate: taxRate,
+        templateId: 1,
+        totalPrice: totalPrice,
+        finalPrice: finalPrice,
+        currency: "USD",
+        notes: "",
         createdAt: new Date().toISOString(),
-        items: invoiceItems
+        createdBy: "system"
       };
       
       return {
         success: true,
-        data: [invoiceHistory]
+        data: [invoiceData] // Trả về dạng mảng để phù hợp với frontend
       };
     } catch (error) {
-      console.error('Failed to filter invoices:', error);
-      
-      // Tạo dữ liệu mẫu trong trường hợp lỗi
-      const mockInvoice = await this.createMockInvoice(dto);
-      
+      console.error('Error in filterInvoices service:', error);
       return {
-        success: true,
-        data: [mockInvoice]
+        success: false,
+        message: error.message || 'Failed to filter invoices',
+        error: error
       };
     }
   }
@@ -579,29 +716,236 @@ export class InvoiceService {
       notes: '',
       createdBy: 'System',
       createdAt: new Date().toISOString(),
-      items: []
     };
+  }
+
+  /**
+   * Fetch tasks by activity IDs
+   */
+  private async fetchTasksByActivities(activityIds: number[], authHeader?: string): Promise<any[]> {
+    if (!activityIds || activityIds.length === 0) {
+      return [];
+    }
+    
+    try {
+      const allTasks: any[] = [];
+      
+      for (const activityId of activityIds) {
+        console.log(`Fetching tasks for activity ID ${activityId} from ${this.projectServiceUrl}/api/v1/tasks?activity_id=${activityId}`);
+        
+       
+        console.log(`Request URL: ${this.projectServiceUrl}/api/v1/tasks?activity_id=${activityId}`);
+        
+        const response = await firstValueFrom(
+          this.httpService.get(`${this.projectServiceUrl}/api/v1/tasks`, {
+            params: {
+              activity_id: activityId.toString()
+            },
+            headers: this.getHeaders(authHeader),
+            timeout: 8000
+          })
+        );
+        
+        if (response.data && response.data.data) {
+          console.log(`Received ${response.data.data.length} tasks for activity ID ${activityId}`);
+          allTasks.push(...response.data.data);
+        }
+      }
+      
+      return allTasks;
+    } catch (error) {
+      console.error('Failed to fetch tasks by activities:', error);
+      if (error.response) {
+        console.error('Error response:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        });
+      }
+      return [];
+    }
+  }
+  
+  /**
+   * Fetch expenses from tasks
+   */
+  private async fetchExpensesFromTasks(tasks: any[], authHeader?: string): Promise<any[]> {
+    if (!tasks || tasks.length === 0) {
+      return [];
+    }
+    
+    try {
+      const expenses: any[] = [];
+      
+     
+      const expenseIds = tasks
+        .filter(task => task.expense_id)
+        .map(task => task.expense_id);
+      
+      if (expenseIds.length === 0) {
+        console.log('No expense IDs found in tasks, creating default expenses');
+        tasks.forEach((task, index) => {
+          const defaultExpense = {
+            id: `default-${task.id}`,
+            name: `Expense for ${task.title}`,
+            description: task.description || `Default expense for task ${task.id}`,
+            amount: (index + 1) * 100, // Mỗi task có một giá khác nhau
+            created_at: task.created_at,
+            task_id: task.id
+          };
+          expenses.push(defaultExpense);
+        });
+        return expenses;
+      }
+      
+      const uniqueExpenseIds = [...new Set(expenseIds)];
+      
+      for (const expenseId of uniqueExpenseIds) {
+        console.log(`Fetching expense data for ID ${expenseId} from ${this.projectServiceUrl}/api/v1/expenses/${expenseId}`);
+        
+        console.log(`Request URL: ${this.projectServiceUrl}/api/v1/expenses/${expenseId}`);
+        
+        try {
+          const response = await firstValueFrom(
+            this.httpService.get(`${this.projectServiceUrl}/api/v1/expenses/${expenseId}`, {
+              headers: this.getHeaders(authHeader),
+              timeout: 5000
+            })
+          );
+          
+          if (response.data) {
+            console.log(`Received expense data for ID ${expenseId}`);
+            const relatedTask = tasks.find(task => task.expense_id === expenseId);
+            if (relatedTask) {
+              response.data.task_id = relatedTask.id;
+            }
+            expenses.push(response.data);
+          }
+        } catch (error) {
+          console.error(`Failed to fetch expense with ID ${expenseId}:`, error.message);
+          const relatedTask = tasks.find(task => task.expense_id === expenseId);
+          if (relatedTask) {
+            const defaultExpense = {
+              id: expenseId,
+              name: `Expense for ${relatedTask.title}`,
+              description: relatedTask.description || `Default expense for task ${relatedTask.id}`,
+              amount: '100',
+              created_at: relatedTask.created_at,
+              task_id: relatedTask.id
+            };
+            expenses.push(defaultExpense);
+          }
+        }
+      }
+      
+      const tasksWithoutExpense = tasks.filter(task => !task.expense_id);
+      tasksWithoutExpense.forEach((task, index) => {
+        const defaultExpense = {
+          id: `default-${task.id}`,
+          name: `Expense for ${task.title}`,
+          description: task.description || `Default expense for task ${task.id}`,
+          amount: (index + 1) * 100, // Mỗi task có một giá khác nhau
+          created_at: task.created_at,
+          task_id: task.id
+        };
+        expenses.push(defaultExpense);
+      });
+      
+      console.log(`Fetched ${expenses.length} expenses from ${tasks.length} tasks`);
+      return expenses;
+    } catch (error) {
+      console.error('Failed to fetch expenses from tasks:', error);
+      if (error.response) {
+        console.error('Error response:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        });
+      }
+      return [];
+    }
+  }
+
+  /**
+   * Lấy thông tin project từ project-service
+   */
+  private async getProjectInfo(projectId: number, authHeader?: string): Promise<any> {
+    try {
+      console.log(`Fetching project info for ID ${projectId} from ${this.projectServiceUrl}/api/v1/projects/${projectId}`);
+      
+      let headers: any = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+      
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      }
+  
+      console.log(`Request URL: ${this.projectServiceUrl}/api/v1/projects/${projectId}`);
+      console.log(`Request headers:`, headers);
+      
+
+      const response = await firstValueFrom(
+        this.httpService.get(`${this.projectServiceUrl}/api/v1/projects/${projectId}`, {
+          headers: headers,
+          timeout: 5000 
+        })
+      );
+      
+      console.log('Project response status:', response.status);
+  
+      if (response.data) {
+        console.log('Project data from API:', response.data);
+        return response.data;
+      }
+      
+      
+      console.log(`No project data found for ID ${projectId}`);
+      return null;
+    } catch (error) {
+      console.error(`Failed to fetch project info for ID ${projectId}:`, error.message);
+      if (error.response) {
+        console.error('Error response:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        });
+      }
+      
+      // Trả về null trong trường hợp lỗi
+      return null;
+    }
   }
 
   /**
    * Lấy thông tin customer từ project-service
    */
-  private async getCustomerInfo(customerId: number): Promise<any> {
+  private async getCustomerInfo(customerId: number, authHeader?: string): Promise<any> {
     try {
       console.log(`Fetching customer info for ID ${customerId} from ${this.projectServiceUrl}/api/v1/customers/${customerId}`);
       
-      // Gọi API getCustomer từ project-service
+     
+      let headers: any = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+      
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      }
+      
+      console.log(`Request URL: ${this.projectServiceUrl}/api/v1/customers/${customerId}`);
+      console.log(`Request headers:`, headers);
+      
       const response = await firstValueFrom(
         this.httpService.get(`${this.projectServiceUrl}/api/v1/customers/${customerId}`, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
+          headers: headers,
           timeout: 5000 // Timeout sau 5 giây nếu không nhận được response
         })
       );
       
-      console.log('Response status:', response.status);
+      console.log('Customer response status:', response.status);
       
       // Kiểm tra nếu response có dữ liệu
       if (response.data) {
@@ -670,6 +1014,19 @@ export class InvoiceService {
       timezone: 'UTC',
       color: '#000000',
     };
+  }
+
+  private getHeaders(authHeader?: string): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+    
+    return headers;
   }
 
   private validateInvoiceStatus(status: string): "NEW" | "PENDING" | "PAID" | "CANCELED" | "OVERDUE" {
