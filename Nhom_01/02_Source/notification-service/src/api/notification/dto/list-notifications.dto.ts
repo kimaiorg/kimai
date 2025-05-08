@@ -5,7 +5,7 @@ import { NotificationType } from '@prisma/client';
 
 export const listNotificationsSchema = paginationSchema.extend({
   type: z.nativeEnum(NotificationType).optional(),
-  hasRead: z.boolean().optional(),
+  hasRead: z.coerce.boolean().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
 });
