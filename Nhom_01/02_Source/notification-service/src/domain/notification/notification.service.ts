@@ -20,9 +20,10 @@ export class NotificationService {
   async updateNotification(
     id: number,
     dto: UpdateNotificationDto,
+    userId: string,
   ): Promise<Notification | null> {
     return await this.notificationRepository.updateOne({
-      where: { id },
+      where: { id, target_id: userId },
       data: {
         has_read: dto.hasRead,
       },

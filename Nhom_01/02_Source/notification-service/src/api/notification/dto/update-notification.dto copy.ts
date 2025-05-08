@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const updateNotificationSchema = z.object({
-  hasRead: z.boolean(),
+  hasRead: z.coerce.boolean(),
 });
 
 export type UpdateNotificationDto = z.infer<typeof updateNotificationSchema>;

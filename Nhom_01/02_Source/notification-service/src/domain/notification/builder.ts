@@ -9,7 +9,7 @@ export const buildListNotificationsQuery = (
   };
 
   if (userId) {
-    where.user_id = userId;
+    where.target_id = userId;
   }
 
   if (dto.startDate) {

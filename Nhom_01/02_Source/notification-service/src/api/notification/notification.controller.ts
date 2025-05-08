@@ -48,14 +48,16 @@ export class NotificationController {
   }
 
   @Put(':id')
-  @UsePipes(new ZodValidationPipe(updateNotificationSchema))
   @ApiOperation({ summary: 'Update a notification' })
   @ApiBody({ type: UpdateNotificationSwaggerDto })
   async updateNotification(
+    @Body(new ZodValidationPipe(updateNotificationSchema))
+    dto: UpdateNotificationDto,
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateNotificationDto,
+    @Req() req: Request,
   ): Promise<Notification | null> {
-    return await this.notificationService.updateNotification(id, dto);
+    const userId = req['user'].sub as string;
+    return await this.notificationService.updateNotification(id, dto, userId);
   }
 
   @Get('')
