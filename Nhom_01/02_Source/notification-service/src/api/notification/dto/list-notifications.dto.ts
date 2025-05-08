@@ -1,0 +1,13 @@
+import { paginationSchema } from '@/libs/dto/pagination.dto';
+import { z } from 'zod';
+
+import { NotificationType } from '@prisma/client';
+
+export const listNotificationsSchema = paginationSchema.extend({
+  type: z.nativeEnum(NotificationType).optional(),
+  hasRead: z.boolean().optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
+
+export type ListNotificationsDto = z.infer<typeof listNotificationsSchema>;
