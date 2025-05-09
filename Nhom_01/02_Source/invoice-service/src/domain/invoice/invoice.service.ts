@@ -22,11 +22,47 @@ export class InvoiceService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
+
+    const env = this.configService.get<string>('NODE_ENV') || 'development';
+  
+    const defaultUrls = {
+      production: {
+        timesheet: 'https://timesheet-service.onrender.com',
+        project: 'https://project-service-6067.onrender.com'
+      },
+      development: {
+        timesheet: 'http://localhost:3334',
+        project: 'http://localhost:3333'
+      }
+    };
+    
+
+    if (env === 'production') {
+      const timesheetUrlProd = this.configService.get<string>('TIMESHEET_SERVICE_URL_PROD');
+      this.timesheetServiceUrl = timesheetUrlProd || defaultUrls.production.timesheet;
+      
+      const projectUrlProd = this.configService.get<string>('PROJECT_SERVICE_URL_PROD');
+      this.projectServiceUrl = projectUrlProd || defaultUrls.production.project;
+    } else {
+      const timesheetUrlDev = this.configService.get<string>('TIMESHEET_SERVICE_URL_DEV');
+      this.timesheetServiceUrl = timesheetUrlDev || defaultUrls.development.timesheet;
+      
+      const projectUrlDev = this.configService.get<string>('PROJECT_SERVICE_URL_DEV');
+      this.projectServiceUrl = projectUrlDev || defaultUrls.development.project;
+    }
+    
     const timesheetUrl = this.configService.get<string>('TIMESHEET_SERVICE_URL');
-    this.timesheetServiceUrl = timesheetUrl || 'https://timesheet-service.onrender.com';
+    if (timesheetUrl) {
+      this.timesheetServiceUrl = timesheetUrl;
+    }
     
     const projectUrl = this.configService.get<string>('PROJECT_SERVICE_URL');
-    this.projectServiceUrl = projectUrl || 'https://project-service-6067.onrender.com';
+    if (projectUrl) {
+      this.projectServiceUrl = projectUrl;
+    }
+    
+    console.log(`[${env}] Using Timesheet Service URL: ${this.timesheetServiceUrl}`);
+    console.log(`[${env}] Using Project Service URL: ${this.projectServiceUrl}`);
   }
 
   async createInvoice(dto: CreateInvoiceDto): Promise<any> {
@@ -528,7 +564,7 @@ export class InvoiceService {
       
       return {
         success: true,
-        data: [invoiceData] // Trả về dạng mảng để phù hợp với frontend
+        data: invoiceData
       };
     } catch (error) {
       console.error('Error in filterInvoices service:', error);
