@@ -11,6 +11,7 @@ import TimesheetViewDialog from "@/app/(pages)/timesheet/timesheet-view-dialog";
 import Loading from "@/app/loading";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -18,12 +19,14 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { secondsToTime } from "@/lib/utils";
 import { Pagination } from "@/type_schema/common";
-import { TimesheetType } from "@/type_schema/timesheet";
+import { ApprovalStatus } from "@/type_schema/request";
+import { TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
 import debounce from "debounce";
 import { Eye, FileDown, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2, Upload } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -100,7 +103,7 @@ function Timesheet() {
         const { user_id, project_id, activity_id, task_id, ...rest } = timesheet;
         return {
           ...rest,
-          status: timesheet.status as "running" | "stopped",
+          status: timesheet.status,
           user: userList.find((user) => user.user_id === user_id)!,
           project: projects.data.find((project) => project.id === project_id)!,
           activity: activities.data.find((activity) => activity.id === activity_id)!,
@@ -112,8 +115,9 @@ function Timesheet() {
       data: timesheets,
       metadata
     });
+    console.log(timesheets);
     const runningRecord = timesheets.find(
-      (timesheet) => timesheet.status === "running" && timesheet.user.user_id === currentUser!.sub
+      (timesheet) => timesheet.status === TimesheetStatus.TRACKING && timesheet.user.user_id === currentUser!.sub
     );
     if (runningRecord) {
       setTrackingTime(runningRecord);
@@ -188,6 +192,89 @@ function Timesheet() {
     if (_fromDate) params.set("fromDate", _fromDate);
     if (_toDate) params.set("toDate", _toDate);
     updateUrl(params);
+  };
+
+  const getTimesheetTrackingStatusBadge = (status: string) => {
+    switch (status) {
+      case TimesheetStatus.TRACKING:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-main text-white"
+          >
+            Tracking
+          </Badge>
+        );
+      case TimesheetStatus.TRACKED:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-lime-500 text-white"
+          >
+            Tracked
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-gray-500 text-gray-50"
+          >
+            N/A
+          </Badge>
+        );
+    }
+  };
+
+  const getTimesheetApprovalStatusBadge = (status?: string) => {
+    if (!status || status === "") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-gray-500 text-white"
+        >
+          N/A
+        </Badge>
+      );
+    }
+    switch (status) {
+      case ApprovalStatus.APPROVED:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-500 text-green-50"
+          >
+            Confirmed
+          </Badge>
+        );
+      case ApprovalStatus.PROCESSING:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-500 text-white"
+          >
+            Processing
+          </Badge>
+        );
+      case ApprovalStatus.REJECTED:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-rose-500 text-yellow-50"
+          >
+            Rejected
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-gray-500 text-gray-50"
+          >
+            N/A
+          </Badge>
+        );
+    }
   };
 
   if (loadingPage) return <Loading />;
@@ -277,7 +364,12 @@ function Timesheet() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Start</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">End</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Duration</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Tracking state
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Approval status
+                </th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
               </tr>
             </thead>
@@ -299,7 +391,7 @@ function Timesheet() {
                     key={index}
                     className={`border-t dark:border-slate-700 `}
                   >
-                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.task?.title}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.task?.title} </td>
 
                     <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                       {format(timesheet.start_time, "dd/MM/yyyy HH:mm")}
@@ -310,7 +402,12 @@ function Timesheet() {
                     <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                       {secondsToTime(timesheet.duration)}
                     </td>
-                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{timesheet.status}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
+                      {getTimesheetTrackingStatusBadge(timesheet.status)}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
+                      <Link href={`/request`}>{getTimesheetApprovalStatusBadge(timesheet?.approval_status)}</Link>
+                    </td>
 
                     <td className="px-4 py-2 text-center">
                       <DropdownMenu>

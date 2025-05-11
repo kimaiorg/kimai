@@ -1,13 +1,7 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
-import {
-  CreateTeamRequestDTO,
-  TeamResponseType,
-  TeamSimpleType,
-  TeamType,
-  UpdateTeamRequestDTO
-} from "@/type_schema/team";
+import { CreateTeamRequestDTO, TeamResponseType, UpdateTeamRequestDTO } from "@/type_schema/team";
 
 export async function getAllTeams(
   page?: number,
@@ -32,7 +26,7 @@ export async function getAllTeams(
   if (projectId) params.append("project_id", projectId);
   if (leadId) params.append("lead_id", leadId);
 
-  const response = await myAxios.get<Pagination<TeamResponseType>>(`/api/v1/teams?${params.toString()}`, {
+  const response = await projectAxios.get<Pagination<TeamResponseType>>(`/api/v1/teams?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -47,7 +41,7 @@ export async function addNewTeam(request: CreateTeamRequestDTO): Promise<number>
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/teams`, payload, {
+    const response = await projectAxios.post(`/api/v1/teams`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -62,7 +56,7 @@ export async function updateTeam(request: UpdateTeamRequestDTO, teamId: number):
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.put(`/api/v1/teams/${teamId}`, payload, {
+    const response = await projectAxios.put(`/api/v1/teams/${teamId}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

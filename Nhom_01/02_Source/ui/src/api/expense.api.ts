@@ -1,5 +1,5 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
 import { CreateExpenseRequestDTO, ExpenseType, UpdateExpenseRequestDTO } from "@/type_schema/expense";
 
@@ -24,7 +24,7 @@ export async function getAllExpenses(
   }
   if (activityId) params.append("activity_id", activityId);
 
-  const response = await myAxios.get<Pagination<ExpenseType>>(`/api/v1/expenses?${params.toString()}`, {
+  const response = await projectAxios.get<Pagination<ExpenseType>>(`/api/v1/expenses?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -39,7 +39,7 @@ export async function addNewExpense(request: CreateExpenseRequestDTO): Promise<n
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/expenses`, payload, {
+    const response = await projectAxios.post(`/api/v1/expenses`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -54,7 +54,7 @@ export async function updateExpense(request: UpdateExpenseRequestDTO, expenseId:
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.put(`/api/v1/expenses/${expenseId}`, payload, {
+    const response = await projectAxios.put(`/api/v1/expenses/${expenseId}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

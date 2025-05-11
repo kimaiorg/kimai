@@ -1,18 +1,20 @@
 "use client";
 
-import { getRequestById, requestCards } from "@/app/(pages)/request/request-items";
+import { getRequestById, requestCards, RequestPageType } from "@/app/(pages)/request/request-items";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n";
 import { RequestViewType } from "@/type_schema/request";
 import { SendHorizontal } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 function RequestPage() {
   const queryParams = useSearchParams();
   const pathname = usePathname();
-  const requestId = queryParams.get("rq") || "timesheet";
+  const { replace } = useRouter();
+  const requestId = queryParams.get("rq") || RequestPageType.TIMESHEET;
   const { t } = useTranslation();
   const [selectedRequest, setSelectedRequest] = useState<RequestViewType>(getRequestById(requestId) || requestCards[0]);
 
@@ -56,8 +58,12 @@ function RequestPage() {
       </div>
       {selectedRequest && (
         <>
-          <div className="py-6">
-            <h2 className="text-lg font-bold mb-2">{selectedRequest.title}</h2>
+          <div className="">
+            <div className="py-5">
+              <div className="max-w-[70%] mx-auto">
+                <Separator />
+              </div>
+            </div>
             <selectedRequest.component />
           </div>
         </>

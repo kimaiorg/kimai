@@ -11,7 +11,7 @@ export type InvoiceHistoryItemType = Omit<ActivityType, "tasks"> & {
 };
 
 export type InvoiceHistoryType = {
-  id: string;
+  invoiceId: number;
   customer: CustomerType;
   project: ProjectType;
   fromDate: string;
@@ -80,13 +80,13 @@ export const FilterInvoiceRequestSchema = z
         path: ["to"]
       });
     }
-    if (activities.length === 0) {
-      ctx.addIssue({
-        code: "custom",
-        message: "At least one activity must be selected",
-        path: ["activities"]
-      });
-    }
+    // if (activities.length === 0) {
+    //   ctx.addIssue({
+    //     code: "custom",
+    //     message: "At least one activity must be selected",
+    //     path: ["activities"]
+    //   });
+    // }
   });
 
 export type FilterInvoiceValidation = z.infer<typeof FilterInvoiceRequestSchema>;
@@ -120,23 +120,29 @@ export type UpdateInvoiceRequestDTO = {
 };
 
 export type InvoiceHistoryRequestType = {
-  customerId: number;
-  projectId: number;
-  fromDate: string;
-  toDate: string;
-  status: string; // NEW, PENDING, PAID, CANCELED
-  totalPrice: number; // Total price of the invoice
-  taxRate: number; // Tax rate
-  taxPrice: number; // Tax price: totalPrice * taxRate
-  finalPrice: number; // Total price after tax: totalPrice + taxPrice
+  invoiceTempId: number;
   currency: string; // Currency of the invoice: USD, VND, etc.
   notes?: string; // Additional notes
-  createdBy: string;
-  createdAt: string;
   templateId: number; // ID of the invoice template
-  activities: {
-    activityId: number; // ID of the activity
-    totalPrice: number;
-    tasks: number[]; // The list of the task ids
-  }[];
 };
+// export type InvoiceHistoryRequestType = {
+//   customerId: number;
+//   projectId: number;
+//   fromDate: string;
+//   toDate: string;
+//   status: string; // NEW, PENDING, PAID, CANCELED
+//   totalPrice: number; // Total price of the invoice
+//   taxRate: number; // Tax rate
+//   taxPrice: number; // Tax price: totalPrice * taxRate
+//   finalPrice: number; // Total price after tax: totalPrice + taxPrice
+//   currency: string; // Currency of the invoice: USD, VND, etc.
+//   notes?: string; // Additional notes
+//   createdBy: string;
+//   createdAt: string;
+//   templateId: number; // ID of the invoice template
+//   activities: {
+//     activityId: number; // ID of the activity
+//     totalPrice: number;
+//     tasks: number[]; // The list of the task ids
+//   }[];
+// };

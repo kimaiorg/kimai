@@ -1,5 +1,5 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { ReportService } from "@/db/reportService";
 import { Pagination } from "@/type_schema/common";
 import {
@@ -100,7 +100,7 @@ export async function getProjectOverviewReport(customerId?: number): Promise<Pro
     const params = new URLSearchParams();
     if (customerId) params.append("customer_id", customerId.toString());
 
-    const response = await myAxios.get<ProjectOverviewResponse>(
+    const response = await projectAxios.get<ProjectOverviewResponse>(
       `/api/v1/reports/projects/overview?${params.toString()}`,
       {
         headers: {

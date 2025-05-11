@@ -26,6 +26,10 @@ function NotificationPage() {
   const [keyword, setKeyword] = useState<string>(searchKeyword);
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
+  const [startDate, setStartDate] = useState<string>(queryParams.get("start_date") || "");
+  const [endDate, setEndDate] = useState<string>(queryParams.get("end_date") || "");
+  const [type, setType] = useState<string>(queryParams.get("type") || "");
+  const [hasRead, setHasRead] = useState<string>(queryParams.get("has_read") || "false");
   const [notificationList, setNotificationList] = useState<Pagination<NotificationType> | null>(null);
 
   const updateQueryParams = (param: string, value: string) => {
@@ -53,10 +57,14 @@ function NotificationPage() {
 
   const handleFilterChange = (props: any) => {
     const params = new URLSearchParams();
-    const { _sortBy, _sortOrder } = props;
+    const { _sortBy, _sortOrder, _startDate, _endDate, _type, _hasRead } = props;
     params.set("page", "1"); // Reset to first page when applying filters
     if (_sortBy) params.set("sortBy", _sortBy);
     if (_sortOrder) params.set("sortOrder", _sortOrder);
+    if (_startDate) params.set("start_date", _startDate);
+    if (_endDate) params.set("end_date", _endDate);
+    if (_type) params.set("type", _type);
+    if (_hasRead) params.set("has_read", _hasRead);
     updateUrl(params);
   };
 
@@ -65,10 +73,24 @@ function NotificationPage() {
     limit?: number,
     keyword?: string,
     sortBy?: string,
-    sortOrder?: string
+    sortOrder?: string,
+    startDate?: string,
+    endDate?: string,
+    type?: string,
+    hasRead?: string
   ) => {
     try {
-      const result = await getAllNotifications(page, limit, keyword, sortBy, sortOrder);
+      const result = await getAllNotifications(
+        page,
+        limit,
+        keyword,
+        sortBy,
+        sortOrder,
+        startDate,
+        endDate,
+        type,
+        hasRead
+      );
       setNotificationList(result);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -77,10 +99,10 @@ function NotificationPage() {
 
   useEffect(() => {
     const fetchNecessaryData = async () => {
-      await handleFetchNotifications(page, limit, searchKeyword, sortBy, sortOrder);
+      await handleFetchNotifications(page, limit, searchKeyword, sortBy, sortOrder, startDate, endDate, type, hasRead);
     };
     fetchNecessaryData();
-  }, [page, limit, searchKeyword, sortBy, sortOrder]);
+  }, [page, limit, searchKeyword, sortBy, sortOrder, startDate, endDate, type, hasRead]);
 
   const goToPage = (page: number) => {
     handleFetchNotifications(page, limit, keyword, sortBy, sortOrder);
@@ -137,6 +159,10 @@ function NotificationPage() {
             handleFilterChangeAction={handleFilterChange}
             sortBy={sortBy}
             sortOrder={sortOrder}
+            startDate={startDate}
+            endDate={endDate}
+            type={type}
+            hasRead={hasRead}
           >
             <Button
               variant="outline"
@@ -218,7 +244,7 @@ function NotificationPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-12">
+          <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg dark:bg-slate-800">
             <Bell className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-1">No notifications</h3>
             <p className="text-sm text-muted-foreground">You don't have any notifications at the moment</p>

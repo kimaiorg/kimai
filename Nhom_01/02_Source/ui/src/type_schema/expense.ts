@@ -1,6 +1,7 @@
 import { ActivityType } from "@/type_schema/activity";
 import { CategoryType } from "@/type_schema/category";
 import { ProjectType } from "@/type_schema/project";
+import { ApprovalStatus } from "@/type_schema/request";
 import { TaskSimpleType } from "@/type_schema/task";
 import { z } from "zod";
 
@@ -16,6 +17,7 @@ export type ExpenseSimpleType = {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  approval_status?: ApprovalStatus;
 };
 
 export type ExpenseType = {
@@ -27,12 +29,20 @@ export type ExpenseType = {
   project: ProjectType;
   activity: ActivityType;
   category: CategoryType;
-  quantity: number;
   cost: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
   task: TaskSimpleType[];
+};
+
+export type ExpenseRequestType = {
+  id: number;
+  expense: ExpenseType;
+  new_quantity: number;
+  new_cost: number;
+  created_at: string;
+  updated_at: string;
 };
 
 export const CreateExpenseRequestSchema = z
@@ -68,9 +78,6 @@ export const CreateExpenseRequestSchema = z
       .nonempty({
         message: "Assignee is required"
       }),
-    quantity: z.string({
-      required_error: "Quantity is required"
-    }),
     cost: z.string({
       required_error: "Cost is required"
     })
@@ -97,7 +104,6 @@ export type CreateExpenseRequestDTO = {
   activity_id: number;
   project_id: number;
   category_id: number;
-  quantity: number;
   cost: number;
 };
 
@@ -108,6 +114,5 @@ export type UpdateExpenseRequestDTO = {
   activity_id: number;
   project_id: number;
   category_id: number;
-  quantity: number;
   cost: number;
 };

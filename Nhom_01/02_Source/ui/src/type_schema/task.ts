@@ -1,7 +1,30 @@
 import { ActivityType } from "@/type_schema/activity";
 import { ExpenseType } from "@/type_schema/expense";
+import { ApprovalStatus } from "@/type_schema/request";
 import { UserType } from "@/type_schema/user.schema";
 import { string, z } from "zod";
+
+export enum TaskStatus {
+  PROCESSING = "PROCESSING",
+  DONE = "DONE",
+  DOING = "DOING",
+  OVERDUE = "OVERDUE",
+  UNDEFINED = "N/A"
+}
+
+// Get the next status based on current status
+export const getNextTaskStatus = (currentStatus?: string) => {
+  if (!currentStatus) return TaskStatus.UNDEFINED;
+  switch (currentStatus) {
+    case TaskStatus.DOING:
+    case TaskStatus.PROCESSING:
+      return TaskStatus.DONE;
+    case TaskStatus.DONE:
+      return TaskStatus.DOING;
+    default:
+      return TaskStatus.UNDEFINED;
+  }
+};
 
 export type TaskSimpleType = {
   id: number;
@@ -14,7 +37,8 @@ export type TaskSimpleType = {
   description: string;
   updated_at: string;
   user_id: string;
-  status: string; // PROCESSING, DONE. => DONE
+  status: TaskStatus;
+  approval_status?: ApprovalStatus;
   billable: boolean; // true, false. => true
   is_paid: boolean; // true, false. => false
   expense_id: number; // => query expense => cost
@@ -32,8 +56,11 @@ export type TaskResponseType = {
   activity: ActivityType;
   expense: ExpenseType;
   expense_id: string;
+  quantity: number;
   user_id: string;
-  status: string;
+  user?: UserType;
+  status: TaskStatus;
+  approval_status?: ApprovalStatus;
   billable: boolean;
 };
 
@@ -48,8 +75,10 @@ export type TaskType = {
   updated_at: string;
   activity: ActivityType;
   expense: ExpenseType;
+  quantity: number;
   user: UserType;
-  status: string;
+  status: TaskStatus;
+  approval_status?: ApprovalStatus;
   billable: boolean;
 };
 
@@ -68,7 +97,6 @@ export const CreateTaskRequestSchema = z
       }),
     color: string(),
     deadline: z.string(),
-    // timeEstimate: z.string(),
     description: z.string().optional(),
     activity_id: z
       .string({
@@ -90,7 +118,15 @@ export const CreateTaskRequestSchema = z
       })
       .nonempty({
         message: "Expense is required"
+      }),
+    quantity: z
+      .string({
+        required_error: "Quantity is required"
       })
+      .nonempty({
+        message: "Quantity is required"
+      }),
+    billable: z.string().default("true")
   })
   .strict();
 // .refine(
@@ -115,6 +151,8 @@ export type CreateTaskRequestDTO = {
   activity_id: number;
   user_id: string;
   expense_id: number;
+  quantity: number;
+  billable: boolean;
 };
 
 export type UpdateTaskRequestDTO = {
@@ -125,4 +163,10 @@ export type UpdateTaskRequestDTO = {
   activity_id: number;
   user_id: string;
   expense_id: number;
+  quantity: number;
+  billable: boolean;
+};
+
+export type TaskExpenseUpdateRequestType = {
+  new_quantity: number;
 };

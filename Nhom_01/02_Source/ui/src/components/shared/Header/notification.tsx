@@ -19,7 +19,7 @@ export default function Notification({ children }: { children: React.ReactNode }
   const getNotifications = async () => {
     const result = await getAllNotifications(1, 3);
     // console.log(result.data);
-    setNotifications(result.data.slice(0, 3));
+    setNotifications(result.data);
   };
 
   useEffect(() => {
@@ -137,9 +137,9 @@ export default function Notification({ children }: { children: React.ReactNode }
 
             {notifications && notifications.length > 0 && (
               <div className="border-t border-gray-200">
-                {notifications.map((notification) => (
+                {notifications.map((notification, index) => (
                   <div
-                    key={notification.id}
+                    key={index}
                     className={`flex items-center p-3 border-b border-gray-200 hover:bg-muted/50 cursor-pointer transition-colors ${
                       !notification.hasRead ? "bg-gray-100 dark:bg-slate-800" : ""
                     }`}

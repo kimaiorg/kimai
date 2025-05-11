@@ -1,5 +1,5 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { ActivityType, CreateActivityRequestDTO, UpdateActivityRequestDTO } from "@/type_schema/activity";
 import { Pagination } from "@/type_schema/common";
 
@@ -30,7 +30,7 @@ export async function getAllActivities(
       params.append("sort_order", sortOrder);
     }
   }
-  const response = await myAxios.get<Pagination<ActivityType>>(`/api/v1/activities?${params.toString()}`, {
+  const response = await projectAxios.get<Pagination<ActivityType>>(`/api/v1/activities?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -45,7 +45,7 @@ export async function addNewActivity(request: CreateActivityRequestDTO): Promise
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/activities`, payload, {
+    const response = await projectAxios.post(`/api/v1/activities`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -60,7 +60,7 @@ export async function updateActivity(request: UpdateActivityRequestDTO, id: numb
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.put(`/api/v1/activities/${id}`, payload, {
+    const response = await projectAxios.put(`/api/v1/activities/${id}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

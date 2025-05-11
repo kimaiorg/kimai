@@ -43,7 +43,6 @@ export function ExpenseCreateDialog({
       activity_id: "",
       project_id: "",
       category_id: "",
-      quantity: "1",
       cost: "0"
     }
   });
@@ -51,12 +50,11 @@ export function ExpenseCreateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { activity_id, project_id, category_id, quantity, cost, ...rest } = values;
+      const { activity_id, project_id, category_id, cost, ...rest } = values;
       const payload: CreateExpenseRequestDTO = {
         activity_id: Number(activity_id),
         project_id: Number(project_id),
         category_id: Number(category_id),
-        quantity: Number(quantity),
         cost: Number(cost),
         ...rest
       };
@@ -288,7 +286,7 @@ export function ExpenseCreateDialog({
                   control={createExpenseForm.control}
                   name="category_id"
                   render={({ field }) => (
-                    <FormItem className="col-span-12">
+                    <FormItem className="col-span-9">
                       <FormLabel>Category</FormLabel>
                       <FormControl>
                         <Select
@@ -317,24 +315,6 @@ export function ExpenseCreateDialog({
                   )}
                 />
               )}
-              <FormField
-                control={createExpenseForm.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem className="col-span-3">
-                    <FormLabel>Quantity</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Enter quantity"
-                        className="!mt-0 border-gray-200"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={createExpenseForm.control}
                 name="cost"

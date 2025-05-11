@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { handleErrorApi } from "@/lib/utils";
+import { formatCurrency, handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
 import { ExpenseType } from "@/type_schema/expense";
 import { CreateTaskRequestDTO, CreateTaskRequestSchema, CreateTaskValidation } from "@/type_schema/task";
@@ -18,7 +18,7 @@ import { UserType } from "@/type_schema/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 export function TaskCreateDialog({ children, fetchTasks }: { children: React.ReactNode; fetchTasks: () => void }) {
@@ -27,6 +27,8 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
   const [activityList, setActivityList] = useState<ActivityType[]>([]);
   const [userList, setUserList] = useState<UserType[]>([]);
   const [expenseList, setExpenseList] = useState<ExpenseType[] | null>(null);
+
+  const [totalPrice, setTotalPrice] = useState<number | null>(null);
 
   const createTaskForm = useForm<CreateTaskValidation>({
     resolver: zodResolver(CreateTaskRequestSchema),
@@ -37,17 +39,21 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
       description: "",
       activity_id: "",
       expense_id: "",
-      user_id: ""
+      user_id: "",
+      quantity: "",
+      billable: "true"
     }
   });
   async function onSubmit(values: CreateTaskValidation) {
     if (loading) return;
     setLoading(true);
     try {
-      const { activity_id, expense_id, ...rest } = values;
+      const { activity_id, expense_id, quantity, billable, ...rest } = values;
       const payload: CreateTaskRequestDTO = {
         activity_id: Number(activity_id),
         expense_id: Number(expense_id),
+        quantity: Number(quantity),
+        billable: billable === "true",
         ...rest
       };
       console.log(payload);
@@ -91,6 +97,23 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
     };
     fetchUsersAndActivities();
   }, []);
+
+  const selectedExpenseId = useWatch({
+    control: createTaskForm.control,
+    name: "expense_id"
+  });
+
+  const selectedQuantity = useWatch({
+    control: createTaskForm.control,
+    name: "quantity"
+  });
+
+  useEffect(() => {
+    if (!selectedQuantity || !selectedExpenseId) return;
+    setTotalPrice(
+      Number(expenseList!.find((expense) => expense.id === Number(selectedExpenseId))!.cost) * Number(selectedQuantity)
+    );
+  }, [selectedQuantity, selectedExpenseId]);
 
   return (
     <Dialog
@@ -145,39 +168,6 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   </FormItem>
                 )}
               />
-              {/* <FormField
-                control={createTaskForm.control}
-                name="timeEstimate"
-                render={({ field }) => (
-                  <FormItem className="col-span-3">
-                    <FormLabel>Estimate time</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        className="h-10 !mt-0 border-gray-200"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-              {/* <FormField
-                control={createTaskForm.control}
-                name="from"
-                render={({ field }) => (
-                  <FormItem className="col-span-6">
-                    <FormLabel>From</FormLabel>
-                    <FormControl>
-                      <DateTimePicker
-                        date={field.value}
-                        setDate={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
               <FormField
                 control={createTaskForm.control}
                 name="deadline"
@@ -252,7 +242,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   control={createTaskForm.control}
                   name="user_id"
                   render={({ field }) => (
-                    <FormItem className="col-span-6">
+                    <FormItem className="col-span-12">
                       <FormLabel>Assignee</FormLabel>
                       <FormControl>
                         <Select
@@ -304,7 +294,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                                 key={index}
                                 value={expense.id.toString()}
                               >
-                                {expense.name}
+                                {expense.name} - {formatCurrency(expense.cost)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -315,6 +305,24 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   )}
                 />
               )}
+              <FormField
+                control={createTaskForm.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem className="col-span-3">
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        className="h-10 !mt-0 border-gray-200 cursor-pointer"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {totalPrice && <div className="col-span-5">Total: {formatCurrency(totalPrice)}</div>}
             </div>
 
             <DialogFooter>

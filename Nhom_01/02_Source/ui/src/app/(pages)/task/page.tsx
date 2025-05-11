@@ -3,11 +3,13 @@
 import { getAllTasks } from "@/api/task.api";
 import { getAllUsers } from "@/api/user.api";
 import FilterTaskModal from "@/app/(pages)/task/filter-modal";
+import { TaskConfirmDialog } from "@/app/(pages)/task/task-confirm-dialog";
 import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
 import { TaskUpdateDialog } from "@/app/(pages)/task/task-update-dialog";
 import TaskViewDialog from "@/app/(pages)/task/task-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -17,11 +19,23 @@ import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { Pagination } from "@/type_schema/common";
 import { ExpenseType } from "@/type_schema/expense";
 import { Role } from "@/type_schema/role";
-import { TaskType } from "@/type_schema/task";
+import { TaskStatus, TaskType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
 import { format } from "date-fns";
 import debounce from "debounce";
-import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
+import {
+  CircleCheckBig,
+  Eye,
+  FileDown,
+  Filter,
+  History,
+  MoreHorizontal,
+  Plus,
+  Search,
+  SquarePen,
+  Trash2,
+  Upload
+} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -40,7 +54,6 @@ function Task() {
   const activityId = queryParams.get("activityId") || "";
   const userId = queryParams.get("userId") || "";
   const [taskList, setTaskList] = useState<Pagination<TaskType> | null>(null);
-  const [expenseList, setExpenseList] = useState<ExpenseType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchTasks = async (
@@ -58,7 +71,7 @@ function Task() {
         dispatch(updateUserList(result.users));
       }
       const result = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
-      console.log(result.data);
+
       const { data, metadata } = result;
       const taskData = data.map((task) => {
         const { user_id, ...rest } = task;
@@ -128,6 +141,57 @@ function Task() {
     updateUrl(params);
   };
 
+  const getTaskStatusBadge = (status?: string) => {
+    if (!status || status === "") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-gray-500 text-white"
+        >
+          N/A
+        </Badge>
+      );
+    }
+    switch (status) {
+      case TaskStatus.DONE:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-500 text-green-50"
+          >
+            Done
+          </Badge>
+        );
+      case TaskStatus.PROCESSING:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-main text-white"
+          >
+            Processing
+          </Badge>
+        );
+      case TaskStatus.DOING:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-500 text-yellow-50"
+          >
+            Doing
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-gray-500 text-gray-50"
+          >
+            N/A
+          </Badge>
+        );
+    }
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -187,7 +251,8 @@ function Task() {
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Name</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Activity</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Assignee</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Deadline</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Due date</th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
             </tr>
           </thead>
@@ -224,6 +289,9 @@ function Task() {
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                     {format(task.deadline, "dd/MM/yyyy HH:mm")}
                   </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
+                    {getTaskStatusBadge(task.status)}
+                  </td>
                   <td className="px-4 py-2 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -244,6 +312,21 @@ function Task() {
                             <Eye size={14} /> Show
                           </div>
                         </TaskViewDialog>
+                        {task?.status && task.status === TaskStatus.PROCESSING && (
+                          <TaskConfirmDialog
+                            targetTask={task}
+                            fetchTasks={handleFetchTasks}
+                          >
+                            <div className="flex gap-2 text-lime-600 dark:text-lime-400 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                              <CircleCheckBig size={14} /> Mark as done
+                            </div>
+                          </TaskConfirmDialog>
+                        )}
+                        {task?.status && task.status === TaskStatus.DONE && (
+                          <div className="flex gap-2 text-yellow-600 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <History size={14} /> Mark as processing
+                          </div>
+                        )}
                         <TaskUpdateDialog
                           targetTask={task}
                           fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}

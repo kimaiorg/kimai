@@ -1,9 +1,8 @@
 services:
-  
-  postgres_database_for_project_service: 
+  postgres_database_for_project_service:
     image: postgres:16-alpine
     container_name: postgres_db_for_project_service
-    restart: unless-stopped
+    restart: always
     ports:
       - 5433:5432
     environment:
@@ -20,10 +19,10 @@ services:
     networks:
       - project_network
 
-  postgres_database_for_timesheet_service: 
+  postgres_database_for_timesheet_service:
     image: postgres:16-alpine
     container_name: postgres_db_for_timesheet_service
-    restart: unless-stopped
+    restart: always
     ports:
       - 5434:5432
     environment:
@@ -40,26 +39,66 @@ services:
     networks:
       - project_network
 
-  # project_service_application: 
+  postgres_database_for_invoice_service:
+    image: postgres:16-alpine
+    container_name: postgres_db_for_invoice_service
+    restart: always
+    ports:
+      - 5434:5432
+    environment:
+      - POSTGRES_DB=invoice
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - project_network
+
+  postgres_database_for_notification_service:
+    image: postgres:16-alpine
+    container_name: postgres_db_for_notification_service
+    restart: always
+    ports:
+      - 5434:5432
+    environment:
+      - POSTGRES_DB=notification
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - project_network
+
+  # project_service_application:
   #   depends_on:
   #     - postgres_database_for_project_service
   #   container_name: project_service_application
-  #   restart: unless-stopped
-  #   env_file: ./project-service/.env 
+  #   restart: always
+  #   env_file: ./project-service/.env
   #   build:
   #     context: ./project-service
   #     dockerfile: Dockerfile
   #   ports:
-  #   - 3333:3333  
+  #   - 3333:3333
   #   networks:
   #     - project_network
 
-  # timesheet_service_application: 
+  # timesheet_service_application:
   #   depends_on:
-  #     - postgres_database_for_timesheet_service 
+  #     - postgres_database_for_timesheet_service
   #   container_name: timesheet_service_application
-  #   restart: unless-stopped
-  #   env_file: ./timesheet-service/.env 
+  #   restart: always
+  #   env_file: ./timesheet-service/.env
   #   build:
   #     context: ./timesheet-service
   #     dockerfile: Dockerfile
@@ -70,4 +109,4 @@ services:
 
 networks:
   project_network:
-    driver: bridge 
+    driver: bridge

@@ -50,7 +50,6 @@ export function ExpenseUpdateDialog({
       activity_id: targetExpense.activity.id.toString(),
       project_id: targetExpense.project.id.toString(),
       category_id: targetExpense.category.id.toString(),
-      quantity: targetExpense?.quantity?.toString() || "",
       cost: targetExpense.cost.toString()
     }
   });
@@ -58,12 +57,11 @@ export function ExpenseUpdateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { activity_id, project_id, category_id, quantity, cost, ...rest } = values;
+      const { activity_id, project_id, category_id, cost, ...rest } = values;
       const payload: UpdateExpenseRequestDTO = {
         activity_id: Number(activity_id),
         project_id: Number(project_id),
         category_id: Number(category_id),
-        quantity: Number(quantity),
         cost: Number(cost),
         ...rest
       };
@@ -287,7 +285,7 @@ export function ExpenseUpdateDialog({
                   control={updateExpenseForm.control}
                   name="category_id"
                   render={({ field }) => (
-                    <FormItem className="col-span-12">
+                    <FormItem className="col-span-9">
                       <FormLabel>Category</FormLabel>
                       <FormControl>
                         <Select
@@ -316,24 +314,6 @@ export function ExpenseUpdateDialog({
                   )}
                 />
               )}
-              <FormField
-                control={updateExpenseForm.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem className="col-span-3">
-                    <FormLabel>Quantity</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Enter quantity"
-                        className="!mt-0 border-gray-200"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={updateExpenseForm.control}
                 name="cost"

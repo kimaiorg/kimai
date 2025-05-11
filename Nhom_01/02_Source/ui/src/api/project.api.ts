@@ -1,5 +1,5 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
 import { CreateProjectRequestDTO, ProjectType, UpdateProjectRequestDTO } from "@/type_schema/project";
 
@@ -29,7 +29,7 @@ export async function getAllProjects(
   if (teamId) params.append("team_id", teamId.toString());
   if (budgetFrom) params.append("budget_from", budgetFrom.toString());
   if (budgetTo) params.append("budget_from", budgetTo.toString());
-  const response = await myAxios.get<Pagination<ProjectType>>(`/api/v1/projects?${params.toString()}`, {
+  const response = await projectAxios.get<Pagination<ProjectType>>(`/api/v1/projects?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -44,7 +44,7 @@ export async function addNewProject(request: CreateProjectRequestDTO): Promise<n
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/projects`, payload, {
+    const response = await projectAxios.post(`/api/v1/projects`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -59,7 +59,7 @@ export async function updateProject(request: UpdateProjectRequestDTO, projectId:
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.put(`/api/v1/projects/${projectId}`, payload, {
+    const response = await projectAxios.put(`/api/v1/projects/${projectId}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

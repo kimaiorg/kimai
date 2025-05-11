@@ -1,4 +1,5 @@
 import { createAccessToken } from "@/api/auth.api";
+import { removeTokens } from "@/api/axios";
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserListType } from "@/type_schema/user.schema";
 
 export async function getAllUsers(
@@ -28,8 +29,10 @@ export async function getAllUsers(
       Authorization: `Bearer ${token}`
     }
   });
+  if (response.status === 401) {
+    removeTokens();
+  }
   const data = await response.json();
-  console.log(data);
   return data;
 }
 
@@ -52,6 +55,9 @@ export async function addNewUser(request: CreateUserRequestDTO): Promise<number>
     },
     body: JSON.stringify(payload)
   });
+  if (userResponse.status === 401) {
+    removeTokens();
+  }
   if (userResponse.status != 201) {
     return userResponse.status;
   }
@@ -69,6 +75,9 @@ export async function addNewUser(request: CreateUserRequestDTO): Promise<number>
     },
     body: JSON.stringify(rolePayload)
   });
+  if (roleResponse.status === 401) {
+    removeTokens();
+  }
   if (roleResponse.status != 204) {
     return roleResponse.status;
   }
@@ -94,6 +103,9 @@ export async function updateUser(request: UpdateUserRequestDTO, uId: string, old
     },
     body: JSON.stringify(payload)
   });
+  if (userResponse.status === 401) {
+    removeTokens();
+  }
   if (userResponse.status != 200) {
     return userResponse.status;
   }
@@ -115,6 +127,9 @@ export async function updateUser(request: UpdateUserRequestDTO, uId: string, old
     },
     body: JSON.stringify(oldRolePayload)
   });
+  if (oldRoleResponse.status === 401) {
+    removeTokens();
+  }
   if (oldRoleResponse.status != 204) {
     return oldRoleResponse.status;
   }
@@ -131,6 +146,9 @@ export async function updateUser(request: UpdateUserRequestDTO, uId: string, old
     },
     body: JSON.stringify(rolePayload)
   });
+  if (roleResponse.status === 401) {
+    removeTokens();
+  }
   if (roleResponse.status != 204) {
     return roleResponse.status;
   }

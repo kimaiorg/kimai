@@ -2,7 +2,6 @@
 
 import type React from "react";
 
-import { useState } from "react";
 import { format } from "date-fns";
 import {
   Activity,
@@ -22,13 +21,13 @@ import {
   Users,
   Wallet
 } from "lucide-react";
+import { useState } from "react";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExpenseType } from "@/type_schema/expense";
 
 export default function ExpenseViewDialog({ children, expense }: { children: React.ReactNode; expense: ExpenseType }) {
@@ -81,16 +80,8 @@ export default function ExpenseViewDialog({ children, expense }: { children: Rea
       .substring(0, 2);
   };
 
-  // Calculate total cost
-  const totalCost = expense.quantity * expense.cost;
-
   // Get currency from project's customer if available
   const currency = expense.project?.customer?.currency || "USD";
-
-  // Calculate budget impact
-  const budgetImpact = expense.activity?.budget ? (totalCost / expense.activity.budget) * 100 : 0;
-  const projectBudgetImpact = expense.project?.budget ? (totalCost / expense.project.budget) * 100 : 0;
-
   return (
     <>
       <Dialog
@@ -110,9 +101,7 @@ export default function ExpenseViewDialog({ children, expense }: { children: Rea
                 </div>
                 <div>
                   <DialogTitle className="text-2xl font-bold">{expense.name}</DialogTitle>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    Expense #{expense.id} • {formatCurrency(totalCost, currency)}
-                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">Expense #{expense.id}</div>
                 </div>
               </div>
               <Badge
@@ -158,77 +147,23 @@ export default function ExpenseViewDialog({ children, expense }: { children: Rea
               className="space-y-6 pt-6"
             >
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader>
                   <CardTitle className="text-base font-medium flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
                     Expense Summary
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Cost</p>
-                      <p className="text-3xl font-bold mt-1">{formatCurrency(totalCost, currency)}</p>
-                    </div>
-                    <div
-                      className="h-20 w-20 rounded-full border-4 flex items-center justify-center"
-                      style={{ borderColor: expense.color || "#e2e8f0" }}
-                    >
-                      <DollarSign
-                        className="h-8 w-8"
-                        style={{ color: expense.color || "#64748b" }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1 border rounded-lg p-3 bg-muted/20">
                       <p className="text-xs text-muted-foreground">Unit Cost</p>
                       <p className="font-medium">{formatCurrency(expense.cost, currency)}</p>
-                    </div>
-                    <div className="space-y-1 border rounded-lg p-3 bg-muted/20">
-                      <p className="text-xs text-muted-foreground">Quantity</p>
-                      <p className="font-medium">{expense.quantity}</p>
                     </div>
                     <div className="space-y-1 border rounded-lg p-3 bg-muted/20">
                       <p className="text-xs text-muted-foreground">Created</p>
                       <p className="font-medium">{formatShortDate(expense.created_at)}</p>
                     </div>
                   </div>
-
-                  {(expense.activity?.budget || expense.project?.budget) && (
-                    <div className="space-y-4 pt-2">
-                      {expense.activity?.budget && (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Activity Budget Impact</span>
-                            <span className="font-medium">
-                              {budgetImpact.toFixed(1)}% of {formatCurrency(expense.activity.budget, currency)}
-                            </span>
-                          </div>
-                          <Progress
-                            value={budgetImpact}
-                            className="h-2"
-                          />
-                        </div>
-                      )}
-
-                      {expense.project?.budget && (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Project Budget Impact</span>
-                            <span className="font-medium">
-                              {projectBudgetImpact.toFixed(1)}% of {formatCurrency(expense.project.budget, currency)}
-                            </span>
-                          </div>
-                          <Progress
-                            value={projectBudgetImpact}
-                            className="h-2"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
@@ -400,25 +335,9 @@ export default function ExpenseViewDialog({ children, expense }: { children: Rea
                           <p className="font-medium">{formatCurrency(expense.cost, currency)}</p>
                         </div>
                       </div>
-
-                      <div className="flex items-start gap-3">
-                        <Hash className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Quantity</p>
-                          <p className="font-medium">{expense.quantity}</p>
-                        </div>
-                      </div>
                     </div>
 
                     <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <Wallet className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Total Cost</p>
-                          <p className="font-medium">{formatCurrency(totalCost, currency)}</p>
-                        </div>
-                      </div>
-
                       <div className="flex items-start gap-3">
                         <Calendar className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                         <div>

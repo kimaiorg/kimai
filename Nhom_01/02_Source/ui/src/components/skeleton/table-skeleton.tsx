@@ -24,6 +24,33 @@ export function TableSkeleton({ columns = 6, rows = 10 }: SkeletonTableProps) {
   );
 }
 
+export function TableWithHeaderSkeleton({ columns = 6, rows = 10 }: SkeletonTableProps) {
+  return (
+    <div className="border rounded-md overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[200px]">
+              <Skeleton className="h-5 w-16" />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: rows }).map((_, rowIndex) => (
+            <TableRow key={`row-${rowIndex}`}>
+              {Array.from({ length: columns }).map((_, colIndex) => (
+                <TableCell key={`cell-${rowIndex}-${colIndex}`}>
+                  <Skeleton className={`h-5 w-full ${colIndex === 0 ? "max-w-[80px]" : "max-w-[120px]"}`} />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
 export function TimesheetTableSkeleton() {
   // Number of project rows to show in skeleton
   const projectCount = 6;

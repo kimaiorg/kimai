@@ -1,5 +1,5 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { CategoryType, CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from "@/type_schema/category";
 import { Pagination } from "@/type_schema/common";
 
@@ -22,7 +22,7 @@ export async function getAllCategories(
     params.append("sort_order", order);
   }
 
-  const response = await myAxios.get<Pagination<CategoryType>>(`/api/v1/categories?${params.toString()}`, {
+  const response = await projectAxios.get<Pagination<CategoryType>>(`/api/v1/categories?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -35,7 +35,7 @@ export async function getAllCategories(
 
 export async function getCategoryById(categoryId: number): Promise<CategoryType> {
   const token = await getManagementAccessToken();
-  const response = await myAxios.get<CategoryType>(`/api/v1/categories/${categoryId}`, {
+  const response = await projectAxios.get<CategoryType>(`/api/v1/categories/${categoryId}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -50,7 +50,7 @@ export async function addNewCategory(request: CreateCategoryRequestDTO): Promise
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/categories`, payload, {
+    const response = await projectAxios.post(`/api/v1/categories`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -65,7 +65,7 @@ export async function updateCategory(request: UpdateCategoryRequestDTO, category
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.put(`/api/v1/categories/${categoryId}`, payload, {
+    const response = await projectAxios.put(`/api/v1/categories/${categoryId}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

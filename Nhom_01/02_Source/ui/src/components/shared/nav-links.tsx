@@ -2,10 +2,8 @@ import { Role } from "@/type_schema/role";
 import {
   AlarmClockPlus,
   Boxes,
-  Calculator,
   Calendar,
   ClipboardPaste,
-  ClipboardPlus,
   FileChartColumnIncreasing,
   FilePlus,
   FileSpreadsheet,
@@ -15,11 +13,8 @@ import {
   ListTodo,
   Menu,
   PackageOpen,
-  PersonStanding,
-  Scale,
   Settings,
   SquareUserRound,
-  Tag,
   UserRound,
   Users,
   UsersRound,
@@ -33,7 +28,8 @@ export const timesheetNavMain = [
     url: "/dashboard",
     icon: Home,
     isActive: false,
-    allowRoles: []
+    allowRoles: [],
+    items: null
   },
   {
     title: "Time tracking",
@@ -58,7 +54,7 @@ export const timesheetNavMain = [
         icon: Calendar,
         isActive: false,
         allowRoles: []
-      },
+      }
       // {
       //   title: "Export",
       //   translationKey: "sidebar.export",
@@ -67,15 +63,16 @@ export const timesheetNavMain = [
       //   isActive: false,
       //   allowRoles: []
       // },
-      {
-        title: "Request",
-        translationKey: "sidebar.request",
-        url: "/request",
-        icon: GitPullRequestCreateArrow,
-        isActive: false,
-        allowRoles: []
-      }
     ]
+  },
+  {
+    title: "Request",
+    translationKey: "sidebar.request",
+    url: "/request",
+    icon: GitPullRequestCreateArrow,
+    isActive: false,
+    allowRoles: [],
+    items: null
   },
   // {
   //   title: "Employment contract",
@@ -109,7 +106,8 @@ export const timesheetNavMain = [
     url: "/reporting",
     icon: FileChartColumnIncreasing,
     isActive: false,
-    allowRoles: []
+    allowRoles: [],
+    items: null
   },
   {
     title: "Invoices",
@@ -151,7 +149,8 @@ export const timesheetNavMain = [
     url: "/task",
     icon: ListTodo,
     isActive: false,
-    allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
+    allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
+    item: null
   },
   {
     title: "Exspenses",

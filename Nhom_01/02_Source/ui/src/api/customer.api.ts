@@ -1,5 +1,5 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { myAxios } from "@/api/axios";
+import { projectAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
 import { CreateCustomerRequestDTO, CustomerType, UpdateCustomerRequestDTO } from "@/type_schema/customer";
 
@@ -21,7 +21,7 @@ export async function getAllCustomers(
     params.append("sort_order", order);
   }
 
-  const response = await myAxios.get<Pagination<CustomerType>>(`/api/v1/customers?${params.toString()}`, {
+  const response = await projectAxios.get<Pagination<CustomerType>>(`/api/v1/customers?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
@@ -36,7 +36,7 @@ export async function addNewCustomer(request: CreateCustomerRequestDTO): Promise
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.post(`/api/v1/customers`, payload, {
+    const response = await projectAxios.post(`/api/v1/customers`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -51,7 +51,7 @@ export async function updateCustomer(request: UpdateCustomerRequestDTO, customer
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await myAxios.put(`/api/v1/customers/${customerId}`, payload, {
+    const response = await projectAxios.put(`/api/v1/customers/${customerId}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

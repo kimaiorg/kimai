@@ -1,13 +1,14 @@
 "use client";
 
-import type React from "react";
-
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { activityFilters } from "@/type_schema/activity";
+import { notificationTypeOptions } from "@/type_schema/notification";
 import { Filter, X } from "lucide-react";
 import { useState } from "react";
 
@@ -15,33 +16,30 @@ export default function FilterNotificationModal({
   children,
   sortBy,
   sortOrder,
+  startDate,
+  endDate,
+  type,
+  hasRead,
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
   sortBy: string;
   sortOrder: string;
+  startDate: string;
+  endDate: string;
+  type: string;
+  hasRead: string;
   handleFilterChangeAction: (props: any) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
     sortBy: sortBy,
-    sortOrder: sortOrder
+    sortOrder: sortOrder,
+    fromDate: startDate,
+    toDate: endDate,
+    type: type,
+    hasRead: hasRead
   });
-  // const [customerList, setCustomerList] = useState<CustomerType[] | null>(null);
-  // const [teamList, setTeamList] = useState<TeamSimpleType[] | null>(null);
-
-  // useEffect(() => {
-  //   const fetchProjects = async () => {
-  //     try {
-  //       const [customers, teams] = await Promise.all([getAllCustomers(), getAllTeams()]);
-  //       setCustomerList(customers.data);
-  //       setTeamList(teams.data);
-  //     } catch (error) {
-  //       console.error("Error fetching projects:", error);
-  //     }
-  //   };
-  //   fetchProjects();
-  // }, []);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -50,7 +48,11 @@ export default function FilterNotificationModal({
   const handleApplyFilters = () => {
     handleFilterChangeAction({
       _sortBy: filters.sortBy,
-      _sortOrder: filters.sortOrder
+      _sortOrder: filters.sortOrder,
+      _fromDate: startDate,
+      _toDate: endDate,
+      _type: type,
+      _hasRead: hasRead
     });
     setOpen(false);
   };
@@ -58,7 +60,11 @@ export default function FilterNotificationModal({
   const handleResetFilters = () => {
     setFilters({
       sortBy: "",
-      sortOrder: "desc"
+      sortOrder: "desc",
+      fromDate: "",
+      toDate: "",
+      type: "",
+      hasRead: "false"
     });
   };
 
@@ -139,6 +145,65 @@ export default function FilterNotificationModal({
                   <SelectItem value="desc">Descending</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                className="border border-gray-200"
+                value={filters.fromDate}
+                onChange={(e) => handleFilterChange("startDate", e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                className="border border-gray-200"
+                value={filters.toDate}
+                onChange={(e) => {
+                  if (e.target.value > filters.fromDate) {
+                    handleFilterChange("endDate", e.target.value);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-5 gap-2">
+            <div className="col-span-4 grid gap-2">
+              <Label htmlFor="type">Type</Label>
+              <Select
+                value={filters.type}
+                onValueChange={(value) => handleFilterChange("type", value)}
+              >
+                <SelectTrigger
+                  id="type"
+                  className="border border-gray-200 !w-full"
+                >
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  {notificationTypeOptions.map((notificationType, index) => (
+                    <SelectItem
+                      key={index}
+                      value={notificationType.type}
+                    >
+                      {notificationType.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-1 grid gap-2">
+              <Label htmlFor="hasRead">Read</Label>
+              <Switch
+                checked={filters.hasRead == "true"}
+                onCheckedChange={(checked) => handleFilterChange("hasRead", checked ? "true" : "false")}
+              />
             </div>
           </div>
         </div>

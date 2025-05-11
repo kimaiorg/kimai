@@ -1,24 +1,35 @@
-import { TimesheetTableSkeleton } from "@/components/skeleton/table-skeleton";
+import { TableWithHeaderSkeleton } from "@/components/skeleton/table-skeleton";
 import { RequestViewType } from "@/type_schema/request";
 import { Clock3, Home, Stethoscope } from "lucide-react";
 import dynamic from "next/dynamic";
 
+const enum RequestPageType {
+  TIMESHEET = "timesheet",
+  EXPENSE = "expense",
+  ABSENCE = "absence",
+  TASK = "task"
+}
+
 const TimesheetRequest = dynamic(() => import("@/app/(pages)/request/timesheet/page"), {
   ssr: false,
-  loading: () => <TimesheetTableSkeleton />
+  loading: () => <TableWithHeaderSkeleton />
 });
-const ExpenseRequest = dynamic(() => import("@/app/(pages)/request/expense/page"), {
-  ssr: false,
-  loading: () => <TimesheetTableSkeleton />
-});
+// const ExpenseRequest = dynamic(() => import("@/app/(pages)/request/expense/page"), {
+//   ssr: false,
+//   loading: () => <TableWithHeaderSkeleton />
+// });
 const AbsenceRequest = dynamic(() => import("@/app/(pages)/request/absence/page"), {
   ssr: false,
-  loading: () => <TimesheetTableSkeleton />
+  loading: () => <TableWithHeaderSkeleton />
+});
+const TaskRequest = dynamic(() => import("@/app/(pages)/request/task/page"), {
+  ssr: false,
+  loading: () => <TableWithHeaderSkeleton />
 });
 
 const requestCards: RequestViewType[] = [
   {
-    id: "timesheet",
+    id: RequestPageType.TIMESHEET,
     title: "Timesheet requests",
     icon: (
       <Clock3
@@ -32,22 +43,35 @@ const requestCards: RequestViewType[] = [
     textColor: "text-violet-600"
   },
   {
-    id: "expense",
-    title: "Expense requests",
+    id: RequestPageType.TASK,
+    title: "Task expense requests",
     icon: (
       <Stethoscope
-        className="h-24 w-24 text-sky-600"
+        className="h-24 w-24 text-lime-600"
         strokeWidth={1}
       />
     ),
-    component: ExpenseRequest,
-    background: "bg-sky-100",
-    description: "Manage expense requests",
-    textColor: "text-sky-600"
+    component: TaskRequest,
+    background: "bg-lime-100",
+    description: "Manage task expense requests",
+    textColor: "text-lime-600"
   },
-
+  // {
+  //   id: RequestPageType.EXPENSE,
+  //   title: "Expense requests",
+  //   icon: (
+  //     <Stethoscope
+  //       className="h-24 w-24 text-sky-600"
+  //       strokeWidth={1}
+  //     />
+  //   ),
+  //   component: ExpenseRequest,
+  //   background: "bg-sky-100",
+  //   description: "Manage expense requests",
+  //   textColor: "text-sky-600"
+  // },
   {
-    id: "absence",
+    id: RequestPageType.ABSENCE,
     title: "Absence requests",
     icon: (
       <Home
@@ -64,4 +88,4 @@ const requestCards: RequestViewType[] = [
 
 const getRequestById = (id: string) => requestCards.find((request) => request.id === id);
 
-export { requestCards, getRequestById };
+export { getRequestById, requestCards, RequestPageType };

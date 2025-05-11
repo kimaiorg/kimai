@@ -32,7 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { TaskType } from "@/type_schema/task";
+import { TaskStatus, TaskType } from "@/type_schema/task";
 
 export default function TaskViewDialog({ children, task }: { children: React.ReactNode; task: TaskType }) {
   const [open, setOpen] = useState(false);
@@ -86,10 +86,10 @@ export default function TaskViewDialog({ children, task }: { children: React.Rea
 
   // Calculate task status
   const getTaskStatus = () => {
-    if (task.deleted_at) {
+    if (task.status == TaskStatus.DONE) {
       return {
-        status: "completed",
-        label: "Completed",
+        status: "done",
+        label: "Done",
         color: "bg-green-500",
         bgColor: "bg-green-50",
         textColor: "text-green-800",
@@ -97,49 +97,19 @@ export default function TaskViewDialog({ children, task }: { children: React.Rea
       };
     }
 
-    if (!task.deadline) {
+    if (task.status == TaskStatus.PROCESSING) {
       return {
-        status: "no-deadline",
-        label: "No Deadline",
-        color: "bg-gray-500",
-        bgColor: "bg-gray-50",
-        textColor: "text-gray-800",
+        status: "processing",
+        label: "Processing",
+        color: "bg-main",
+        bgColor: "bg-violet-50",
+        textColor: "text-violet-800",
         icon: <Clock className="h-4 w-4" />
       };
     }
-
-    const now = new Date();
-    const deadlineDate = parseISO(task.deadline);
-
-    if (isAfter(now, deadlineDate)) {
-      return {
-        status: "overdue",
-        label: "Overdue",
-        color: "bg-red-500",
-        bgColor: "bg-red-50",
-        textColor: "text-red-800",
-        icon: <AlertCircle className="h-4 w-4" />
-      };
-    }
-
-    // If deadline is within 2 days
-    const twoDaysFromNow = new Date();
-    twoDaysFromNow.setDate(now.getDate() + 2);
-
-    if (isBefore(deadlineDate, twoDaysFromNow)) {
-      return {
-        status: "soon",
-        label: "Due Soon",
-        color: "bg-amber-500",
-        bgColor: "bg-amber-50",
-        textColor: "text-amber-800",
-        icon: <Clock className="h-4 w-4" />
-      };
-    }
-
     return {
-      status: "upcoming",
-      label: "Upcoming",
+      status: "overdue",
+      label: "Overdue",
       color: "bg-blue-500",
       bgColor: "bg-blue-50",
       textColor: "text-blue-800",

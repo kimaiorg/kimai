@@ -1,13 +1,20 @@
 import { ActivityType } from "@/type_schema/activity";
 import { ProjectType } from "@/type_schema/project";
+import { ApprovalStatus } from "@/type_schema/request";
 import { TaskResponseType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
 import { z } from "zod";
 
+export enum TimesheetStatus {
+  TRACKING = "running",
+  TRACKED = "stopped"
+}
+
 export type TimesheetResponseType = {
   id: number;
   description: string;
-  status: string;
+  status: TimesheetStatus;
+  approval_status: ApprovalStatus;
   start_time: string;
   end_time: null;
   duration: number;
@@ -35,7 +42,8 @@ export type TimesheetType = {
   task: TaskResponseType | null;
   project: ProjectType | null;
   activity: ActivityType | null;
-  status: "running" | "stopped";
+  status: TimesheetStatus;
+  approval_status: ApprovalStatus;
 };
 
 export const CreateTimesheetRequestSchema = z.object({
@@ -146,4 +154,9 @@ export type UpdateTimesheetRequestDTO = {
   user_name: string;
   project_id: number;
   activity_id: number;
+};
+
+export type TimesheetUpdateRequestType = {
+  new_start_time: string;
+  new_end_time: string;
 };

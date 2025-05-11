@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { handleErrorApi } from "@/lib/utils";
+import { formatCurrency, handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
 import { ExpenseType } from "@/type_schema/expense";
 import { CreateTaskRequestSchema, TaskType, UpdateTaskRequestDTO, UpdateTaskValidation } from "@/type_schema/task";
@@ -19,7 +19,7 @@ import { UserType } from "@/type_schema/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 export function TaskUpdateDialog({
@@ -36,6 +36,7 @@ export function TaskUpdateDialog({
   const [activityList, setActivityList] = useState<ActivityType[]>([]);
   const [expenseList, setExpenseList] = useState<ExpenseType[]>([]);
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
+  const [totalPrice, setTotalPrice] = useState<number>(targetTask.quantity * targetTask.expense.cost);
 
   const updateTaskForm = useForm<UpdateTaskValidation>({
     resolver: zodResolver(CreateTaskRequestSchema),
@@ -46,6 +47,7 @@ export function TaskUpdateDialog({
       description: targetTask.description,
       activity_id: targetTask.activity.id.toString(),
       user_id: targetTask.user.user_id,
+      quantity: targetTask?.quantity?.toString() || "",
       expense_id: targetTask.expense?.id?.toString() || ""
     }
   });
@@ -53,10 +55,12 @@ export function TaskUpdateDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const { activity_id, expense_id, ...rest } = values;
+      const { activity_id, expense_id, quantity, billable, ...rest } = values;
       const payload: UpdateTaskRequestDTO = {
         activity_id: Number(activity_id),
         expense_id: Number(expense_id),
+        quantity: Number(quantity),
+        billable: billable == "true",
         ...rest
       };
       console.log(payload);
@@ -100,6 +104,21 @@ export function TaskUpdateDialog({
     };
     fetchUsersAndActivities();
   }, []);
+
+  const selectedExpenseId = useWatch({
+    control: updateTaskForm.control,
+    name: "expense_id"
+  });
+
+  const selectedQuantity = useWatch({
+    control: updateTaskForm.control,
+    name: "quantity"
+  });
+
+  useEffect(() => {
+    if (!selectedQuantity || !selectedExpenseId) return;
+    setTotalPrice(Number(selectedExpenseId) * Number(selectedQuantity));
+  }, [selectedQuantity, selectedExpenseId]);
 
   return (
     <Dialog
@@ -291,6 +310,24 @@ export function TaskUpdateDialog({
                   )}
                 />
               )}
+              <FormField
+                control={updateTaskForm.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem className="col-span-3">
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        className="h-10 !mt-0 border-gray-200 cursor-pointer"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="col-span-5">Total: {formatCurrency(totalPrice)}</div>
             </div>
 
             <DialogFooter>

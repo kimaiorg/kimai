@@ -31,7 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TimesheetType } from "@/type_schema/timesheet";
+import { TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
 
 export default function TimesheetViewDialog({
   children,
@@ -88,7 +88,7 @@ export default function TimesheetViewDialog({
 
   // Calculate current duration for running timesheets
   const calculateCurrentDuration = () => {
-    if (timesheet.status === "stopped" || !timesheet.start_time) {
+    if (timesheet.status === TimesheetStatus.TRACKED || !timesheet.start_time) {
       return timesheet.duration;
     }
 
@@ -110,14 +110,6 @@ export default function TimesheetViewDialog({
       .substring(0, 2);
   };
 
-  // Get color based on timesheet status
-  const getStatusColor = () => {
-    return timesheet.status === "running"
-      ? { bg: "bg-green-500", text: "text-green-500", light: "bg-green-100" }
-      : { bg: "bg-blue-500", text: "text-blue-500", light: "bg-blue-100" };
-  };
-
-  const statusColor = getStatusColor();
   const currentDuration = calculateCurrentDuration();
 
   return (

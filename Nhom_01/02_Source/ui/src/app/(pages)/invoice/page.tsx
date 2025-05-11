@@ -80,32 +80,32 @@ function InvoiceContent() {
         project_id: Number(project_id),
         activities: activities.map((activity) => Number(activity))
       };
-      const response: InvoiceHistoryType = await filterInvoices(payload);
-      console.log(response);
-      const exportableInvoices: InvoiceHistoryType = {
-        id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
-        customer: customerList.find((customer) => customer.id === payload.customer_id)!,
-        project: (projectList || []).find((project) => project.id === payload.project_id)!,
-        fromDate: values.from,
-        toDate: values.to,
-        status: "NEW",
-        totalPrice: Math.round(Math.random() * 40000) + 5000,
-        taxRate: 10,
-        taxPrice: Math.round(Math.random() * 100),
-        finalPrice: Math.round(Math.random() * 40000) + 10000,
-        currency: "USD",
-        notes: "",
-        createdBy: currentUser!.sub!,
-        createdAt: new Date(2025, 4, 7).toISOString(),
-        template: invoiceTemplateList!.find((template) => template.id === invoiceTemplateId)!,
-        activities: (activityList || []).map((activity) => ({
-          ...activity,
-          tasks: fakeTaskData(),
-          totalPrice: Math.round(Math.random() * 10000) + 10000
-        }))
-      };
-      setInvoiceHistory(exportableInvoices);
-      if (response.hasOwnProperty("id")) {
+      const targetInvoice: InvoiceHistoryType = await filterInvoices(payload);
+      console.log(targetInvoice);
+      // const exportableInvoices: InvoiceHistoryType = {
+      //   id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
+      //   customer: customerList.find((customer) => customer.id === payload.customer_id)!,
+      //   project: (projectList || []).find((project) => project.id === payload.project_id)!,
+      //   fromDate: values.from,
+      //   toDate: values.to,
+      //   status: "NEW",
+      //   totalPrice: Math.round(Math.random() * 40000) + 5000,
+      //   taxRate: 10,
+      //   taxPrice: Math.round(Math.random() * 100),
+      //   finalPrice: Math.round(Math.random() * 40000) + 10000,
+      //   currency: "USD",
+      //   notes: "",
+      //   createdBy: currentUser!.sub!,
+      //   createdAt: new Date(2025, 4, 7).toISOString(),
+      //   template: invoiceTemplateList!.find((template) => template.id === invoiceTemplateId)!,
+      //   activities: (activityList || []).map((activity) => ({
+      //     ...activity,
+      //     tasks: fakeTaskData(),
+      //     totalPrice: Math.round(Math.random() * 10000) + 10000
+      //   }))
+      // };
+      setInvoiceHistory(targetInvoice);
+      if (targetInvoice.hasOwnProperty("id")) {
         toast("Success", {
           description: "Filter invoice successfully",
           duration: 2000,
@@ -132,27 +132,10 @@ function InvoiceContent() {
   const handleSaveInvoice = async () => {
     try {
       const payload: InvoiceHistoryRequestType = {
-        customerId: Number(invoiceHistory!.id),
-        projectId: invoiceHistory!.project!.id,
-        fromDate: invoiceHistory!.fromDate,
-        toDate: invoiceHistory!.toDate,
-        status: invoiceHistory!.status,
-        totalPrice: invoiceHistory!.totalPrice,
-        taxRate: invoiceHistory!.taxRate,
-        taxPrice: invoiceHistory!.taxPrice,
-        finalPrice: invoiceHistory!.finalPrice,
+        invoiceTempId: invoiceHistory!.invoiceId!,
         currency: invoiceHistory!.currency,
         notes: invoiceHistory!.notes,
-        createdBy: invoiceHistory!.createdBy,
-        createdAt: invoiceHistory!.createdAt,
-        templateId: Number(invoiceHistory!.template.id),
-        activities: invoiceHistory!.activities.map((activity) => {
-          return {
-            activityId: activity.id,
-            totalPrice: activity.totalPrice,
-            tasks: activity.tasks.map((task) => task.id)
-          };
-        })
+        templateId: Number(invoiceHistory!.template.id)
       };
       const result = await saveInvoice(payload);
       if (result == 201 || result == 200) {
@@ -520,12 +503,12 @@ function InvoiceContent() {
                               <span className="ml-2">{task.title}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-center">{task.expense.quantity || "45"}</td>
+                          <td className="px-4 py-2 text-center">{task.quantity || "45"}</td>
                           <td className="px-4 py-2 text-center">
                             {currencyFormat(task.expense.cost, "USD") || "1235"}
                           </td>
                           <td className="text-center">
-                            {currencyFormat(Number(task.expense.quantity) * Number(task.expense.cost), "USD")}
+                            {currencyFormat(Number(task.quantity) * Number(task.expense.cost), "USD")}
                           </td>
                           <td className="px-4 py-2 text-center"></td>
                         </tr>
@@ -637,320 +620,3 @@ function InvoiceContent() {
 const AuthenticatedInvoice = AuthenticatedRoute(InvoiceContent, [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD]);
 
 export default AuthenticatedInvoice;
-
-function fakeTaskData(): TaskType[] {
-  return [
-    {
-      id: 1,
-      title: "Do something",
-      color: "#FF5733",
-      deadline: "string",
-      created_at: "string",
-      deleted_at: null,
-      description: "string",
-      updated_at: "string",
-      activity: {
-        id: 0,
-        name: "",
-        color: "",
-        description: "",
-        activity_number: 0,
-        budget: 0,
-        project_id: 0,
-        created_at: "",
-        updated_at: "",
-        deleted_at: null,
-        project: {
-          id: 0,
-          name: "",
-          color: "",
-          project_number: 0,
-          order_number: 0,
-          order_date: "",
-          start_date: "",
-          end_date: "",
-          budget: 0,
-          customer_id: 0,
-          created_at: "",
-          updated_at: "",
-          deleted_at: null
-        },
-        team: {
-          id: 0,
-          name: "",
-          color: "",
-          created_at: "",
-          updated_at: "",
-          deleted_at: null,
-          lead: "",
-          users: []
-        },
-        tasks: []
-      },
-      expense: {
-        id: 0,
-        name: "",
-        color: "",
-        description: "",
-        project_id: 0,
-        project: {
-          id: 0,
-          name: "",
-          color: "",
-          project_number: 0,
-          order_number: 0,
-          order_date: "",
-          start_date: "",
-          end_date: "",
-          budget: 0,
-          created_at: "",
-          updated_at: "",
-          deleted_at: null,
-          teams: [],
-          customer: {
-            id: 0,
-            name: "",
-            color: "",
-            description: "",
-            address: "",
-            company_name: "",
-            account_number: "",
-            vat_id: "",
-            country: "",
-            currency: "",
-            timezone: "",
-            email: "",
-            phone: "",
-            homepage: "",
-            created_at: "",
-            updated_at: "",
-            deleted_at: null,
-            projects: []
-          }
-        },
-        activity: {
-          id: 0,
-          name: "",
-          color: "",
-          description: "",
-          activity_number: 0,
-          budget: 0,
-          project_id: 0,
-          created_at: "",
-          updated_at: "",
-          deleted_at: null,
-          project: {
-            id: 0,
-            name: "",
-            color: "",
-            project_number: 0,
-            order_number: 0,
-            order_date: "",
-            start_date: "",
-            end_date: "",
-            budget: 0,
-            customer_id: 0,
-            created_at: "",
-            updated_at: "",
-            deleted_at: null
-          },
-          team: {
-            id: 0,
-            name: "",
-            color: "",
-            created_at: "",
-            updated_at: "",
-            deleted_at: null,
-            lead: "",
-            users: []
-          },
-          tasks: [],
-          quota: undefined
-        },
-        category: {
-          id: 0,
-          name: "",
-          color: "",
-          description: "",
-          created_at: "",
-          updated_at: "",
-          deleted_at: null
-        },
-        quantity: 10,
-        cost: 1000,
-        created_at: "",
-        updated_at: "",
-        deleted_at: null,
-        task: []
-      },
-      user: {
-        created_at: "",
-        user_id: "auth0|67d991b80f7916d942e25d1d",
-        email: "",
-        picture: "",
-        name: "",
-        nickname: "",
-        email_verified: false,
-        updated_at: ""
-      },
-      status: "string",
-      billable: true
-    },
-    {
-      id: 2,
-      title: "Research something",
-      color: "#DC143C",
-      deadline: "string",
-      created_at: "string",
-      deleted_at: null,
-      description: "string",
-      updated_at: "string",
-      activity: {
-        id: 0,
-        name: "",
-        color: "",
-        description: "",
-        activity_number: 0,
-        budget: 0,
-        project_id: 0,
-        created_at: "",
-        updated_at: "",
-        deleted_at: null,
-        project: {
-          id: 0,
-          name: "",
-          color: "",
-          project_number: 0,
-          order_number: 0,
-          order_date: "",
-          start_date: "",
-          end_date: "",
-          budget: 0,
-          customer_id: 0,
-          created_at: "",
-          updated_at: "",
-          deleted_at: null
-        },
-        team: {
-          id: 0,
-          name: "",
-          color: "",
-          created_at: "",
-          updated_at: "",
-          deleted_at: null,
-          lead: "",
-          users: []
-        },
-        tasks: []
-      },
-      expense: {
-        id: 0,
-        name: "",
-        color: "",
-        description: "",
-        project_id: 0,
-        project: {
-          id: 0,
-          name: "",
-          color: "",
-          project_number: 0,
-          order_number: 0,
-          order_date: "",
-          start_date: "",
-          end_date: "",
-          budget: 0,
-          created_at: "",
-          updated_at: "",
-          deleted_at: null,
-          teams: [],
-          customer: {
-            id: 0,
-            name: "",
-            color: "",
-            description: "",
-            address: "",
-            company_name: "",
-            account_number: "",
-            vat_id: "",
-            country: "",
-            currency: "",
-            timezone: "",
-            email: "",
-            phone: "",
-            homepage: "",
-            created_at: "",
-            updated_at: "",
-            deleted_at: null,
-            projects: []
-          }
-        },
-        activity: {
-          id: 0,
-          name: "",
-          color: "",
-          description: "",
-          activity_number: 0,
-          budget: 0,
-          project_id: 0,
-          created_at: "",
-          updated_at: "",
-          deleted_at: null,
-          project: {
-            id: 0,
-            name: "",
-            color: "",
-            project_number: 0,
-            order_number: 0,
-            order_date: "",
-            start_date: "",
-            end_date: "",
-            budget: 0,
-            customer_id: 0,
-            created_at: "",
-            updated_at: "",
-            deleted_at: null
-          },
-          team: {
-            id: 0,
-            name: "",
-            color: "",
-            created_at: "",
-            updated_at: "",
-            deleted_at: null,
-            lead: "",
-            users: []
-          },
-          tasks: [],
-          quota: undefined
-        },
-        category: {
-          id: 0,
-          name: "",
-          color: "",
-          description: "",
-          created_at: "",
-          updated_at: "",
-          deleted_at: null
-        },
-        quantity: 32,
-        cost: 1500,
-        created_at: "",
-        updated_at: "",
-        deleted_at: null,
-        task: []
-      },
-      user: {
-        created_at: "",
-        user_id: "auth0|67d991b80f7916d942e25d1d",
-        email: "",
-        picture: "",
-        name: "",
-        nickname: "",
-        email_verified: false,
-        updated_at: ""
-      },
-      status: "string",
-      billable: true
-    }
-  ];
-}
