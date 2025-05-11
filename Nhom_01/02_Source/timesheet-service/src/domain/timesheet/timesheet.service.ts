@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { TimesheetRepository } from '@/infrastructure/timesheet/timesheet.repository';
 import { Timesheet } from '@prisma/client';
 import {
@@ -11,10 +11,18 @@ import {
   buildListTimesheetsMeQuery,
   buildListTimesheetsQuery,
 } from './builder';
-
+import { ProjectHttpService } from '@/libs/http/project-http.service';
+import { RabbitmqService } from '@/libs/rabbitmq/rabbitmq.service';
+import { ENV } from '@/libs/configs/env';
+import { ActivityResponse } from './response';
 @Injectable()
 export class TimesheetService {
-  constructor(private readonly timesheetRepository: TimesheetRepository) {}
+  constructor(
+    private readonly timesheetRepository: TimesheetRepository,
+    @Inject('RABBITMQ_SERVICE_NOTIFICATION')
+    private readonly rabbitmqService: RabbitmqService,
+    private readonly projectHttpService: ProjectHttpService,
+  ) {}
 
   async startTimesheet(
     userId: string,
@@ -30,7 +38,18 @@ export class TimesheetService {
       throw new Error('You have not ended the previous timesheet.');
     }
 
-    return await this.timesheetRepository.create({
+    const activity: ActivityResponse = await this.projectHttpService.callApi(
+      `api/v1/activities/${dto.activity_id}`,
+      'get',
+      {},
+      {
+        headers: {
+          'X-Internal-Code': ENV.internal_code,
+        },
+      },
+    );
+
+    const timesheet = await this.timesheetRepository.create({
       user_id: userId,
       username: dto.username,
       description: dto.description,
@@ -38,6 +57,19 @@ export class TimesheetService {
       activity_id: dto.activity_id,
       task_id: dto.task_id,
     });
+
+    await this.rabbitmqService.emit(
+      { cmd: 'create_notification' },
+      {
+        title: 'Request Start Timesheet',
+        content: `${dto.username} has requested to start a timesheet for ${activity.name}`,
+        type: 'timesheet_request',
+        target_id: 'timesheet',
+        user_id: activity.team.lead,
+      },
+    );
+
+    return timesheet;
   }
 
   async endTimesheet(userId: string): Promise<Timesheet | null> {
@@ -62,7 +94,6 @@ export class TimesheetService {
         end_time: null,
       },
       data: {
-        status: 'stopped',
         end_time: end_date,
         duration: duration,
       },

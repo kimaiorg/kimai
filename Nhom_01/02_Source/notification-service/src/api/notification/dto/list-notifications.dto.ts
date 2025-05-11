@@ -8,6 +8,7 @@ export const listNotificationsSchema = paginationSchema.extend({
   hasRead: z.coerce.boolean().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
+  targetId: z.string().optional(),
 });
 
 export type ListNotificationsDto = z.infer<typeof listNotificationsSchema>;

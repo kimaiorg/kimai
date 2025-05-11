@@ -2,10 +2,7 @@ import {
   Body,
   Controller,
   Get,
-  Param,
-  ParseIntPipe,
   Post,
-  Put,
   Query,
   Req,
   UsePipes,
@@ -16,8 +13,6 @@ import { TimesheetService } from '@/domain/timesheet/timesheet.service';
 import {
   startTimesheetSchema,
   StartTimesheetDto,
-  endTimesheetSchema,
-  EndTimesheetDto,
   listTimesheetsSchema,
   ListTimesheetsDto,
   ListTimesheetsMeDto,
@@ -42,14 +37,14 @@ export class TimesheetController {
     @Req() req: Request,
     @Body() dto: StartTimesheetDto,
   ): Promise<Timesheet | null> {
-    const userId = req['user'].sub;
-    return await this.timesheetService.startTimesheet(userId, dto);
+    const userId = req['user'] as { sub: string };
+    return await this.timesheetService.startTimesheet(userId.sub, dto);
   }
 
   @Post('end')
   async endTimesheet(@Req() req: Request): Promise<Timesheet | null> {
-    const userId = req['user'].sub;
-    return await this.timesheetService.endTimesheet(userId);
+    const userId = req['user'] as { sub: string };
+    return await this.timesheetService.endTimesheet(userId.sub);
   }
 
   @Get('')
@@ -69,7 +64,7 @@ export class TimesheetController {
     @Req() req: Request,
     @Query() dto: ListTimesheetsMeDto,
   ): Promise<PaginationResponse<Timesheet>> {
-    const userId = req['user'].sub;
-    return await this.timesheetService.listTimesheetsMe(userId, dto);
+    const userId = req['user'] as { sub: string };
+    return await this.timesheetService.listTimesheetsMe(userId.sub, dto);
   }
 }

@@ -3,7 +3,7 @@ import { NotificationType } from '@prisma/client';
 
 export class CreateNotificationSwaggerDto {
   @ApiProperty({
-    example: 'user_123',
+    example: 'timesheet',
     description: 'Target ID',
   })
   target_id: string;
@@ -55,6 +55,12 @@ export class ListNotificationsSwaggerDto {
     description: 'Type of the notification',
   })
   type?: NotificationType;
+
+  @ApiPropertyOptional({
+    example: 'timesheet',
+    description: 'Target ID',
+  })
+  targetId?: string;
 
   @ApiPropertyOptional({
     example: true,

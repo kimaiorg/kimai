@@ -4,7 +4,7 @@ export const buildListTimesheetsMeQuery = (
   userId: string,
   dto: ListTimesheetsMeDto,
 ) => {
-  const where: any = {
+  const where: Record<string, any> = {
     user_id: userId,
     deleted_at: null,
   };
@@ -25,7 +25,7 @@ export const buildListTimesheetsMeQuery = (
 };
 
 export const buildListTimesheetsQuery = (dto: ListTimesheetsDto) => {
-  const where: any = {
+  const where: Record<string, any> = {
     deleted_at: null,
   };
 

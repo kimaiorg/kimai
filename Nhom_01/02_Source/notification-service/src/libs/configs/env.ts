@@ -6,4 +6,10 @@ export const ENV = {
   database: {
     uri: process.env.DATABASE_URL,
   },
+
+  rabbitmq: {
+    url: process.env.RABBITMQ_URL,
+  },
+
+  internal_code: process.env.INTERNAL_CODE,
 };

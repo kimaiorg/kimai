@@ -23,7 +23,7 @@ export class NotificationService {
     userId: string,
   ): Promise<Notification | null> {
     return await this.notificationRepository.updateOne({
-      where: { id, target_id: userId },
+      where: { id, user_id: userId },
       data: {
         has_read: dto.hasRead,
       },

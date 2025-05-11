@@ -7,6 +7,7 @@ export const createNotificationSchema = z.object({
   content: z.string(),
   type: z.nativeEnum(NotificationType),
   target_id: z.string(),
+  user_id: z.string(),
 });
 
 export type CreateNotificationDto = z.infer<typeof createNotificationSchema>;

@@ -6,4 +6,6 @@ export const ENV = {
   database: {
     uri: process.env.DATABASE_URL,
   },
+
+  internal_code: process.env.INTERNAL_CODE,
 };

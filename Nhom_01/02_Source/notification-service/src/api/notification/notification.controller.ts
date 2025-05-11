@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Body,
   Controller,
@@ -32,6 +35,12 @@ import {
   UpdateNotificationDto,
   updateNotificationSchema,
 } from './dto/update-notification.dto copy';
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
 
 @Controller('notifications')
 export class NotificationController {
@@ -45,6 +54,24 @@ export class NotificationController {
     @Body() dto: CreateNotificationDto,
   ): Promise<Notification | null> {
     return await this.notificationService.createNotification(dto);
+  }
+
+  @MessagePattern({ cmd: 'create_notification' })
+  async createNotificationByQueue(
+    @Payload(new ZodValidationPipe(createNotificationSchema))
+    dto: CreateNotificationDto,
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    try {
+      console.log('createNotificationByQueue', dto);
+      await this.notificationService.createNotification(dto);
+      channel.ack(originalMsg);
+    } catch (error) {
+      console.log('error', error);
+      channel.nack(originalMsg, false, true);
+    }
   }
 
   @Put(':id')
