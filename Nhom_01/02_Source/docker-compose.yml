@@ -44,7 +44,7 @@ services:
     container_name: postgres_db_for_invoice_service
     restart: always
     ports:
-      - 5434:5432
+      - 5435:5432
     environment:
       - POSTGRES_DB=invoice
       - POSTGRES_USER=postgres
@@ -64,7 +64,7 @@ services:
     container_name: postgres_db_for_notification_service
     restart: always
     ports:
-      - 5434:5432
+      - 5436:5432
     environment:
       - POSTGRES_DB=notification
       - POSTGRES_USER=postgres
@@ -76,6 +76,19 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
+    networks:
+      - project_network
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
     networks:
       - project_network
 

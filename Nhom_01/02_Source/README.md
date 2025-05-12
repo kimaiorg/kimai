@@ -32,6 +32,7 @@
   # database configs
   DATABASE_URL=postgres://postgres:postgres@localhost:5433/project
 
+  INTERNAL_CODE=X9T4B7LQZV3MHG2JYAFWECNPDUK6SR80I5LO1XQBVUNZK3MTDY
   ```
 
 - Timesheet service: `cd /timesheet-service`
@@ -47,6 +48,14 @@
 
   # database configs
   DATABASE_URL=postgres://postgres:postgres@localhost:5434/timesheet
+
+  AUTH0_DOMAIN=dev-r0btd5eozgc7ofkj.us.auth0.com
+
+  RABBITMQ_URL=amqp://root:root@localhost:5672
+
+  PROJECT_SERVICE_URL=http://localhost:3333
+
+  INTERNAL_CODE=X9T4B7LQZV3MHG2JYAFWECNPDUK6SR80I5LO1XQBVUNZK3MTDY
   ```
 
 - Invoice service: `cd /invoice-service`
@@ -77,6 +86,9 @@
 
   # database configs
   DATABASE_URL=postgres://postgres:postgres@localhost:5436/notification
+  AUTH0_DOMAIN=dev-r0btd5eozgc7ofkj.us.auth0.com
+
+  RABBITMQ_URL=amqp://root:root@localhost:5672
   ```
 
 3. Start services:
