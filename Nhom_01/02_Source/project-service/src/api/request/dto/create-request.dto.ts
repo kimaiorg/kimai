@@ -5,6 +5,7 @@ export const createRequestSchema = z
   .object({
     comment: z.string(),
     type: z.nativeEnum(RequestType),
+    team_id: z.number().optional(),
     target_id: z.number(),
     request_data: z.record(z.string(), z.any()).optional(),
   })

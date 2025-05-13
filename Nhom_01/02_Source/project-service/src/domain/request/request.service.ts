@@ -49,8 +49,8 @@ export class RequestService {
     return await this.requestRepository.create({
       comment: dto.comment,
       type: dto.type,
-      
       target_id: dto.target_id,
+      team_id: dto.team_id ?? null,
       user_id: userId,
       previous_data: target ?? {},
       request_data: dto.request_data ?? {},
@@ -68,9 +68,7 @@ export class RequestService {
     const data = await this.requestRepository.findAll({
       where,
       include: {
-        project: true,
         team: true,
-        tasks: true,
       },
       skip: (dto.page - 1) * dto.limit,
       take: dto.limit,
