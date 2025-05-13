@@ -32,18 +32,16 @@ export class RequestService {
         },
       });
     } else if (dto.type === RequestType.START_TIMESHEET) {
-      const response = await this.timesheetHttpService.callApi(
-        `/timesheets/${dto.target_id}`,
-        'post',
+      target = await this.timesheetHttpService.callApi(
+        `api/v1/timesheets/${dto.target_id}`,
+        'get',
         {},
         {
           headers: {
-            'Content-Type': 'application/json',
             'X-Internal-Code': ENV.internal_code,
           },
         },
       );
-      target = (response as { data: JSON }).data;
     }
 
     return await this.requestRepository.create({

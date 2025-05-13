@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   Req,
@@ -70,7 +71,9 @@ export class TimesheetController {
   }
 
   @Get(':id')
-  async getTimesheet(@Param('id') id: string): Promise<Timesheet | null> {
+  async getTimesheet(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Timesheet | null> {
     return await this.timesheetService.getTimesheet(id);
   }
 }

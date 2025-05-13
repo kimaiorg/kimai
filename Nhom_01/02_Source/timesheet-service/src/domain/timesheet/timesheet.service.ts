@@ -91,11 +91,11 @@ export class TimesheetService {
     return await this.timesheetRepository.update({
       where: {
         user_id: userId,
-        status: 'stopped',
         end_time: null,
       },
       data: {
         end_time: end_date,
+        status: 'stopped',
         duration: duration,
       },
     });
@@ -160,7 +160,7 @@ export class TimesheetService {
     };
   }
 
-  async getTimesheet(id: string): Promise<Timesheet | null> {
+  async getTimesheet(id: number): Promise<Timesheet | null> {
     return await this.timesheetRepository.findById(id);
   }
 }

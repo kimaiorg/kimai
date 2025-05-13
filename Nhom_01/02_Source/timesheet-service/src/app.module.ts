@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@/libs/configs/config.module';
 import { PrismaModule } from '@/libs/database/prisma.module';
 import { ApiModule } from '@/api/api.module';
@@ -28,6 +33,13 @@ import { PermissionMiddleware } from '@/libs/middlewares/permission.middleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes('*');
-    consumer.apply(PermissionMiddleware).forRoutes('*');
+    consumer
+      .apply(PermissionMiddleware)
+      .exclude({
+        path: 'timesheets/:id',
+        method: RequestMethod.GET,
+        version: '1',
+      })
+      .forRoutes('*');
   }
 }
