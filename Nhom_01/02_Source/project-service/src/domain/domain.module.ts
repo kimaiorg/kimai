@@ -4,6 +4,7 @@ import { ProjectModule } from '@/domain/project/project.module';
 import { ActivityModule } from '@/domain/activity/activity.module';
 import { TaskModule } from '@/domain/task/task.module';
 import { CategoryModule } from '@/domain/category/category.module';
+import { RequestModule } from '@/domain/request/request.module';
 import { ExpenseModule } from '@/domain/expense/expense.module';
 import { Module } from '@nestjs/common';
 
@@ -16,6 +17,7 @@ import { Module } from '@nestjs/common';
     TaskModule,
     CategoryModule,
     ExpenseModule,
+    RequestModule,
   ],
   exports: [
     CustomerModule,
@@ -25,6 +27,7 @@ import { Module } from '@nestjs/common';
     TaskModule,
     CategoryModule,
     ExpenseModule,
+    RequestModule,
   ],
 })
-export class DomainModule { }
+export class DomainModule {}

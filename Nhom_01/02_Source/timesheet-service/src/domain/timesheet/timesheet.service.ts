@@ -159,4 +159,8 @@ export class TimesheetService {
       },
     };
   }
+
+  async getTimesheet(id: string): Promise<Timesheet | null> {
+    return await this.timesheetRepository.findById(id);
+  }
 }

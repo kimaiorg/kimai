@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -66,5 +67,10 @@ export class TimesheetController {
   ): Promise<PaginationResponse<Timesheet>> {
     const userId = req['user'] as { sub: string };
     return await this.timesheetService.listTimesheetsMe(userId.sub, dto);
+  }
+
+  @Get(':id')
+  async getTimesheet(@Param('id') id: string): Promise<Timesheet | null> {
+    return await this.timesheetService.getTimesheet(id);
   }
 }

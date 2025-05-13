@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "requests" ALTER COLUMN "status" SET DEFAULT 'PROCESSING';

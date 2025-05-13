@@ -8,4 +8,8 @@ export const ENV = {
   },
 
   internal_code: process.env.INTERNAL_CODE,
+
+  timesheet_service: {
+    url: process.env.TIMESHEET_SERVICE_URL,
+  },
 };

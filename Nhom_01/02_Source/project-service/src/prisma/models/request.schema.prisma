@@ -1,0 +1,32 @@
+enum RequestType {
+  START_TIMESHEET
+  CHANGE_EXPENSE_QUANTITY
+}
+
+enum RequestStatus {
+  PROCESSING
+  APPROVED
+  REJECTED
+}
+
+model Request {
+  id      Int           @id @default(autoincrement())
+  comment String?
+  type    RequestType
+  status  RequestStatus @default(PROCESSING)
+
+  target_id Int
+
+  user_id String
+  team_id Int?
+  team    Team?  @relation(fields: [team_id], references: [id])
+
+  previous_data Json?
+  request_data  Json?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("requests")
+}

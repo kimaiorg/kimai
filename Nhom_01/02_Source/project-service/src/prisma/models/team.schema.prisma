@@ -8,6 +8,8 @@ model Team {
   projects   Project[]  @relation("ProjectTeam")
   activities Activity[]
 
+  requests Request[]
+
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?

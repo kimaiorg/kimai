@@ -5,9 +5,8 @@ import { ApiModule } from '@/api/api.module';
 import { DomainModule } from '@/domain/domain.module';
 import { InfrastructureModule } from '@/infrastructure/infrastructure.module';
 import { AuthMiddleware } from '@/libs/middlewares';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from '@/libs/guards/permission.guard';
-import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 
 @Module({
   imports: [

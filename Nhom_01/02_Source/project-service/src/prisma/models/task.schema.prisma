@@ -5,7 +5,7 @@ model Task {
   description String
   user_id     String
   color       String?
-  status      String    @default("PROCESSING")
+  status      String    @default("DOING")
   billable    Boolean   @default(false)
   is_paid     Boolean   @default(false)
 
