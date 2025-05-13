@@ -91,6 +91,7 @@ export class TimesheetService {
     return await this.timesheetRepository.update({
       where: {
         user_id: userId,
+        status: 'stopped',
         end_time: null,
       },
       data: {

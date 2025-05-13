@@ -1,13 +1,7 @@
-enum TimesheetStatus {
-  NORMAL
-  PENDING
-  REJECTED
-}
-
 model Timesheet {
-  id          Int             @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   description String?
-  status      TimesheetStatus @default(PENDING)
+  status      String  @default("running")
 
   start_time DateTime  @default(now())
   end_time   DateTime?
