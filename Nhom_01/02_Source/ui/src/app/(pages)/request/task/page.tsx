@@ -34,7 +34,7 @@ function TaskExpenseUpdateRequestPage() {
   const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const activityId = queryParams.get("activityId") || "";
+  const teamId = queryParams.get("teamId") || "";
   const userId = queryParams.get("userId") || "";
   const [taskList, setTaskList] = useState<Pagination<
     RequestUpdateType<TaskResponseType, TaskExpenseUpdateRequestType>
@@ -49,7 +49,7 @@ function TaskExpenseUpdateRequestPage() {
     sortOrder?: string
   ) => {
     try {
-      const result = await getAllExpenseUpdateTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
+      const result = await getAllExpenseUpdateTasks(page, limit, keyword, sortBy, sortOrder, teamId, userId);
 
       const { data, metadata } = result;
       const taskData = data.map((taskExpense) => {
@@ -196,7 +196,7 @@ function TaskExpenseUpdateRequestPage() {
             keyword={keyword}
             sortBy={sortBy}
             sortOrder={sortOrder}
-            activityId={activityId}
+            teamId={teamId}
             userId={userId}
           >
             <Button

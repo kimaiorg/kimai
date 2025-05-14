@@ -155,7 +155,14 @@ export interface WeeklyAllUsersReportResponse {
   };
 }
 
+export enum ReportView {
+  WEEKLY_USER = "WEEKLY_USER",
+  WEEKLY_ALL_USERS = "WEEKLY_ALL_USERS",
+  PROJECT_OVERVIEW = "PROJECT_OVERVIEW"
+}
+
 export type ReportViewType = {
+  type: ReportView;
   title: string;
   icon: React.ReactNode;
   component: ComponentType<any>;

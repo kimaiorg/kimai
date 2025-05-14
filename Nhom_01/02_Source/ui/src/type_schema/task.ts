@@ -168,5 +168,5 @@ export type UpdateTaskRequestDTO = {
 };
 
 export type TaskExpenseUpdateRequestType = {
-  new_quantity: number;
+  quantity: number;
 };

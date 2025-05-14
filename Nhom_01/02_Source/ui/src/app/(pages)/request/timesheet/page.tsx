@@ -7,8 +7,8 @@ import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTasks } from "@/api/task.api";
 import { getAllMyTimesheetUpdateRequests } from "@/api/timesheet.api";
+import FilterTimesheetV2Modal from "@/app/(pages)/request/timesheet/timesheet-filter-modal";
 import TimesheetRequestDialog from "@/app/(pages)/request/timesheet/timesheet-request-dialog";
-import FilterTimesheetModal from "@/app/(pages)/timesheet/filter-modal";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -41,13 +41,8 @@ function TimesheetUpdateRequestPage() {
   const [keyword, setKeyword] = useState<string>(searchKeyword);
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
-  const projectId = queryParams.get("projectId") || "";
-  const activityId = queryParams.get("activityId") || "";
-  const taskId = queryParams.get("taskId") || "";
+  const teamId = queryParams.get("teamId") || "";
   const userId = queryParams.get("userId") || "";
-  const status = queryParams.get("status") || "";
-  const fromDate = queryParams.get("fromDate") || "";
-  const toDate = queryParams.get("toDate") || "";
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const [timesheetUpdateList, setTimesheetUpdateList] = useState<Pagination<
     RequestUpdateType<TimesheetType, TimesheetUpdateRequestType>
@@ -83,20 +78,7 @@ function TimesheetUpdateRequestPage() {
   ) => {
     // Start all fetch requests concurrently
     const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
-    const result = await getAllMyTimesheetUpdateRequests(
-      page,
-      limit,
-      keyword,
-      sortBy,
-      sortOrder,
-      fromDate,
-      toDate,
-      userId,
-      projectId,
-      activityId,
-      taskId,
-      status
-    );
+    const result = await getAllMyTimesheetUpdateRequests(page, limit, keyword, sortBy, sortOrder, teamId, userId);
     const { data, metadata } = result;
     const timesheets: RequestUpdateType<TimesheetType, TimesheetUpdateRequestType>[] = data.map((timesheetUpdate) => {
       const { previous_data, ...rest } = timesheetUpdate;
@@ -227,18 +209,12 @@ function TimesheetUpdateRequestPage() {
               onChange={handleSearchChange}
             />
           </div>
-          <FilterTimesheetModal
+          <FilterTimesheetV2Modal
             handleFilterChangeAction={handleFilterChange}
-            keyword={keyword}
             sortBy={sortBy}
             sortOrder={sortOrder}
-            projectId={projectId}
-            activityId={activityId}
-            taskId={taskId}
+            teamId={teamId}
             userId={userId}
-            status={status}
-            fromDate={fromDate}
-            toDate={toDate}
           >
             <Button
               variant="outline"
@@ -247,7 +223,7 @@ function TimesheetUpdateRequestPage() {
             >
               <Filter className="h-4 w-4" />
             </Button>
-          </FilterTimesheetModal>
+          </FilterTimesheetV2Modal>
         </div>
       </div>
 

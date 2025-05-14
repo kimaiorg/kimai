@@ -7,6 +7,7 @@ import {
   WeeklyAllUsersReportResponseType,
   WeeklyOneUserReportResponseType
 } from "@/type_schema/report";
+import { TaskStatus } from "@/type_schema/task";
 import axios from "axios";
 
 const TIMESHEET_BACKEND_URL = process.env.TIMESHEET_BACKEND_URL;
@@ -15,7 +16,7 @@ export async function getWeeklyOneUserReport(
   userId: string,
   fromDate: string,
   toDate: string
-): Promise<Pagination<WeeklyOneUserReportResponseType>> {
+): Promise<WeeklyOneUserReportResponseType> {
   const token = await getManagementAccessToken();
   console.log(token);
   const params = new URLSearchParams();
@@ -23,17 +24,9 @@ export async function getWeeklyOneUserReport(
   params.append("fromDate", fromDate);
   params.append("toDate", toDate);
 
-  return {
-    metadata: {
-      total: 4,
-      page: 1,
-      limit: 10,
-      totalPages: 1
-    },
-    data: fakeWeeklyOneUserReport()
-  };
+  return fakeWeeklyOneUserReport();
 
-  const response = await axios.get<Pagination<WeeklyOneUserReportResponseType>>(
+  const response = await axios.get<WeeklyOneUserReportResponseType>(
     `${TIMESHEET_BACKEND_URL}/api/v1/reports/one-user?${params.toString()}`,
     {
       headers: {
@@ -124,23 +117,102 @@ export async function getProjectOverviewReport(customerId?: number): Promise<Pro
   }
 }
 
-const fakeWeeklyOneUserReport = (): WeeklyOneUserReportResponseType[] => {
-  return [
-    {
-      user_id: "1",
-      fromDate: "2025-05-01T15:39:11.346Z",
-      toDate: "2025-05-07T15:39:11.346Z",
-      entries: [
-        {
-          task: {
-            id: 1,
-            title: "Task 1",
-            color: "red",
-            deadline: "2023-05-01T15:39:11.346Z",
-            created_at: "2023-05-01T15:39:11.346Z",
+const fakeWeeklyOneUserReport = (): WeeklyOneUserReportResponseType => {
+  return {
+    user_id: "1",
+    fromDate: "2025-05-01T15:39:11.346Z",
+    toDate: "2025-05-07T15:39:11.346Z",
+    entries: [
+      {
+        task: {
+          id: 1,
+          title: "Task 1 Fix bug",
+          color: "red",
+          deadline: "2023-05-01T15:39:11.346Z",
+          created_at: "2023-05-01T15:39:11.346Z",
+          deleted_at: null,
+          description: "",
+          updated_at: "",
+          activity: {
+            id: 0,
+            name: "",
+            color: "",
+            description: "",
+            activity_number: 0,
+            budget: 0,
+            project_id: 0,
+            created_at: "",
+            updated_at: "",
             deleted_at: null,
-            description: "Description 1",
-            updated_at: "2023-05-01T15:39:11.346Z",
+            project: {
+              id: 0,
+              name: "",
+              color: "",
+              project_number: 0,
+              order_number: 0,
+              order_date: "",
+              start_date: "",
+              end_date: "",
+              budget: 0,
+              customer_id: 0,
+              created_at: "",
+              updated_at: "",
+              deleted_at: null
+            },
+            team: {
+              id: 0,
+              name: "",
+              color: "",
+              created_at: "",
+              updated_at: "",
+              deleted_at: null,
+              lead: "",
+              users: []
+            },
+            tasks: [],
+            quota: undefined
+          },
+          expense: {
+            id: 0,
+            name: "",
+            color: "",
+            description: "",
+            project_id: 0,
+            project: {
+              id: 0,
+              name: "",
+              color: "",
+              project_number: 0,
+              order_number: 0,
+              order_date: "",
+              start_date: "",
+              end_date: "",
+              budget: 0,
+              created_at: "",
+              updated_at: "",
+              deleted_at: null,
+              teams: [],
+              customer: {
+                id: 0,
+                name: "",
+                color: "",
+                description: "",
+                address: "",
+                company_name: "",
+                account_number: "",
+                vat_id: "",
+                country: "",
+                currency: "",
+                timezone: "",
+                email: "",
+                phone: "",
+                homepage: "",
+                created_at: "",
+                updated_at: "",
+                deleted_at: null,
+                projects: []
+              }
+            },
             activity: {
               id: 0,
               name: "",
@@ -177,122 +249,123 @@ const fakeWeeklyOneUserReport = (): WeeklyOneUserReportResponseType[] => {
                 lead: "",
                 users: []
               },
-              tasks: []
+              tasks: [],
+              quota: undefined
             },
-            expense: {
+            category: {
               id: 0,
               name: "",
               color: "",
               description: "",
-              project_id: 0,
-              project: {
-                id: 0,
-                name: "",
-                color: "",
-                project_number: 0,
-                order_number: 0,
-                order_date: "",
-                start_date: "",
-                end_date: "",
-                budget: 0,
-                created_at: "",
-                updated_at: "",
-                deleted_at: null,
-                teams: [],
-                customer: {
-                  id: 0,
-                  name: "",
-                  color: "",
-                  description: "",
-                  address: "",
-                  company_name: "",
-                  account_number: "",
-                  vat_id: "",
-                  country: "",
-                  currency: "",
-                  timezone: "",
-                  email: "",
-                  phone: "",
-                  homepage: "",
-                  created_at: "",
-                  updated_at: "",
-                  deleted_at: null,
-                  projects: []
-                }
-              },
-              activity: {
-                id: 0,
-                name: "",
-                color: "",
-                description: "",
-                activity_number: 0,
-                budget: 0,
-                project_id: 0,
-                created_at: "",
-                updated_at: "",
-                deleted_at: null,
-                project: {
-                  id: 0,
-                  name: "",
-                  color: "",
-                  project_number: 0,
-                  order_number: 0,
-                  order_date: "",
-                  start_date: "",
-                  end_date: "",
-                  budget: 0,
-                  customer_id: 0,
-                  created_at: "",
-                  updated_at: "",
-                  deleted_at: null
-                },
-                team: {
-                  id: 0,
-                  name: "",
-                  color: "",
-                  created_at: "",
-                  updated_at: "",
-                  deleted_at: null,
-                  lead: "",
-                  users: []
-                },
-                tasks: [],
-                quota: undefined
-              },
-              category: {
-                id: 0,
-                name: "",
-                color: "",
-                description: "",
-                created_at: "",
-                updated_at: "",
-                deleted_at: null
-              },
-              quantity: 0,
-              cost: 0,
               created_at: "",
               updated_at: "",
-              deleted_at: null,
-              task: []
+              deleted_at: null
             },
-            expense_id: "1",
-            user_id: "1",
-            status: "DONE",
-            billable: true
+            cost: 0,
+            created_at: "",
+            updated_at: "",
+            deleted_at: null,
+            task: []
           },
-          duration: ["8:00", "8:00", "8:00", "", "8:10", "", ""],
-          totalDuration: "32:10"
+          expense_id: "",
+          quantity: 0,
+          user_id: "",
+          status: TaskStatus.PROCESSING,
+          billable: false
         },
-        {
-          task: {
-            id: 2,
-            title: "Task 2 research",
-            color: "red",
-            deadline: "2023-05-01T15:39:11.346Z",
-            created_at: "2023-05-01T15:39:11.346Z",
+        duration: ["8:00", "8:00", "8:00", "", "8:10", "", ""],
+        totalDuration: "32:10"
+      },
+      {
+        task: {
+          id: 2,
+          title: "Task 2 research",
+          color: "red",
+          deadline: "2023-05-01T15:39:11.346Z",
+          created_at: "2023-05-01T15:39:11.346Z",
+          deleted_at: null,
+          description: "",
+          updated_at: "",
+          activity: {
+            id: 0,
+            name: "",
+            color: "",
+            description: "",
+            activity_number: 0,
+            budget: 0,
+            project_id: 0,
+            created_at: "",
+            updated_at: "",
             deleted_at: null,
-            description: "Description 1",
-            updated_at: "2023-05-01T15:39:11.346Z",
+            project: {
+              id: 0,
+              name: "",
+              color: "",
+              project_number: 0,
+              order_number: 0,
+              order_date: "",
+              start_date: "",
+              end_date: "",
+              budget: 0,
+              customer_id: 0,
+              created_at: "",
+              updated_at: "",
+              deleted_at: null
+            },
+            team: {
+              id: 0,
+              name: "",
+              color: "",
+              created_at: "",
+              updated_at: "",
+              deleted_at: null,
+              lead: "",
+              users: []
+            },
+            tasks: [],
+            quota: undefined
+          },
+          expense: {
+            id: 0,
+            name: "",
+            color: "",
+            description: "",
+            project_id: 0,
+            project: {
+              id: 0,
+              name: "",
+              color: "",
+              project_number: 0,
+              order_number: 0,
+              order_date: "",
+              start_date: "",
+              end_date: "",
+              budget: 0,
+              created_at: "",
+              updated_at: "",
+              deleted_at: null,
+              teams: [],
+              customer: {
+                id: 0,
+                name: "",
+                color: "",
+                description: "",
+                address: "",
+                company_name: "",
+                account_number: "",
+                vat_id: "",
+                country: "",
+                currency: "",
+                timezone: "",
+                email: "",
+                phone: "",
+                homepage: "",
+                created_at: "",
+                updated_at: "",
+                deleted_at: null,
+                projects: []
+              }
+            },
             activity: {
               id: 0,
               name: "",
@@ -329,115 +402,35 @@ const fakeWeeklyOneUserReport = (): WeeklyOneUserReportResponseType[] => {
                 lead: "",
                 users: []
               },
-              tasks: []
+              tasks: [],
+              quota: undefined
             },
-            expense: {
+            category: {
               id: 0,
               name: "",
               color: "",
               description: "",
-              project_id: 0,
-              project: {
-                id: 0,
-                name: "",
-                color: "",
-                project_number: 0,
-                order_number: 0,
-                order_date: "",
-                start_date: "",
-                end_date: "",
-                budget: 0,
-                created_at: "",
-                updated_at: "",
-                deleted_at: null,
-                teams: [],
-                customer: {
-                  id: 0,
-                  name: "",
-                  color: "",
-                  description: "",
-                  address: "",
-                  company_name: "",
-                  account_number: "",
-                  vat_id: "",
-                  country: "",
-                  currency: "",
-                  timezone: "",
-                  email: "",
-                  phone: "",
-                  homepage: "",
-                  created_at: "",
-                  updated_at: "",
-                  deleted_at: null,
-                  projects: []
-                }
-              },
-              activity: {
-                id: 0,
-                name: "",
-                color: "",
-                description: "",
-                activity_number: 0,
-                budget: 0,
-                project_id: 0,
-                created_at: "",
-                updated_at: "",
-                deleted_at: null,
-                project: {
-                  id: 0,
-                  name: "",
-                  color: "",
-                  project_number: 0,
-                  order_number: 0,
-                  order_date: "",
-                  start_date: "",
-                  end_date: "",
-                  budget: 0,
-                  customer_id: 0,
-                  created_at: "",
-                  updated_at: "",
-                  deleted_at: null
-                },
-                team: {
-                  id: 0,
-                  name: "",
-                  color: "",
-                  created_at: "",
-                  updated_at: "",
-                  deleted_at: null,
-                  lead: "",
-                  users: []
-                },
-                tasks: [],
-                quota: undefined
-              },
-              category: {
-                id: 0,
-                name: "",
-                color: "",
-                description: "",
-                created_at: "",
-                updated_at: "",
-                deleted_at: null
-              },
-              quantity: 0,
-              cost: 0,
               created_at: "",
               updated_at: "",
-              deleted_at: null,
-              task: []
+              deleted_at: null
             },
-            expense_id: "1",
-            user_id: "1",
-            status: "DONE",
-            billable: true
+            cost: 0,
+            created_at: "",
+            updated_at: "",
+            deleted_at: null,
+            task: []
           },
-          duration: ["", "", "7:00", "5:00", "6:00", "", ""],
-          totalDuration: "18:00"
-        }
-      ]
-    }
-  ];
+          expense_id: "",
+          quantity: 0,
+          user_id: "",
+          status: TaskStatus.PROCESSING,
+          billable: false
+        },
+        duration: ["", "", "7:00", "5:00", "6:00", "", ""],
+        totalDuration: "18:00"
+      }
+    ]
+  };
 };
 
 const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
@@ -450,13 +443,13 @@ const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
           user_id: "1",
           task: {
             id: 1,
-            title: "Task 1",
+            title: "Task 1 Fix bug",
             color: "red",
             deadline: "2023-05-01T15:39:11.346Z",
             created_at: "2023-05-01T15:39:11.346Z",
             deleted_at: null,
-            description: "Description 1",
-            updated_at: "2023-05-01T15:39:11.346Z",
+            description: "",
+            updated_at: "",
             activity: {
               id: 0,
               name: "",
@@ -493,7 +486,8 @@ const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
                 lead: "",
                 users: []
               },
-              tasks: []
+              tasks: [],
+              quota: undefined
             },
             expense: {
               id: 0,
@@ -584,17 +578,17 @@ const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
                 updated_at: "",
                 deleted_at: null
               },
-              quantity: 0,
               cost: 0,
               created_at: "",
               updated_at: "",
               deleted_at: null,
               task: []
             },
-            expense_id: "1",
-            user_id: "1",
-            status: "DONE",
-            billable: true
+            expense_id: "",
+            quantity: 0,
+            user_id: "",
+            status: TaskStatus.PROCESSING,
+            billable: false
           },
           duration: ["8:00", "8:00", "8:00", "", "8:10", "", ""],
           totalDuration: "32:10"
@@ -608,8 +602,8 @@ const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
             deadline: "2023-05-01T15:39:11.346Z",
             created_at: "2023-05-01T15:39:11.346Z",
             deleted_at: null,
-            description: "Description 1",
-            updated_at: "2023-05-01T15:39:11.346Z",
+            description: "",
+            updated_at: "",
             activity: {
               id: 0,
               name: "",
@@ -646,7 +640,8 @@ const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
                 lead: "",
                 users: []
               },
-              tasks: []
+              tasks: [],
+              quota: undefined
             },
             expense: {
               id: 0,
@@ -737,17 +732,17 @@ const fakeWeeklyAllUsersReport = (): WeeklyAllUsersReportResponseType[] => {
                 updated_at: "",
                 deleted_at: null
               },
-              quantity: 0,
               cost: 0,
               created_at: "",
               updated_at: "",
               deleted_at: null,
               task: []
             },
-            expense_id: "1",
-            user_id: "1",
-            status: "DONE",
-            billable: true
+            expense_id: "",
+            quantity: 0,
+            user_id: "",
+            status: TaskStatus.PROCESSING,
+            billable: false
           },
           duration: ["", "", "7:00", "5:00", "6:00", "", ""],
           totalDuration: "18:00"

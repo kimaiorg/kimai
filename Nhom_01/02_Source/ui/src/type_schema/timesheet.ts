@@ -156,6 +156,9 @@ export type UpdateTimesheetRequestDTO = {
   activity_id: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type TimesheetStartTrackingRequestType = {};
+
 export type TimesheetUpdateRequestType = {
   new_start_time: string;
   new_end_time: string;

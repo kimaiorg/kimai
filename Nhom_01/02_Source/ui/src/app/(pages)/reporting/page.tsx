@@ -1,15 +1,15 @@
 "use client";
 
-import { reportCards } from "@/app/(pages)/reporting/report-items";
+import { getReportViewByType, reportCards } from "@/app/(pages)/reporting/report-items";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Card } from "@/components/ui/card";
 import { useTranslation } from "@/lib/i18n";
-import { ReportViewType } from "@/type_schema/report";
+import { ReportView, ReportViewType } from "@/type_schema/report";
 import { useState } from "react";
 
 function Reporting() {
   const { t } = useTranslation();
-  const [selectedReport, setSelectedReport] = useState<ReportViewType | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReportViewType>(getReportViewByType(ReportView.WEEKLY_USER));
 
   const handleSelectingReport = (component: ReportViewType) => {
     setSelectedReport(component);

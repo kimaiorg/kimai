@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { formatCurrency, handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
 import { ExpenseType } from "@/type_schema/expense";
@@ -25,7 +27,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [activityList, setActivityList] = useState<ActivityType[]>([]);
-  const [userList, setUserList] = useState<UserType[]>([]);
+  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const [expenseList, setExpenseList] = useState<ExpenseType[] | null>(null);
 
   const [totalPrice, setTotalPrice] = useState<number | null>(null);
@@ -109,11 +111,10 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
   });
 
   useEffect(() => {
-    if (!selectedQuantity || !selectedExpenseId) return;
-    setTotalPrice(
-      Number(expenseList!.find((expense) => expense.id === Number(selectedExpenseId))!.cost) * Number(selectedQuantity)
-    );
-  }, [selectedQuantity, selectedExpenseId]);
+    if (!selectedQuantity || !selectedExpenseId || !expenseList || expenseList.length == 0) return;
+    const expense = expenseList!.find((expense) => expense.id.toString() === selectedExpenseId)!;
+    setTotalPrice(expense.cost * Number(selectedQuantity));
+  }, [selectedQuantity, selectedExpenseId, expenseList]);
 
   return (
     <Dialog
@@ -168,23 +169,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   </FormItem>
                 )}
               />
-              <FormField
-                control={createTaskForm.control}
-                name="deadline"
-                render={({ field }) => (
-                  <FormItem className="col-span-6">
-                    <FormLabel>To</FormLabel>
-                    <FormControl>
-                      <DateTimePicker
-                        date={field.value}
-                        setDate={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Company Name and VAT ID */}
+
               <FormField
                 control={createTaskForm.control}
                 name="description"
@@ -197,6 +182,22 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                         rows={2}
                         className="!mt-0 border-gray-200"
                         {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createTaskForm.control}
+                name="deadline"
+                render={({ field }) => (
+                  <FormItem className="col-span-6">
+                    <FormLabel>Due date</FormLabel>
+                    <FormControl>
+                      <DateTimePicker
+                        date={field.value}
+                        setDate={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -242,7 +243,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   control={createTaskForm.control}
                   name="user_id"
                   render={({ field }) => (
-                    <FormItem className="col-span-12">
+                    <FormItem className="col-span-10">
                       <FormLabel>Assignee</FormLabel>
                       <FormControl>
                         <Select
@@ -271,6 +272,22 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   )}
                 />
               )}
+              <FormField
+                control={createTaskForm.control}
+                name="billable"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Billable</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={field.value == "true"}
+                        onCheckedChange={(value) => field.onChange(value ? "true" : "false")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {expenseList && (
                 <FormField
                   control={createTaskForm.control}
@@ -309,12 +326,12 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                 control={createTaskForm.control}
                 name="quantity"
                 render={({ field }) => (
-                  <FormItem className="col-span-3">
+                  <FormItem className="col-span-2">
                     <FormLabel>Quantity</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        className="h-10 !mt-0 border-gray-200 cursor-pointer"
+                        className="!mt-0 border-gray-200 cursor-pointer"
                         {...field}
                       />
                     </FormControl>
@@ -322,7 +339,15 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                   </FormItem>
                 )}
               />
-              {totalPrice && <div className="col-span-5">Total: {formatCurrency(totalPrice)}</div>}
+              {totalPrice && (
+                <FormItem className="col-span-3">
+                  <FormLabel>Preview</FormLabel>
+                  <div className="col-span-5 flex items-center justify-between bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-gray-200 gap-2">
+                    <span className="font-medium text-gray-700">Total:</span>
+                    <span className="text-lg font-semibold text-main">{formatCurrency(totalPrice)}</span>
+                  </div>
+                </FormItem>
+              )}
             </div>
 
             <DialogFooter>

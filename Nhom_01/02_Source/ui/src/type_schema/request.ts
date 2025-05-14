@@ -1,5 +1,6 @@
-import { ExpenseType } from "@/type_schema/expense";
+import { TeamResponseType } from "@/type_schema/team";
 import { TimesheetResponseType } from "@/type_schema/timesheet";
+import { UserType } from "@/type_schema/user.schema";
 import { ComponentType } from "react";
 
 export enum ApprovalStatus {
@@ -26,14 +27,26 @@ export type RequestViewType = {
 
 export type RequestUpdateType<T, V> = {
   id: number;
-  type: RequestTypeType;
   comment: string;
+  type: RequestTypeType;
   status: ApprovalStatus;
+  target_id: number;
+  user_id: number;
+  user?: UserType;
+  team_id?: number;
+  team?: TeamResponseType;
   previous_data: T;
   request_data: V;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+};
+
+export type CommonRequestType<T> = {
+  comment: string;
+  type: RequestTypeType;
+  target_id: number;
+  request_data: T;
 };
 
 export type TimesheetRequestType = {

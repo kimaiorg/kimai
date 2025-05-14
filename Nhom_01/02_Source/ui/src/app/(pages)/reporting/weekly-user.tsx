@@ -11,7 +11,12 @@ import { generateWeeklyReportPdf } from "@/lib/pdf-utils";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { formatDuration, generateWeekOption, getWeekNumber } from "@/lib/utils";
 import { ProjectType } from "@/type_schema/project";
-import { WeekDayType, WeeklyReportEntry } from "@/type_schema/report";
+import {
+  WeekDayType,
+  WeeklyOneUserReportResponseType,
+  WeeklyOneUserReportType,
+  WeeklyReportEntry
+} from "@/type_schema/report";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useEffect, useState } from "react";
@@ -21,7 +26,7 @@ function WeeklyUserReport() {
   const { t } = useTranslation();
   const { user } = useUser();
   const weekOptions = generateWeekOption();
-  const currentWeekNumber = getWeekNumber(new Date(), weekOptions);
+  const [currentWeekNumber, setCurrentWeekNumber] = useState(getWeekNumber(new Date(), weekOptions));
 
   const [selectedWeek, setSelectedWeek] = useState(weekOptions.find((week) => week.week === currentWeekNumber));
   const [projects, setProjects] = useState<ProjectType[]>([]);
@@ -34,13 +39,21 @@ function WeeklyUserReport() {
 
   const [weekInfo, setWeekInfo] = useState({ number: 15, year: 2025, start: "", end: "" });
 
+  const [weeklyReport, setWeeklyReport] = useState<WeeklyOneUserReportType | null>(null);
+
   // Fetch report data
   useEffect(() => {
     const fetchReportData = async () => {
       setIsLoading(true);
       try {
-        const data = await getWeeklyOneUserReport(selectedUser.user_id!, selectedWeek!.from, selectedWeek!.to);
-        // setTimeEntries(data.entries || []);
+        const response = await getWeeklyOneUserReport(selectedUser.user_id!, selectedWeek!.from, selectedWeek!.to);
+        const data: WeeklyOneUserReportType = {
+          ...response,
+          user: userList.find((u) => u.user_id === selectedUser.user_id)!,
+          totalOfDays: "0",
+          totalOfEachDay: ["0", "0", "0", "0", "0", "0", "0"]
+        };
+        setWeeklyReport(data);
       } catch (error) {
         console.error("Error fetching weekly report data:", error);
       } finally {
@@ -122,12 +135,14 @@ function WeeklyUserReport() {
   const previousWeek = () => {
     if (selectedWeek!.week !== 1) {
       setSelectedWeek(weekOptions.find((week) => week.week === currentWeekNumber - 1)!);
+      setCurrentWeekNumber(currentWeekNumber - 1);
     }
   };
 
   const nextWeek = () => {
     if (selectedWeek!.week !== 52) {
       setSelectedWeek(weekOptions.find((week) => week.week === currentWeekNumber + 1)!);
+      setCurrentWeekNumber(currentWeekNumber + 1);
     }
   };
 

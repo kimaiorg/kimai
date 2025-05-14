@@ -6,6 +6,7 @@ import FilterTaskModal from "@/app/(pages)/task/filter-modal";
 import { TaskConfirmDialog } from "@/app/(pages)/task/task-confirm-dialog";
 import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
 import { TaskUpdateDialog } from "@/app/(pages)/task/task-update-dialog";
+import { TaskUpdateExpenseRequestDialog } from "@/app/(pages)/task/task-update-expense-request-dialog";
 import TaskViewDialog from "@/app/(pages)/task/task-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
@@ -17,7 +18,6 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { Pagination } from "@/type_schema/common";
-import { ExpenseType } from "@/type_schema/expense";
 import { Role } from "@/type_schema/role";
 import { TaskStatus, TaskType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
@@ -25,6 +25,7 @@ import { format } from "date-fns";
 import debounce from "debounce";
 import {
   CircleCheckBig,
+  CircleDollarSign,
   Eye,
   FileDown,
   Filter,
@@ -80,6 +81,7 @@ function Task() {
           user: userList.find((user) => user.user_id === user_id)!
         };
       });
+
       setTaskList({
         metadata: metadata,
         data: taskData
@@ -256,7 +258,7 @@ function Task() {
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
             </tr>
           </thead>
-          {isLoading && <TableSkeleton columns={6} />}
+          {isLoading && <TableSkeleton columns={7} />}
           <tbody>
             {taskList && taskList.data.length === 0 && (
               <tr className="h-48 text-center">
@@ -322,6 +324,14 @@ function Task() {
                             </div>
                           </TaskConfirmDialog>
                         )}
+                        <TaskUpdateExpenseRequestDialog
+                          targetTask={task}
+                          fetchTasks={handleFetchTasks}
+                        >
+                          <div className="flex gap-2 text-main items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                            <CircleDollarSign size={14} /> Make a request
+                          </div>
+                        </TaskUpdateExpenseRequestDialog>
                         {task?.status && task.status === TaskStatus.DONE && (
                           <div className="flex gap-2 text-yellow-600 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
                             <History size={14} /> Mark as processing

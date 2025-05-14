@@ -32,6 +32,10 @@
   # database configs
   DATABASE_URL=postgres://postgres:postgres@localhost:5433/project
 
+  RABBITMQ_URL=amqp://root:root@localhost:5672
+
+  TIMESHEET_SERVICE_URL=http://localhost:3334
+
   INTERNAL_CODE=X9T4B7LQZV3MHG2JYAFWECNPDUK6SR80I5LO1XQBVUNZK3MTDY
   ```
 

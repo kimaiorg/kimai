@@ -71,7 +71,7 @@ export const timesheetNavMain = [
     url: "/request",
     icon: GitPullRequestCreateArrow,
     isActive: false,
-    allowRoles: [],
+    allowRoles: [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD],
     items: null
   },
   // {

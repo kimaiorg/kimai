@@ -3,7 +3,7 @@
 import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTasks } from "@/api/task.api";
-import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
+import { endTimesheetRecord, getAllMyTimesheets, requestStartTrackingTimesheet } from "@/api/timesheet.api";
 import FilterTimesheetModal from "@/app/(pages)/timesheet/filter-modal";
 import { ManualTimesheetCreateDialog } from "@/app/(pages)/timesheet/manual-timesheet-create-dialog";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
@@ -19,8 +19,8 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { secondsToTime } from "@/lib/utils";
 import { Pagination } from "@/type_schema/common";
-import { ApprovalStatus } from "@/type_schema/request";
-import { TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
+import { ApprovalStatus, CommonRequestType, RequestTypeType } from "@/type_schema/request";
+import { TimesheetStartTrackingRequestType, TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
@@ -98,6 +98,7 @@ function Timesheet() {
       status
     );
     const { data, metadata } = result;
+    console.log(data);
     const timesheets: TimesheetType[] = data
       .map((timesheet) => {
         const { user_id, project_id, activity_id, task_id, ...rest } = timesheet;
@@ -115,7 +116,7 @@ function Timesheet() {
       data: timesheets,
       metadata
     });
-    console.log(timesheets);
+
     const runningRecord = timesheets.find(
       (timesheet) => timesheet.status === TimesheetStatus.TRACKING && timesheet.user.user_id === currentUser!.sub
     );
@@ -153,7 +154,7 @@ function Timesheet() {
     }
   };
 
-  function handleStartingTracking(): void {
+  async function handleStartingTracking(): Promise<void> {
     handleFetchTimesheets(1);
   }
 
@@ -373,7 +374,7 @@ function Timesheet() {
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
               </tr>
             </thead>
-            {!timesheetList && <TableSkeleton columns={6} />}
+            {!timesheetList && <TableSkeleton columns={7} />}
             <tbody>
               {timesheetList && timesheetList.data.length === 0 && (
                 <tr className="h-48 text-center">

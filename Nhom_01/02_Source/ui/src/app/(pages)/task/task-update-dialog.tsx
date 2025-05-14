@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { formatCurrency, handleErrorApi } from "@/lib/utils";
@@ -47,8 +48,9 @@ export function TaskUpdateDialog({
       description: targetTask.description,
       activity_id: targetTask.activity.id.toString(),
       user_id: targetTask.user.user_id,
-      quantity: targetTask?.quantity?.toString() || "",
-      expense_id: targetTask.expense?.id?.toString() || ""
+      quantity: targetTask.quantity.toString() || "",
+      expense_id: targetTask.expense.id.toString() || "",
+      billable: targetTask.billable ? "true" : "false"
     }
   });
   async function onSubmit(values: UpdateTaskValidation) {
@@ -116,9 +118,11 @@ export function TaskUpdateDialog({
   });
 
   useEffect(() => {
-    if (!selectedQuantity || !selectedExpenseId) return;
-    setTotalPrice(Number(selectedExpenseId) * Number(selectedQuantity));
-  }, [selectedQuantity, selectedExpenseId]);
+    if (!selectedQuantity || !selectedExpenseId || !expenseList || expenseList.length == 0) return;
+    const expense = expenseList.find((expense) => expense.id.toString() == selectedExpenseId)!;
+    // console.log(selectedExpenseId, expense);
+    setTotalPrice(expense.cost * Number(selectedQuantity));
+  }, [selectedQuantity, selectedExpenseId, expenseList]);
 
   return (
     <Dialog
@@ -197,7 +201,7 @@ export function TaskUpdateDialog({
                 name="deadline"
                 render={({ field }) => (
                   <FormItem className="col-span-5">
-                    <FormLabel>Deadline</FormLabel>
+                    <FormLabel>Due date</FormLabel>
                     <FormControl>
                       <DateTimePicker
                         date={field.value}
@@ -247,7 +251,7 @@ export function TaskUpdateDialog({
                   control={updateTaskForm.control}
                   name="user_id"
                   render={({ field }) => (
-                    <FormItem className="col-span-6">
+                    <FormItem className="col-span-10">
                       <FormLabel>Assignee</FormLabel>
                       <FormControl>
                         <Select
@@ -276,6 +280,22 @@ export function TaskUpdateDialog({
                   )}
                 />
               )}
+              <FormField
+                control={updateTaskForm.control}
+                name="billable"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Billable</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={field.value == "true"}
+                        onCheckedChange={(value) => field.onChange(value ? "true" : "false")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {expenseList && (
                 <FormField
                   control={updateTaskForm.control}
@@ -299,7 +319,7 @@ export function TaskUpdateDialog({
                                 key={index}
                                 value={expense.id.toString()}
                               >
-                                {expense.name}
+                                {expense.name} - {formatCurrency(expense.cost)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -314,12 +334,12 @@ export function TaskUpdateDialog({
                 control={updateTaskForm.control}
                 name="quantity"
                 render={({ field }) => (
-                  <FormItem className="col-span-3">
+                  <FormItem className="col-span-2">
                     <FormLabel>Quantity</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        className="h-10 !mt-0 border-gray-200 cursor-pointer"
+                        className="!mt-0 border-gray-200 cursor-pointer"
                         {...field}
                       />
                     </FormControl>
@@ -327,7 +347,13 @@ export function TaskUpdateDialog({
                   </FormItem>
                 )}
               />
-              <div className="col-span-5">Total: {formatCurrency(totalPrice)}</div>
+              <FormItem className="col-span-3">
+                <FormLabel>Preview</FormLabel>
+                <div className="col-span-5 flex items-center justify-between bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-gray-200 gap-2">
+                  <span className="font-medium text-gray-700">Total:</span>
+                  <span className="text-lg font-semibold text-main">{formatCurrency(totalPrice)}</span>
+                </div>
+              </FormItem>
             </div>
 
             <DialogFooter>

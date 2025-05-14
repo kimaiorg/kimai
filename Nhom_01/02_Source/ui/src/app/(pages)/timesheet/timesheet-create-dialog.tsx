@@ -1,7 +1,7 @@
 "use client";
 
 import { getAllTasksByUserId } from "@/api/task.api";
-import { addNewTimesheetRecord } from "@/api/timesheet.api";
+import { addNewTimesheetRecord, requestStartTrackingTimesheet } from "@/api/timesheet.api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,11 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { handleErrorApi } from "@/lib/utils";
 import { ActivityType } from "@/type_schema/activity";
 import { CustomerProjectType } from "@/type_schema/project";
+import { CommonRequestType, RequestTypeType } from "@/type_schema/request";
 import { TaskResponseType } from "@/type_schema/task";
 import {
   CreateTimesheetRequestDTO,
   CreateTimesheetRequestSchema,
-  CreateTimesheetValidation
+  CreateTimesheetValidation,
+  TimesheetStartTrackingRequestType
 } from "@/type_schema/timesheet";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,19 +59,28 @@ export function TimesheetCreateDialog({
         activity_id: activity!.id
       };
       const response = await addNewTimesheetRecord(payload);
-      console.log(response);
-      if (response == 201) {
+
+      if (response != null) {
         toast("Success", {
-          description: "Add new task successfully",
+          description: "Start tracking task successfully",
           duration: 2000,
           className: "!bg-lime-500 !text-white"
         });
+        const taskName = taskList.find((task) => task.id.toString() === response.task_id.toString())!.title;
+        const payload: CommonRequestType<TimesheetStartTrackingRequestType> = {
+          comment: `Start tracking for task: ${taskName}`,
+          target_id: response.id,
+          type: RequestTypeType.START_TIMESHEET,
+          request_data: {}
+        };
+        const res = await requestStartTrackingTimesheet(payload);
+        console.log(res);
         fetchTimesheets();
         createTimesheetForm.reset();
         setOpen(false);
       } else {
         toast("Failed", {
-          description: "Failed to add task. Please try again!",
+          description: "Failed to start tracking task. Please try again!",
           duration: 2000,
           className: "!bg-red-500 !text-white"
         });

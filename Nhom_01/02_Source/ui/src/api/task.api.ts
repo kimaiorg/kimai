@@ -1,7 +1,8 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { projectAxios } from "@/api/axios";
+import { getAllExpenseUpdates } from "@/api/request.api";
 import { Pagination } from "@/type_schema/common";
-import { ApprovalStatus, RequestTypeType, RequestUpdateType } from "@/type_schema/request";
+import { CommonRequestType, RequestTypeType, RequestUpdateType } from "@/type_schema/request";
 import {
   CreateTaskRequestDTO,
   TaskExpenseUpdateRequestType,
@@ -102,60 +103,64 @@ export async function confirmTaskStatus(request: any, taskId: number): Promise<n
   }
 }
 
+export async function requestUpdateTaskExpense(
+  request: CommonRequestType<TaskExpenseUpdateRequestType>
+): Promise<number> {
+  const token = await getManagementAccessToken();
+
+  try {
+    const response = await projectAxios.post(`/api/v1/requests`, request, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.status;
+  } catch (error: any) {
+    return error.response.status;
+  }
+}
+
 export async function getAllExpenseUpdateTasks(
   page?: number,
   limit?: number,
   keyword?: string,
   sortBy?: string,
   sortOrder?: string,
-  activityId?: string,
+  teamId?: string,
   userId?: string
 ): Promise<Pagination<RequestUpdateType<TaskResponseType, TaskExpenseUpdateRequestType>>> {
-  const token = await getManagementAccessToken();
-
-  const params = new URLSearchParams();
-  if (page) params.append("page", page.toString());
-  if (limit) params.append("limit", limit.toString());
-  if (keyword) params.append("keyword", keyword);
-  if (sortBy) {
-    params.append("sort_by", sortBy);
-    const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sort_order", order);
-  }
-  if (activityId) params.append("activity_id", activityId);
-  if (userId) params.append("user_id", userId);
-
   // Fake data
-  const responseFake = await getAllTasks();
-  const { metadata, data: dataFake } = responseFake;
-  return {
-    metadata,
-    data: dataFake.map((task, index) => {
-      return {
-        id: index + 1,
-        type: RequestTypeType.START_TIMESHEET,
-        comment: "A comment",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        deleted_at: null,
-        previous_data: task,
-        request_data: {
-          new_quantity: Math.floor(Math.random() * 100)
-        },
-        status: Math.random() > 0.5 ? ApprovalStatus.PROCESSING : ApprovalStatus.APPROVED
-      };
-    })
-  };
+  // const responseFake = await getAllTasks();
+  // const { metadata, data: dataFake } = responseFake;
+  // return {
+  //   metadata,
+  //   data: dataFake.map((task, index) => {
+  //     return {
+  //       id: index + 1,
+  //       type: RequestTypeType.START_TIMESHEET,
+  //       comment: "A comment",
+  //       created_at: new Date().toISOString(),
+  //       updated_at: new Date().toISOString(),
+  //       deleted_at: null,
+  //       previous_data: task,
+  //       user_id: 1,
+  //       target_id: task.id,
+  //       request_data: {
+  //         quantity: Math.floor(Math.random() * 100)
+  //       },
+  //       status: Math.random() > 0.5 ? ApprovalStatus.PROCESSING : ApprovalStatus.APPROVED
+  //     };
+  //   })
+  // };
 
-  const response = await projectAxios.get<
-    Pagination<RequestUpdateType<TaskResponseType, TaskExpenseUpdateRequestType>>
-  >(`/api/v1/tasks/request?${params.toString()}`, {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  const data = response.data;
-  return data;
+  return getAllExpenseUpdates(
+    RequestTypeType.CHANGE_EXPENSE_QUANTITY,
+    page,
+    limit,
+    keyword,
+    sortBy,
+    sortOrder,
+    teamId,
+    userId
+  );
 }

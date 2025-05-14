@@ -1,6 +1,6 @@
 import { FolderIcon, UserIcon, UsersIcon } from "@/components/shared/icons";
 import { TimesheetTableSkeleton } from "@/components/skeleton/table-skeleton";
-import { ReportViewType } from "@/type_schema/report";
+import { ReportView, ReportViewType } from "@/type_schema/report";
 import dynamic from "next/dynamic";
 
 const ProjectOverview = dynamic(() => import("@/app/(pages)/reporting/project-overview"), {
@@ -19,20 +19,24 @@ const WeeklyUser = dynamic(() => import("@/app/(pages)/reporting/weekly-user"), 
 const reportCards: ReportViewType[] = [
   {
     title: "Weekly view for one user",
+    type: ReportView.WEEKLY_USER,
     icon: <UserIcon className="h-6 w-6 text-pink-500" />,
     component: WeeklyUser
   },
-
   {
     title: "Weekly view for all users",
+    type: ReportView.WEEKLY_ALL_USERS,
     icon: <UsersIcon className="h-6 w-6 text-pink-500" />,
     component: WeeklyAll
   },
   {
+    type: ReportView.PROJECT_OVERVIEW,
     title: "Project overview",
     icon: <FolderIcon className="h-6 w-6 text-green-500" />,
     component: ProjectOverview
   }
 ];
 
-export { reportCards };
+const getReportViewByType = (type: ReportView): ReportViewType => reportCards.find((report) => report.type === type)!;
+
+export { getReportViewByType, reportCards };

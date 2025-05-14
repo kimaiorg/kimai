@@ -2,24 +2,21 @@
 
 import type React from "react";
 
-import { getAllActivities } from "@/api/activity.api";
+import { getAllTeams } from "@/api/team.api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { activityFilters, ActivityType } from "@/type_schema/activity";
+import { activityFilters } from "@/type_schema/activity";
+import { TeamResponseType } from "@/type_schema/team";
 import { UserType } from "@/type_schema/user.schema";
 import { Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { TeamResponseType } from "@/type_schema/team";
-import { getAllTeams } from "@/api/team.api";
 
-export default function FilterTaskModal({
+export default function FilterTimesheetV2Modal({
   children,
-  keyword,
   sortBy,
   sortOrder,
   teamId,
@@ -27,7 +24,6 @@ export default function FilterTaskModal({
   handleFilterChangeAction
 }: {
   children: React.ReactNode;
-  keyword: string;
   sortBy: string;
   sortOrder: string;
   teamId: string;
@@ -36,7 +32,6 @@ export default function FilterTaskModal({
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
-    keyword: keyword,
     sortBy: sortBy,
     sortOrder: sortOrder,
     teamId: teamId,
@@ -51,7 +46,7 @@ export default function FilterTaskModal({
         const [teams] = await Promise.all([getAllTeams()]);
         setTeamList(teams.data);
       } catch (error) {
-        console.error("Error fetching activities:", error);
+        console.error("Error fetching data:", error);
       }
     };
     fetchData();
@@ -63,7 +58,6 @@ export default function FilterTaskModal({
 
   const handleApplyFilters = () => {
     handleFilterChangeAction({
-      _keyword: filters.keyword,
       _sortBy: filters.sortBy,
       _sortOrder: filters.sortOrder,
       _teamId: filters.teamId,
@@ -74,9 +68,8 @@ export default function FilterTaskModal({
 
   const handleResetFilters = () => {
     setFilters({
-      keyword: "",
       sortBy: "",
-      sortOrder: "desc",
+      sortOrder: "",
       teamId: "",
       userId: ""
     });
@@ -95,7 +88,7 @@ export default function FilterTaskModal({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 pl-2">
             <Filter className="h-4 w-4" />
-            <h4 className="font-medium">Filter Tasks</h4>
+            <h4 className="font-medium">Filter Activities</h4>
           </div>
           <Button
             variant="ghost"
@@ -110,17 +103,6 @@ export default function FilterTaskModal({
         <Separator className="!m-0" />
 
         <div className="grid gap-4 p-2">
-          <div className="grid gap-2 md:hidden">
-            <Label htmlFor="keyword">Keyword</Label>
-            <Input
-              id="keyword"
-              placeholder="Search..."
-              className="border border-gray-200"
-              value={filters.keyword}
-              onChange={(e) => handleFilterChange("keyword", e.target.value)}
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-2">
             <div className="grid gap-2">
               <Label htmlFor="sortBy">Sort By</Label>
@@ -175,7 +157,7 @@ export default function FilterTaskModal({
 
           {teamList && (
             <div className="grid gap-2">
-              <Label htmlFor="teamId">Activity</Label>
+              <Label htmlFor="teamId">Project</Label>
               <Select
                 onValueChange={(value) => handleFilterChange("teamId", value)}
                 value={filters.teamId}
@@ -213,10 +195,7 @@ export default function FilterTaskModal({
                 value={filters.userId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
-                  <SelectValue
-                    placeholder="Select user"
-                    defaultValue={filters.userId}
-                  />
+                  <SelectValue placeholder="Select a user" />
                 </SelectTrigger>
                 <SelectContent>
                   {userList.map((user, index) => (

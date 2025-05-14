@@ -48,7 +48,7 @@ export default function TaskExpenseUpdateRequestDialog({
   const [open, setOpen] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [commentMessage, setCommentMessage] = useState("");
+  // const [commentMessage, setCommentMessage] = useState("");
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -146,8 +146,8 @@ export default function TaskExpenseUpdateRequestDialog({
   const taskExpenseUpdateInfo = {
     oldQuantity: taskExpense.previous_data.quantity,
     oldPrice: taskExpense.previous_data.expense.cost * taskExpense.previous_data.quantity,
-    newQuantity: taskExpense.request_data.new_quantity,
-    newPrice: taskExpense.previous_data.expense.cost * taskExpense.request_data.new_quantity
+    newQuantity: taskExpense.request_data.quantity,
+    newPrice: taskExpense.previous_data.expense.cost * taskExpense.request_data.quantity
   };
 
   const handleRejectTaskExpense = async () => {
@@ -155,7 +155,7 @@ export default function TaskExpenseUpdateRequestDialog({
     setRejectLoading(true);
     try {
       const payload: TaskExpenseUpdateRequestType = {
-        new_quantity: taskExpense.request_data.new_quantity
+        quantity: taskExpense.request_data.quantity
       };
       const response = await rejectUpdateTask(payload, taskExpense.id.toString());
 
@@ -190,7 +190,7 @@ export default function TaskExpenseUpdateRequestDialog({
     setConfirmLoading(true);
     try {
       const payload: TaskExpenseUpdateRequestType = {
-        new_quantity: taskExpense.request_data.new_quantity
+        quantity: taskExpense.request_data.quantity
       };
       const response = await confirmUpdateTask(payload, taskExpense.id.toString());
 
@@ -275,7 +275,7 @@ export default function TaskExpenseUpdateRequestDialog({
                   <p className="font-medium">{formatCurrency(taskExpenseUpdateInfo.newPrice, currency)}</p>
                 </div>
               </div>
-              <div className="py-2">
+              {/* <div className="py-2">
                 <Textarea
                   rows={1}
                   placeholder="Enter your message"
@@ -283,12 +283,11 @@ export default function TaskExpenseUpdateRequestDialog({
                   value={commentMessage}
                   onChange={(e) => setCommentMessage(e.target.value)}
                 />
-              </div>
+              </div> */}
               <div className="flex justify-end gap-4">
                 <Button
-                  variant="outline"
                   onClick={handleRejectTaskExpense}
-                  className="cursor-pointer"
+                  className="bg-rose-500 hover:bg-rose-600 text-white cursor-pointer"
                 >
                   Reject
                 </Button>
