@@ -29,9 +29,9 @@ export class CreateRequestSwagger {
 }
 
 export class UpdateRequestSwagger {
-  @ApiPropertyOptional({
-    example: 'Design Phase',
-    description: 'Name of the request',
+  @ApiProperty({
+    example: 'APPROVED',
+    description: 'Status of the request',
   })
   status: RequestStatus;
 }
@@ -108,4 +108,12 @@ export class ListRequestSwaggerDto {
     default: 'desc',
   })
   sort_order?: 'asc' | 'desc';
+}
+
+export class ApproveRequestSwagger {
+  @ApiProperty({
+    example: 'APPROVED',
+    description: 'Status of the request',
+  })
+  status: RequestStatus;
 }

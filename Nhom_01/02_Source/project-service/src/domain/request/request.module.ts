@@ -4,10 +4,21 @@ import { RequestModule as RequestRepositoryModule } from '@/infrastructure/reque
 import { ProjectModule } from '@/infrastructure/project/project.module';
 import { TimesheetHttpService } from '@/libs/http/timesheet-http.service';
 import { HttpModule } from '@/libs/http/http.module';
+import { RabbitmqModule } from '@/libs/rabbitmq/rabbitmq.module';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from '@/libs/database/prisma.module';
 
 @Module({
-  imports: [RequestRepositoryModule, ProjectModule, HttpModule, ConfigModule],
+  imports: [
+    RequestRepositoryModule,
+    ProjectModule,
+    HttpModule,
+    ConfigModule,
+    RabbitmqModule.register({
+      queue: 'notification',
+    }),
+    PrismaModule,
+  ],
   providers: [RequestService, TimesheetHttpService],
   exports: [RequestService],
 })

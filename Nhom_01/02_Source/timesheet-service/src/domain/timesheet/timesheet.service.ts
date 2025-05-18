@@ -5,6 +5,7 @@ import {
   ListTimesheetsDto,
   ListTimesheetsMeDto,
   StartTimesheetDto,
+  UpdateTimesheetDto,
 } from '@/api/timesheet/dto';
 import { PaginationResponse } from '@/libs/response/pagination';
 import {
@@ -62,9 +63,9 @@ export class TimesheetService {
       { cmd: 'create_notification' },
       {
         title: 'Request Start Timesheet',
-        content: `${dto.username} has requested to start a timesheet for ${activity.name}`,
+        content: `${dto.username} has requested to start a timesheet`,
         type: 'timesheet_request',
-        target_id: 'timesheet',
+        target_id: timesheet.id.toString(),
         user_id: activity.team.lead,
       },
     );
@@ -162,5 +163,15 @@ export class TimesheetService {
 
   async getTimesheet(id: number): Promise<Timesheet | null> {
     return await this.timesheetRepository.findById(id);
+  }
+
+  async updateTimesheet(
+    id: number,
+    dto: UpdateTimesheetDto,
+  ): Promise<Timesheet | null> {
+    return await this.timesheetRepository.update({
+      where: { id },
+      data: dto,
+    });
   }
 }

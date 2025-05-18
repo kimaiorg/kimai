@@ -1,7 +1,15 @@
+enum RequestTimesheetStatus {
+  PROCESSING
+  APPROVED
+  REJECTED
+}
+
 model Timesheet {
   id          Int     @id @default(autoincrement())
   description String?
   status      String  @default("running")
+
+  request_status RequestTimesheetStatus @default(PROCESSING)
 
   start_time DateTime  @default(now())
   end_time   DateTime?

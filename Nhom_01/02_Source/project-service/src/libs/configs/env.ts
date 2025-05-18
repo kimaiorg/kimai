@@ -12,4 +12,8 @@ export const ENV = {
   timesheet_service: {
     url: process.env.TIMESHEET_SERVICE_URL,
   },
+
+  rabbitmq: {
+    url: process.env.RABBITMQ_URL,
+  },
 };

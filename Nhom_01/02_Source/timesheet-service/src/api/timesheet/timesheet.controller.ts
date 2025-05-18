@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   Req,
   UsePipes,
@@ -19,6 +20,7 @@ import {
   ListTimesheetsDto,
   ListTimesheetsMeDto,
   listTimesheetsMeSchema,
+  UpdateTimesheetDto,
 } from '@/api/timesheet/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import { PaginationResponse } from '@/libs/response/pagination';
@@ -75,5 +77,13 @@ export class TimesheetController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Timesheet | null> {
     return await this.timesheetService.getTimesheet(id);
+  }
+
+  @Put(':id')
+  async updateTimesheet(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateTimesheetDto,
+  ): Promise<Timesheet | null> {
+    return await this.timesheetService.updateTimesheet(id, dto);
   }
 }
