@@ -5,6 +5,7 @@ enum NotificationType {
   expense_request_status
   absence_request_status
   timesheet_request_status
+  change_status_request
 }
 
 model Notification {
