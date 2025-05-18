@@ -7,5 +7,8 @@ export const envDto = createZodDto(
     APP_PORT: z.string().transform(Number),
     APP_VERSION: z.string().transform(Number),
     DATABASE_URL: z.string(),
+    TIMESHEET_SERVICE_URL: z.string(),
+    RABBITMQ_URL: z.string(),
+    INTERNAL_CODE: z.string(),
   }),
 );

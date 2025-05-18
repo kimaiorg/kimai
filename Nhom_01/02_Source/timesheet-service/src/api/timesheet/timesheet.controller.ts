@@ -84,6 +84,7 @@ export class TimesheetController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateTimesheetDto,
   ): Promise<Timesheet | null> {
+    console.log(dto);
     return await this.timesheetService.updateTimesheet(id, dto);
   }
 }

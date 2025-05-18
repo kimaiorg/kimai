@@ -60,9 +60,8 @@ export class RequestService {
         },
       );
     } else if (dto.type === RequestType.START_TIMESHEET) {
-      target = await this.timesheetHttpService.callApi(
+      target = await this.timesheetHttpService.get(
         `api/v1/timesheets/${dto.target_id}`,
-        'get',
         {},
         {
           headers: {
@@ -156,11 +155,15 @@ export class RequestService {
           },
         });
       } else if (request.type === RequestType.START_TIMESHEET) {
-        await this.timesheetHttpService.callApi(
-          `api/v1/timesheets/${request.target_id}`,
-          'put',
+        await this.timesheetHttpService.put(
+          `${ENV.timesheet_service.url}/api/v1/timesheets/${request.target_id}`,
           {
             request_status: dto.status,
+          },
+          {
+            headers: {
+              'X-Internal-Code': ENV.internal_code,
+            },
           },
         );
       }
