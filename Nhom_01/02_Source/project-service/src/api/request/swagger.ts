@@ -56,14 +56,14 @@ export class ListRequestSwaggerDto {
   keyword?: string;
 
   @ApiPropertyOptional({
-    example: 'design',
-    description: 'Search keyword to filter requests by comment',
+    example: 'PROCESSING',
+    description: 'Filter requests by status',
   })
   status?: RequestStatus;
 
   @ApiPropertyOptional({
-    example: 'design',
-    description: 'Search keyword to filter requests by comment',
+    example: 'START_TIMESHEET',
+    description: 'Filter requests by type',
   })
   type?: RequestType;
 
