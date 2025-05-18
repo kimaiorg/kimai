@@ -167,6 +167,20 @@ export class RequestService {
           },
         );
       }
+    } else {
+      if (request.type === RequestType.START_TIMESHEET) {
+        await this.timesheetHttpService.put(
+          `${ENV.timesheet_service.url}/api/v1/timesheets/${request.target_id}`,
+          {
+            request_status: dto.status,
+          },
+          {
+            headers: {
+              'X-Internal-Code': ENV.internal_code,
+            },
+          },
+        );
+      }
     }
 
     await this.rabbitmqService.emit(
