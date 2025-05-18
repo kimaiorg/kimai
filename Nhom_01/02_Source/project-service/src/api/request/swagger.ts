@@ -56,6 +56,18 @@ export class ListRequestSwaggerDto {
   keyword?: string;
 
   @ApiPropertyOptional({
+    example: 'design',
+    description: 'Search keyword to filter requests by comment',
+  })
+  status?: RequestStatus;
+
+  @ApiPropertyOptional({
+    example: 'design',
+    description: 'Search keyword to filter requests by comment',
+  })
+  type?: RequestType;
+
+  @ApiPropertyOptional({
     example: '2024-01-01',
     description: 'Filter requests by date',
   })
