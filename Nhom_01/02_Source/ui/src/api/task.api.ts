@@ -129,30 +129,6 @@ export async function getAllExpenseUpdateTasks(
   teamId?: string,
   userId?: string
 ): Promise<Pagination<RequestUpdateType<TaskResponseType, TaskExpenseUpdateRequestType>>> {
-  // Fake data
-  // const responseFake = await getAllTasks();
-  // const { metadata, data: dataFake } = responseFake;
-  // return {
-  //   metadata,
-  //   data: dataFake.map((task, index) => {
-  //     return {
-  //       id: index + 1,
-  //       type: RequestTypeType.START_TIMESHEET,
-  //       comment: "A comment",
-  //       created_at: new Date().toISOString(),
-  //       updated_at: new Date().toISOString(),
-  //       deleted_at: null,
-  //       previous_data: task,
-  //       user_id: 1,
-  //       target_id: task.id,
-  //       request_data: {
-  //         quantity: Math.floor(Math.random() * 100)
-  //       },
-  //       status: Math.random() > 0.5 ? ApprovalStatus.PROCESSING : ApprovalStatus.APPROVED
-  //     };
-  //   })
-  // };
-
   return getAllExpenseUpdates(
     RequestTypeType.CHANGE_EXPENSE_QUANTITY,
     page,

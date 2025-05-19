@@ -1,7 +1,7 @@
 "use client";
 
 import { getWeeklyOneUserReport } from "@/api/report.api";
-import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { AuthenticatedRoute, hasRole } from "@/components/shared/authenticated-route";
 import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +17,7 @@ import {
   WeeklyOneUserReportType,
   WeeklyReportEntry
 } from "@/type_schema/report";
+import { Role, RolePermissionType } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useEffect, useState } from "react";
@@ -31,7 +32,8 @@ function WeeklyUserReport() {
   const [selectedWeek, setSelectedWeek] = useState(weekOptions.find((week) => week.week === currentWeekNumber));
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
-
+  const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
+  const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
   const [currentWeek, setCurrentWeek] = useState<WeekDayType[]>([]);
   const [timeEntries, setTimeEntries] = useState<WeeklyReportEntry[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserType>(userList.find((u) => u.user_id === user!.sub!)!);
@@ -272,25 +274,27 @@ function WeeklyUserReport() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Select
-              onValueChange={handleUserChange}
-              value={selectedUser.user_id}
-            >
-              <SelectTrigger className="w-full !mt-0 border-gray-200 cursor-pointer">
-                <SelectValue placeholder="Select user" />
-              </SelectTrigger>
-              <SelectContent className="border border-gray-200">
-                {userList.map((user, index) => (
-                  <SelectItem
-                    key={index}
-                    value={user.user_id}
-                    className="cursor-pointer"
-                  >
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {hasRole(userRolePermissions.role, allowRoles) && (
+              <Select
+                onValueChange={handleUserChange}
+                value={selectedUser.user_id}
+              >
+                <SelectTrigger className="w-full !mt-0 border-gray-200 cursor-pointer">
+                  <SelectValue placeholder="Select user" />
+                </SelectTrigger>
+                <SelectContent className="border border-gray-200">
+                  {userList.map((user, index) => (
+                    <SelectItem
+                      key={index}
+                      value={user.user_id}
+                      className="cursor-pointer"
+                    >
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
             <div className="flex space-x-2">
               <Button

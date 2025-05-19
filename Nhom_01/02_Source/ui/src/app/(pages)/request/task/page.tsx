@@ -6,7 +6,7 @@ import { getAllExpenseUpdateTasks } from "@/api/task.api";
 import { getRequestById } from "@/app/(pages)/request/request-items";
 import ExpenseUpdateRequestDialog from "@/app/(pages)/request/task/task-expense-request-dialog";
 import FilterTaskModal from "@/app/(pages)/task/filter-modal";
-import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { AuthenticatedRoute, hasRole } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,10 @@ import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Pagination } from "@/type_schema/common";
-import { Role } from "@/type_schema/role";
+import { Role, RolePermissionType } from "@/type_schema/role";
 import { TaskExpenseUpdateRequestType, TaskResponseType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import debounce from "debounce";
 import { Filter, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -27,7 +28,12 @@ function TaskExpenseUpdateRequestPage() {
   const queryParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
+
   const userList: UserType[] = useAppSelector((state) => state.userListState.users) as UserType[];
+  const { user: currentUser } = useUser();
+  const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
+  const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
+
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const searchKeyword = queryParams.get("keyword") || "";
@@ -39,7 +45,6 @@ function TaskExpenseUpdateRequestPage() {
   const [taskList, setTaskList] = useState<Pagination<
     RequestUpdateType<TaskResponseType, TaskExpenseUpdateRequestType>
   > | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const handleFetchTasks = async (
     page?: number,
@@ -52,7 +57,10 @@ function TaskExpenseUpdateRequestPage() {
       const result = await getAllExpenseUpdateTasks(page, limit, keyword, sortBy, sortOrder, teamId, userId);
 
       const { data, metadata } = result;
-      const taskData = data.map((taskExpense) => {
+      const filteredData = hasRole(userRolePermissions.role, allowRoles)
+        ? data
+        : data.filter((task) => task.user_id === currentUser?.sub);
+      const taskData = filteredData.map((taskExpense) => {
         const { previous_data: task, ...rest } = taskExpense;
         const { user_id, ...restTask } = task;
         return {
@@ -76,9 +84,7 @@ function TaskExpenseUpdateRequestPage() {
   // Fetch Tasks on component mount
   useEffect(() => {
     const fetchNecessaryData = async () => {
-      setIsLoading(true);
       await handleFetchTasks(page, limit, searchKeyword, sortBy, sortOrder);
-      setIsLoading(false);
     };
     fetchNecessaryData();
   }, [page, limit, searchKeyword, sortBy, sortOrder]);
@@ -161,7 +167,7 @@ function TaskExpenseUpdateRequestPage() {
             variant="outline"
             className="bg-rose-500 text-yellow-50"
           >
-            Doing
+            Rejected
           </Badge>
         );
       default:
@@ -196,7 +202,7 @@ function TaskExpenseUpdateRequestPage() {
             keyword={keyword}
             sortBy={sortBy}
             sortOrder={sortOrder}
-            teamId={teamId}
+            activityId={teamId}
             userId={userId}
           >
             <Button
@@ -229,7 +235,7 @@ function TaskExpenseUpdateRequestPage() {
                   colSpan={6}
                   className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
                 >
-                  No tasks found.
+                  No task requests found.
                 </td>
               </tr>
             )}
@@ -280,4 +286,4 @@ function TaskExpenseUpdateRequestPage() {
   );
 }
 
-export default AuthenticatedRoute(TaskExpenseUpdateRequestPage, [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]);
+export default AuthenticatedRoute(TaskExpenseUpdateRequestPage, []);

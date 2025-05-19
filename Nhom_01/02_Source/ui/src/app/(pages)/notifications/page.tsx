@@ -2,6 +2,7 @@
 
 import { callMarkAsReadNotificationRequest, getAllNotifications } from "@/api/notification.api";
 import FilterNotificationModal from "@/app/(pages)/notifications/filter-modal";
+import { RequestPageType } from "@/app/(pages)/request/request-items";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -111,33 +112,36 @@ function NotificationPage() {
 
   const determineUrl = (type: NotificationTypeType, targetId: string) => {
     switch (type) {
-      case "expense_request":
-        return `/request?type=expense_request&targetId=${targetId}`;
-      case "absence_request":
-        return `/request?type=absence_request&targetId=${targetId}`;
-      case "timesheet_request":
-        return `/request?type=timesheet_request&targetId=${targetId}`;
+      case NotificationTypeType.EXPENSE_REQUEST:
+      case NotificationTypeType.EXPENSE_REQUEST_STATUS:
+        return `/request?rq=${RequestPageType.TASK}&targetId=${targetId}`;
+      case NotificationTypeType.ABSENCE_REQUEST:
+      case NotificationTypeType.ABSENCE_REQUEST_STATUS:
+        return `/request?rq=${RequestPageType.ABSENCE}&targetId=${targetId}`;
+      case NotificationTypeType.TIMESHEET_REQUEST:
+      case NotificationTypeType.TIMESHEET_REQUEST_STATUS:
+        return `/request?rq=${RequestPageType.TIMESHEET}&targetId=${targetId}`;
       default:
         return `/request`;
     }
   };
 
   const handleMarkAsReadAndRedirect = async (notification: NotificationType) => {
-    if (!notification.hasRead) {
-      const result = await callMarkAsReadNotificationRequest(notification.id);
+    if (!notification.has_read) {
+      const result = await callMarkAsReadNotificationRequest(notification.id.toString());
       if (result == 200 || result == 201) {
         const { data, metadata } = notificationList!;
         const currentNotifications = [...data];
         const notificationIndex = currentNotifications.findIndex((n) => n.id === notification.id);
-        currentNotifications[notificationIndex].hasRead = true;
+        currentNotifications[notificationIndex].has_read = true;
         setNotificationList({
           metadata: metadata,
           data: currentNotifications
         });
       }
     }
-    const determinedUrl = determineUrl(notification.type, notification.targetId);
-    router.push(determinedUrl);
+    const determinedUrl = determineUrl(notification.type, notification.target_id);
+    router.replace(determinedUrl);
   };
 
   return (
@@ -186,7 +190,7 @@ function NotificationPage() {
                 variant="secondary"
                 className="font-medium text-white"
               >
-                {notificationList.data.filter((n) => !n.hasRead).length} Unread
+                {notificationList.data.filter((n) => !n.has_read).length} Unread
               </Badge>
             )}
           </div>
@@ -213,20 +217,20 @@ function NotificationPage() {
                 key={notification.id}
                 onClick={() => handleMarkAsReadAndRedirect(notification)}
                 className={`flex p-4 border border-gray-200 rounded-lg bg-white dark:bg-slate-900 hover:bg-gray-200/50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${
-                  !notification.hasRead ? "bg-muted/20" : ""
+                  !notification.has_read ? "bg-muted/20" : ""
                 }`}
               >
                 <div className="mr-4 mt-1">{getNotificationIcon(notification.type)}</div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <h3 className={`font-medium ${!notification.hasRead ? "font-semibold" : ""}`}>
+                      <h3 className={`font-medium ${!notification.has_read ? "font-semibold" : ""}`}>
                         {notification.title}
                       </h3>
-                      {!notification.hasRead && <span className="h-2 w-2 rounded-full bg-rose-500"></span>}
+                      {!notification.has_read && <span className="h-2 w-2 rounded-full bg-rose-500"></span>}
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{notification.content}</p>
@@ -268,14 +272,14 @@ export default AuthenticatedRoute(NotificationPage, []);
 
 const getNotificationIcon = (type: NotificationTypeType) => {
   switch (type) {
-    case "expense_request":
-    case "expense_request_status":
+    case NotificationTypeType.EXPENSE_REQUEST_STATUS:
+    case NotificationTypeType.EXPENSE_REQUEST:
       return <CreditCard className="h-5 w-5 text-emerald-500" />;
-    case "absence_request":
-    case "absence_request_status":
+    case NotificationTypeType.ABSENCE_REQUEST_STATUS:
+    case NotificationTypeType.ABSENCE_REQUEST:
       return <Calendar className="h-5 w-5 text-violet-500" />;
-    case "timesheet_request":
-    case "timesheet_request_status":
+    case NotificationTypeType.TIMESHEET_REQUEST_STATUS:
+    case NotificationTypeType.TIMESHEET_REQUEST:
       return <Clock className="h-5 w-5 text-amber-500" />;
     default:
       return <FileText className="h-5 w-5 text-sky-500" />;

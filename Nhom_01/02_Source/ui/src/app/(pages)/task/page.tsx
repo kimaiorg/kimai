@@ -1,26 +1,25 @@
 "use client";
 
 import { getAllTasks } from "@/api/task.api";
-import { getAllUsers } from "@/api/user.api";
 import FilterTaskModal from "@/app/(pages)/task/filter-modal";
 import { TaskConfirmDialog } from "@/app/(pages)/task/task-confirm-dialog";
 import { TaskCreateDialog } from "@/app/(pages)/task/task-create-dialog";
 import { TaskUpdateDialog } from "@/app/(pages)/task/task-update-dialog";
 import { TaskUpdateExpenseRequestDialog } from "@/app/(pages)/task/task-update-expense-request-dialog";
 import TaskViewDialog from "@/app/(pages)/task/task-view-dialog";
-import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { AuthenticatedRoute, hasRole } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
-import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Pagination } from "@/type_schema/common";
-import { Role } from "@/type_schema/role";
+import { Role, RolePermissionType } from "@/type_schema/role";
 import { TaskStatus, TaskType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
 import debounce from "debounce";
 import {
@@ -29,7 +28,6 @@ import {
   Eye,
   FileDown,
   Filter,
-  History,
   MoreHorizontal,
   Plus,
   Search,
@@ -44,8 +42,11 @@ function Task() {
   const queryParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-  const users: UserType[] = useAppSelector((state) => state.userListState.users);
-  const dispatch = useAppDispatch();
+  const userList: UserType[] = useAppSelector((state) => state.userListState.users) as UserType[];
+  const { user: currentUser } = useUser();
+  const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
+  const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
+
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const searchKeyword = queryParams.get("keyword") || "";
@@ -65,15 +66,14 @@ function Task() {
     sortOrder?: string
   ) => {
     try {
-      let userList = users;
-      if (users.length == 0) {
-        const result = await getAllUsers();
-        userList = result.users;
-        dispatch(updateUserList(result.users));
+      let finalResult = null;
+      if (hasRole(userRolePermissions.role, allowRoles)) {
+        finalResult = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
+      } else {
+        finalResult = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, currentUser!.sub!);
       }
-      const result = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
-
-      const { data, metadata } = result;
+      const { data, metadata } = finalResult;
+      console.log(data);
       const taskData = data.map((task) => {
         const { user_id, ...rest } = task;
         return {
@@ -225,11 +225,13 @@ function Task() {
               <Filter className="h-4 w-4" />
             </Button>
           </FilterTaskModal>
-          <TaskCreateDialog fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}>
-            <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
-              Create <Plus />
-            </Button>
-          </TaskCreateDialog>
+          {hasRole(userRolePermissions.role, allowRoles) && (
+            <TaskCreateDialog fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}>
+              <Button className="flex items-center justify-center bg-main gap-2 cursor-pointer text-white">
+                Create <Plus />
+              </Button>
+            </TaskCreateDialog>
+          )}
           <Button
             variant="outline"
             size="icon"
@@ -314,7 +316,7 @@ function Task() {
                             <Eye size={14} /> Show
                           </div>
                         </TaskViewDialog>
-                        {task?.status && task.status === TaskStatus.PROCESSING && (
+                        {task.status && task.status === TaskStatus.DOING && (
                           <TaskConfirmDialog
                             targetTask={task}
                             fetchTasks={handleFetchTasks}
@@ -332,24 +334,26 @@ function Task() {
                             <CircleDollarSign size={14} /> Make a request
                           </div>
                         </TaskUpdateExpenseRequestDialog>
-                        {task?.status && task.status === TaskStatus.DONE && (
+                        {/* {task?.status && task.status === TaskStatus.DONE && (
                           <div className="flex gap-2 text-yellow-600 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
                             <History size={14} /> Mark as processing
                           </div>
+                        )} */}
+                        {hasRole(userRolePermissions.role, allowRoles) && (
+                          <TaskUpdateDialog
+                            targetTask={task}
+                            fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}
+                          >
+                            <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                              <SquarePen size={14} /> Edit
+                            </div>
+                          </TaskUpdateDialog>
                         )}
-                        <TaskUpdateDialog
-                          targetTask={task}
-                          fetchTasks={() => handleFetchTasks(1, limit, keyword, sortBy, sortOrder)}
-                        >
-                          <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                            <SquarePen size={14} /> Edit
-                          </div>
-                        </TaskUpdateDialog>
                         <div className="text-red-500 flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
                           <Trash2
                             size={14}
                             stroke="red"
-                          />{" "}
+                          />
                           Delete
                         </div>
                       </DropdownMenuContent>
@@ -371,4 +375,4 @@ function Task() {
     </>
   );
 }
-export default AuthenticatedRoute(Task, [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]);
+export default AuthenticatedRoute(Task, []);

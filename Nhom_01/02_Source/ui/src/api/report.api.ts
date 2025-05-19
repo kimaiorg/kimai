@@ -45,7 +45,7 @@ export async function getWeeklyAllUsersReport(
   toDate: string
 ): Promise<Pagination<WeeklyAllUsersReportResponseType>> {
   const token = await getManagementAccessToken();
-  console.log(token);
+
   const params = new URLSearchParams();
   params.append("fromDate", fromDate);
   params.append("toDate", toDate);

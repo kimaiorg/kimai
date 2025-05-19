@@ -66,10 +66,13 @@ export function TimesheetCreateDialog({
           duration: 2000,
           className: "!bg-lime-500 !text-white"
         });
-        const taskName = taskList.find((task) => task.id.toString() === response.task_id.toString())!.title;
+        const selectedTask = taskList.find((task) => task.id.toString() === response.task_id.toString());
+        console.log(selectedTask);
+        const taskName = selectedTask!.title;
         const payload: CommonRequestType<TimesheetStartTrackingRequestType> = {
           comment: `Start tracking for task: ${taskName}`,
           target_id: response.id,
+          team_id: selectedTask!.activity!.team!.id,
           type: RequestTypeType.START_TIMESHEET,
           request_data: {}
         };

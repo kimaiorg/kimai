@@ -2,15 +2,17 @@ import { getManagementAccessToken } from "@/api/auth.api";
 import { projectAxios } from "@/api/axios";
 import { Pagination } from "@/type_schema/common";
 import { RequestUpdateType } from "@/type_schema/request";
-import { TaskExpenseUpdateRequestType } from "@/type_schema/task";
-import { TimesheetUpdateRequestType } from "@/type_schema/timesheet";
+import { TaskUpdateStatusRequestType } from "@/type_schema/task";
+import { TimesheetUpdateStatusRequestType } from "@/type_schema/timesheet";
 
-export async function confirmUpdateTimesheet(timesheetUpdate: TimesheetUpdateRequestType, id: string): Promise<number> {
+export async function confirmUpdateTimesheet(
+  timesheetUpdate: TimesheetUpdateStatusRequestType,
+  requestId: string
+): Promise<number> {
   const token = await getManagementAccessToken();
 
-  return 200;
   try {
-    const response = await projectAxios.put(`/api/v1/timesheet/request/${id}/confirm`, timesheetUpdate, {
+    const response = await projectAxios.put(`/api/v1/requests/${requestId}`, timesheetUpdate, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -21,32 +23,14 @@ export async function confirmUpdateTimesheet(timesheetUpdate: TimesheetUpdateReq
   }
 }
 
-export async function rejectUpdateTimesheet(timesheetUpdate: TimesheetUpdateRequestType, id: string): Promise<number> {
+export async function rejectUpdateTimesheet(
+  timesheetUpdate: TimesheetUpdateStatusRequestType,
+  requestId: string
+): Promise<number> {
   const token = await getManagementAccessToken();
 
-  return 200;
   try {
-    const response = await projectAxios.put(
-      `/api/v1/timesheet/request/${id}/reject`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-    return response.status;
-  } catch (error: any) {
-    return error.response.status;
-  }
-}
-
-export async function confirmUpdateTask(taskExpense: TaskExpenseUpdateRequestType, id: string): Promise<number> {
-  const token = await getManagementAccessToken();
-
-  return 200;
-  try {
-    const response = await projectAxios.put(`/api/v1/tasks/request/${id}/confirm`, taskExpense, {
+    const response = await projectAxios.put(`/api/v1/requests/${requestId}`, timesheetUpdate, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -57,20 +41,30 @@ export async function confirmUpdateTask(taskExpense: TaskExpenseUpdateRequestTyp
   }
 }
 
-export async function rejectUpdateTask(taskExpense: TaskExpenseUpdateRequestType, id: string): Promise<number> {
+export async function confirmUpdateTask(taskStatus: TaskUpdateStatusRequestType, id: string): Promise<number> {
   const token = await getManagementAccessToken();
 
-  return 200;
   try {
-    const response = await projectAxios.put(
-      `/api/v1/tasks/request/${id}/reject`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    const response = await projectAxios.put(`/api/v1/requests/${id}`, taskStatus, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
+    });
+    return response.status;
+  } catch (error: any) {
+    return error.response.status;
+  }
+}
+
+export async function rejectUpdateTask(taskStatus: TaskUpdateStatusRequestType, id: string): Promise<number> {
+  const token = await getManagementAccessToken();
+
+  try {
+    const response = await projectAxios.put(`/api/v1/requests/${id}`, taskStatus, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return response.status;
   } catch (error: any) {
     return error.response.status;

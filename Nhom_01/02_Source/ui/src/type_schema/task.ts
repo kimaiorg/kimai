@@ -170,3 +170,7 @@ export type UpdateTaskRequestDTO = {
 export type TaskExpenseUpdateRequestType = {
   quantity: number;
 };
+
+export type TaskUpdateStatusRequestType = {
+  status: ApprovalStatus.APPROVED | ApprovalStatus.REJECTED;
+};

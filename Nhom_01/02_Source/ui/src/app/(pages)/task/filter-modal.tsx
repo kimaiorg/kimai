@@ -22,7 +22,7 @@ export default function FilterTaskModal({
   keyword,
   sortBy,
   sortOrder,
-  teamId,
+  activityId,
   userId,
   handleFilterChangeAction
 }: {
@@ -30,7 +30,7 @@ export default function FilterTaskModal({
   keyword: string;
   sortBy: string;
   sortOrder: string;
-  teamId: string;
+  activityId: string;
   userId: string;
   handleFilterChangeAction: (props: any) => void;
 }) {
@@ -39,17 +39,17 @@ export default function FilterTaskModal({
     keyword: keyword,
     sortBy: sortBy,
     sortOrder: sortOrder,
-    teamId: teamId,
+    activityId: activityId,
     userId: userId
   });
-  const [teamList, setTeamList] = useState<TeamResponseType[] | null>(null);
+  const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teams] = await Promise.all([getAllTeams()]);
-        setTeamList(teams.data);
+        const [activities] = await Promise.all([getAllActivities()]);
+        setActivityList(activities.data);
       } catch (error) {
         console.error("Error fetching activities:", error);
       }
@@ -66,7 +66,7 @@ export default function FilterTaskModal({
       _keyword: filters.keyword,
       _sortBy: filters.sortBy,
       _sortOrder: filters.sortOrder,
-      _teamId: filters.teamId,
+      _activityId: filters.activityId,
       _userId: filters.userId
     });
     setOpen(false);
@@ -77,7 +77,7 @@ export default function FilterTaskModal({
       keyword: "",
       sortBy: "",
       sortOrder: "desc",
-      teamId: "",
+      activityId: "",
       userId: ""
     });
   };
@@ -173,31 +173,31 @@ export default function FilterTaskModal({
             </div>
           </div>
 
-          {teamList && (
+          {activityList && (
             <div className="grid gap-2">
-              <Label htmlFor="teamId">Activity</Label>
+              <Label htmlFor="activityId">Activity</Label>
               <Select
-                onValueChange={(value) => handleFilterChange("teamId", value)}
-                value={filters.teamId}
+                onValueChange={(value) => handleFilterChange("activityId", value)}
+                value={filters.activityId}
               >
                 <SelectTrigger className="w-full !mt-0 border-gray-200">
                   <SelectValue
-                    placeholder="Select team"
-                    defaultValue={filters.teamId}
+                    placeholder="Select activity"
+                    defaultValue={filters.activityId}
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {teamList.map((team, index) => (
+                  {activityList.map((activity, index) => (
                     <SelectItem
                       key={index}
-                      value={team.id.toString()}
+                      value={activity.id.toString()}
                       className="flex items-center gap-1"
                     >
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: team.color || "#FF5733" }}
+                        style={{ backgroundColor: activity.color || "#FF5733" }}
                       ></div>
-                      {team.name}
+                      {activity.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

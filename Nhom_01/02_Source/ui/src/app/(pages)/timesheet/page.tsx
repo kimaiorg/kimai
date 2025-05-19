@@ -407,7 +407,7 @@ function Timesheet() {
                       {getTimesheetTrackingStatusBadge(timesheet.status)}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
-                      <Link href={`/request`}>{getTimesheetApprovalStatusBadge(timesheet?.approval_status)}</Link>
+                      <Link href={`/request`}>{getTimesheetApprovalStatusBadge(timesheet.request_status)}</Link>
                     </td>
 
                     <td className="px-4 py-2 text-center">

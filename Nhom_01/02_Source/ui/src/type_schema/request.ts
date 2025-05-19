@@ -12,7 +12,8 @@ export enum ApprovalStatus {
 export enum RequestTypeType {
   CHANGE_EXPENSE_QUANTITY = "CHANGE_EXPENSE_QUANTITY",
   START_TIMESHEET = "START_TIMESHEET",
-  ABSENCE = "ABSENCE"
+  TIMESHEET_REQUEST_STATUS = "timesheet_request_status",
+  ABSENCE_REQUEST_STATUS = "absence_request_status"
 }
 
 export type RequestViewType = {
@@ -31,7 +32,7 @@ export type RequestUpdateType<T, V> = {
   type: RequestTypeType;
   status: ApprovalStatus;
   target_id: number;
-  user_id: number;
+  user_id: string;
   user?: UserType;
   team_id?: number;
   team?: TeamResponseType;
@@ -46,6 +47,7 @@ export type CommonRequestType<T> = {
   comment: string;
   type: RequestTypeType;
   target_id: number;
+  team_id: number;
   request_data: T;
 };
 

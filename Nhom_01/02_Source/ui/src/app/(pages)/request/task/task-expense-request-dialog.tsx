@@ -31,10 +31,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { ApprovalStatus, RequestUpdateType } from "@/type_schema/request";
-import { TaskExpenseUpdateRequestType, TaskResponseType } from "@/type_schema/task";
+import { TaskExpenseUpdateRequestType, TaskResponseType, TaskUpdateStatusRequestType } from "@/type_schema/task";
 import { toast } from "sonner";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { Role, RolePermissionType } from "@/type_schema/role";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { hasRole } from "@/components/shared/authenticated-route";
 
 export default function TaskExpenseUpdateRequestDialog({
   children,
@@ -48,6 +51,8 @@ export default function TaskExpenseUpdateRequestDialog({
   const [open, setOpen] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
+  const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
   // const [commentMessage, setCommentMessage] = useState("");
 
   // Format date
@@ -154,8 +159,8 @@ export default function TaskExpenseUpdateRequestDialog({
     if (rejectLoading) return;
     setRejectLoading(true);
     try {
-      const payload: TaskExpenseUpdateRequestType = {
-        quantity: taskExpense.request_data.quantity
+      const payload: TaskUpdateStatusRequestType = {
+        status: ApprovalStatus.REJECTED
       };
       const response = await rejectUpdateTask(payload, taskExpense.id.toString());
 
@@ -189,8 +194,8 @@ export default function TaskExpenseUpdateRequestDialog({
     if (confirmLoading) return;
     setConfirmLoading(true);
     try {
-      const payload: TaskExpenseUpdateRequestType = {
-        quantity: taskExpense.request_data.quantity
+      const payload: TaskUpdateStatusRequestType = {
+        status: ApprovalStatus.APPROVED
       };
       const response = await confirmUpdateTask(payload, taskExpense.id.toString());
 
@@ -255,7 +260,7 @@ export default function TaskExpenseUpdateRequestDialog({
           </DialogHeader>
 
           {/* Display task quantity update info and Confirm update button section */}
-          {taskExpense.status == ApprovalStatus.PROCESSING && (
+          {hasRole(userRolePermissions.role, allowRoles) && taskExpense.status == ApprovalStatus.PROCESSING && (
             <div className="border-t border-b py-2 space-y-2">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1 border rounded-lg px-3 py-1 bg-muted/20">

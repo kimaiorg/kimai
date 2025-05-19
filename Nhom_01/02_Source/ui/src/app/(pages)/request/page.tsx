@@ -7,13 +7,11 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n";
 import { RequestViewType } from "@/type_schema/request";
 import { SendHorizontal } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 function RequestPage() {
   const queryParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
   const requestId = queryParams.get("rq") || RequestPageType.TIMESHEET;
   const { t } = useTranslation();
   const [selectedRequest, setSelectedRequest] = useState<RequestViewType>(getRequestById(requestId) || requestCards[0]);
@@ -42,7 +40,7 @@ function RequestPage() {
                   className="bg-main text-white cursor-pointer px-3 flex gap-1 items-center rounded-lg"
                   onClick={() => handleSelectingRequest(request)}
                 >
-                  View{" "}
+                  View
                   <SendHorizontal
                     stroke="white"
                     size={14}

@@ -46,6 +46,7 @@ export function TaskUpdateExpenseRequestDialog({
       const payload: CommonRequestType<TaskExpenseUpdateRequestType> = {
         comment: reasonInput,
         target_id: targetTask.id,
+        team_id: targetTask.activity.team.id,
         type: RequestTypeType.CHANGE_EXPENSE_QUANTITY,
         request_data: {
           quantity: Number(quantity)

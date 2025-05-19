@@ -1,6 +1,7 @@
 "use client";
 
 import { confirmUpdateTimesheet, rejectUpdateTimesheet } from "@/api/request.api";
+import { hasRole } from "@/components/shared/authenticated-route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { ApprovalStatus, RequestUpdateType } from "@/type_schema/request";
-import { TimesheetStatus, TimesheetType, TimesheetUpdateRequestType } from "@/type_schema/timesheet";
+import { Role, RolePermissionType } from "@/type_schema/role";
+import {
+  TimesheetStatus,
+  TimesheetType,
+  TimesheetUpdateRequestType,
+  TimesheetUpdateStatusRequestType
+} from "@/type_schema/timesheet";
 import { formatDate } from "date-fns";
 import {
   Activity,
@@ -46,14 +54,15 @@ export default function TimesheetRequestDialog({
   const [commentMessage, setCommentMessage] = useState("");
   const [rejectLoading, setRejectLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
+  const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
 
   const handleConfirmTimesheet = async () => {
     if (confirmLoading) return;
     setConfirmLoading(true);
     try {
-      const payload: TimesheetUpdateRequestType = {
-        new_end_time: targetTimesheetUpdate.request_data.new_end_time,
-        new_start_time: targetTimesheetUpdate.request_data.new_start_time
+      const payload: TimesheetUpdateStatusRequestType = {
+        status: ApprovalStatus.APPROVED
       };
       const response = await confirmUpdateTimesheet(payload, targetTimesheetUpdate.id.toString());
 
@@ -87,9 +96,8 @@ export default function TimesheetRequestDialog({
     if (rejectLoading) return;
     setRejectLoading(true);
     try {
-      const payload: TimesheetUpdateRequestType = {
-        new_end_time: targetTimesheetUpdate.request_data.new_end_time,
-        new_start_time: targetTimesheetUpdate.request_data.new_start_time
+      const payload: TimesheetUpdateStatusRequestType = {
+        status: ApprovalStatus.REJECTED
       };
       const response = await rejectUpdateTimesheet(payload, targetTimesheetUpdate.id.toString());
 
@@ -179,7 +187,7 @@ export default function TimesheetRequestDialog({
             </div>
           </div>
         </DialogHeader>
-        {targetTimesheetUpdate.status == ApprovalStatus.PROCESSING && (
+        {hasRole(userRolePermissions.role, allowRoles) && targetTimesheetUpdate.status == ApprovalStatus.PROCESSING && (
           <>
             <div className="py-2">
               <div className="pb-3">

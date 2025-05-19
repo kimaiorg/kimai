@@ -194,18 +194,18 @@ function Team() {
             <TableHead className="w-[4rem]">Action</TableHead>
           </TableRow>
         </TableHeader>
-        {loadingData && <TableSkeleton columns={6} />}
-        {teamList && teamList.data.length === 0 && (
-          <TableRow>
-            <TableCell
-              colSpan={6}
-              className="text-center py-12"
-            >
-              No team found
-            </TableCell>
-          </TableRow>
-        )}
+        {!teamList && <TableSkeleton columns={6} />}
         <TableBody>
+          {teamList && teamList.data.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                className="text-center py-12"
+              >
+                No team found
+              </TableCell>
+            </TableRow>
+          )}
           {teamList &&
             teamList.data.length > 0 &&
             teamList.data.map((team, index) => (

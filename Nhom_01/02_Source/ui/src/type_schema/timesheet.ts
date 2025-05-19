@@ -14,7 +14,7 @@ export type TimesheetResponseType = {
   id: number;
   description: string;
   status: TimesheetStatus;
-  approval_status: ApprovalStatus;
+  request_status: ApprovalStatus;
   start_time: string;
   end_time: null;
   duration: number;
@@ -43,7 +43,7 @@ export type TimesheetType = {
   project: ProjectType | null;
   activity: ActivityType | null;
   status: TimesheetStatus;
-  approval_status: ApprovalStatus;
+  request_status: ApprovalStatus;
 };
 
 export const CreateTimesheetRequestSchema = z.object({
@@ -162,4 +162,8 @@ export type TimesheetStartTrackingRequestType = {};
 export type TimesheetUpdateRequestType = {
   new_start_time: string;
   new_end_time: string;
+};
+
+export type TimesheetUpdateStatusRequestType = {
+  status: ApprovalStatus.APPROVED | ApprovalStatus.REJECTED;
 };

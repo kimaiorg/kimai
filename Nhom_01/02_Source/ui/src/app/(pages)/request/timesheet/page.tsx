@@ -9,19 +9,20 @@ import { getAllTasks } from "@/api/task.api";
 import { getAllMyTimesheetUpdateRequests } from "@/api/timesheet.api";
 import FilterTimesheetV2Modal from "@/app/(pages)/request/timesheet/timesheet-filter-modal";
 import TimesheetRequestDialog from "@/app/(pages)/request/timesheet/timesheet-request-dialog";
-import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
+import { AuthenticatedRoute, hasRole } from "@/components/shared/authenticated-route";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { secondsToTime } from "@/lib/utils";
 import { Pagination } from "@/type_schema/common";
 import { ApprovalStatus } from "@/type_schema/request";
+import { Role, RolePermissionType } from "@/type_schema/role";
 import { TimesheetType, TimesheetUpdateRequestType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
-import { format } from "date-fns";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { format, formatDistanceToNow } from "date-fns";
 import debounce from "debounce";
 import { Filter, Search } from "lucide-react";
 import Link from "next/link";
@@ -35,6 +36,10 @@ function TimesheetUpdateRequestPage() {
   const { replace } = useRouter();
   const targetId = sessionStorage.getItem("timesheetId");
   // const targetId = queryParams.get("timesheetId") || null;
+  const { user: currentUser } = useUser();
+  const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
+  const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
+
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const searchKeyword = queryParams.get("keyword") || "";
@@ -80,21 +85,26 @@ function TimesheetUpdateRequestPage() {
     const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
     const result = await getAllMyTimesheetUpdateRequests(page, limit, keyword, sortBy, sortOrder, teamId, userId);
     const { data, metadata } = result;
-    const timesheets: RequestUpdateType<TimesheetType, TimesheetUpdateRequestType>[] = data.map((timesheetUpdate) => {
-      const { previous_data, ...rest } = timesheetUpdate;
-      const { user_id, project_id, activity_id, task_id, ...restTimesheet } = previous_data;
-      return {
-        ...rest,
-        previous_data: {
-          ...restTimesheet,
-          status: previous_data.status,
-          user: userList.find((user) => user.user_id === user_id)!,
-          project: projects.data.find((project) => project.id === project_id)!,
-          activity: activities.data.find((activity) => activity.id === activity_id)!,
-          task: tasks.data.find((task) => task.id === task_id)!
-        }
-      };
-    });
+    const filteredData = hasRole(userRolePermissions.role, allowRoles)
+      ? data
+      : data.filter((timesheetData) => timesheetData.user_id === currentUser?.sub);
+    const timesheets: RequestUpdateType<TimesheetType, TimesheetUpdateRequestType>[] = filteredData.map(
+      (timesheetUpdate) => {
+        const { previous_data, ...rest } = timesheetUpdate;
+        const { user_id, project_id, activity_id, task_id, ...restTimesheet } = previous_data;
+        return {
+          ...rest,
+          previous_data: {
+            ...restTimesheet,
+            status: previous_data.status,
+            user: userList.find((user) => user.user_id === user_id)!,
+            project: projects.data.find((project) => project.id === project_id)!,
+            activity: activities.data.find((activity) => activity.id === activity_id)!,
+            task: tasks.data.find((task) => task.id === task_id)!
+          }
+        };
+      }
+    );
     // .filter((timesheet) => timesheet.user.user_id === currentUser?.sub);
     setTimesheetUpdateList({
       data: timesheets,
@@ -179,7 +189,7 @@ function TimesheetUpdateRequestPage() {
             variant="outline"
             className="bg-rose-500 text-yellow-50"
           >
-            Doing
+            Rejected
           </Badge>
         );
       default:
@@ -235,11 +245,13 @@ function TimesheetUpdateRequestPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Task</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Start</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">End</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Duration</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Requested At
+                </th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
               </tr>
             </thead>
-            {!timesheetUpdateList && <TableSkeleton columns={7} />}
+            {!timesheetUpdateList && <TableSkeleton columns={5} />}
             <tbody>
               {timesheetUpdateList && timesheetUpdateList.data.length === 0 && (
                 <tr className="h-48 text-center">
@@ -247,7 +259,7 @@ function TimesheetUpdateRequestPage() {
                     colSpan={7}
                     className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400"
                   >
-                    No timesheet records found.
+                    No timesheet requests found.
                   </td>
                 </tr>
               )}
@@ -277,7 +289,7 @@ function TimesheetUpdateRequestPage() {
                           : "N/A"}
                       </td>
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                        {secondsToTime(timesheetUpdate.previous_data.duration)}
+                        {formatDistanceToNow(timesheetUpdate.created_at)}
                       </td>
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
                         <Link href={`/request`}>{getTimesheetApprovalStatusBadge(timesheetUpdate.status)}</Link>

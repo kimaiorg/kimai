@@ -71,7 +71,7 @@ export const timesheetNavMain = [
     url: "/request",
     icon: GitPullRequestCreateArrow,
     isActive: false,
-    allowRoles: [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD],
+    allowRoles: [],
     items: null
   },
   // {
@@ -149,7 +149,7 @@ export const timesheetNavMain = [
     url: "/task",
     icon: ListTodo,
     isActive: false,
-    allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD],
+    allowRoles: [],
     item: null
   },
   {

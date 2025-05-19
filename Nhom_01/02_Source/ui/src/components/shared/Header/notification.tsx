@@ -1,6 +1,7 @@
 "use client";
 
 import { callMarkAsReadNotificationRequest, getAllNotifications } from "@/api/notification.api";
+import { RequestPageType } from "@/app/(pages)/request/request-items";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,48 +34,48 @@ export default function Notification({ children }: { children: React.ReactNode }
   const determineUrl = (type: NotificationTypeType, targetId: string) => {
     switch (type) {
       case "expense_request":
-        return `/request?type=expense_request&targetId=${targetId}`;
+        return `/request?rq=${RequestPageType.TASK}&targetId=${targetId}`;
       case "absence_request":
-        return `/request?type=absence_request&targetId=${targetId}`;
+        return `/request?rq=${RequestPageType.ABSENCE}&targetId=${targetId}`;
       case "timesheet_request":
-        return `/request?type=timesheet_request&targetId=${targetId}`;
+        return `/request?rq=${RequestPageType.TIMESHEET}&targetId=${targetId}`;
       default:
         return `/request`;
     }
   };
 
   const handleMarkAsReadAndRedirect = async (notification: NotificationType) => {
-    if (!notification.hasRead) {
-      const result = await callMarkAsReadNotificationRequest(notification.id);
+    if (!notification.has_read) {
+      const result = await callMarkAsReadNotificationRequest(notification.id.toString());
       if (result == 200 || result == 201) {
         const currentNotifications = [...notifications!];
         const notificationIndex = currentNotifications.findIndex((n) => n.id === notification.id);
-        currentNotifications[notificationIndex].hasRead = true;
+        currentNotifications[notificationIndex].has_read = true;
         setNotifications(currentNotifications);
       }
     }
-    const determinedUrl = determineUrl(notification.type, notification.targetId);
-    console.log(determinedUrl);
-    router.push(determinedUrl);
+    const determinedUrl = determineUrl(notification.type, notification.target_id);
+
+    router.replace(determinedUrl);
   };
 
   const getNotificationIcon = (type: NotificationTypeType) => {
     switch (type) {
-      case "expense_request":
-      case "expense_request_status":
+      case NotificationTypeType.EXPENSE_REQUEST:
+      case NotificationTypeType.EXPENSE_REQUEST_STATUS:
         return <CreditCard className="h-10 w-8 text-emerald-500" />;
-      case "absence_request":
-      case "absence_request_status":
+      case NotificationTypeType.ABSENCE_REQUEST:
+      case NotificationTypeType.ABSENCE_REQUEST_STATUS:
         return <Calendar className="h-8 w-8 text-violet-500" />;
-      case "timesheet_request":
-      case "timesheet_request_status":
+      case NotificationTypeType.TIMESHEET_REQUEST:
+      case NotificationTypeType.TIMESHEET_REQUEST_STATUS:
         return <Clock className="h-8 w-8 text-amber-500" />;
       default:
         return <FileText className="h-8 w-8 text-sky-500" />;
     }
   };
 
-  const numOfUnReadNotifications = (notifications || []).filter((notification) => notification.hasRead == true).length;
+  const numOfUnReadNotifications = (notifications || []).filter((notification) => !notification.has_read).length;
 
   return (
     <div className="p-0">
@@ -141,7 +142,7 @@ export default function Notification({ children }: { children: React.ReactNode }
                   <div
                     key={index}
                     className={`flex items-center p-3 border-b border-gray-200 hover:bg-muted/50 cursor-pointer transition-colors ${
-                      !notification.hasRead ? "bg-gray-100 dark:bg-slate-800" : ""
+                      !notification.has_read ? "bg-gray-100 dark:bg-slate-800" : ""
                     }`}
                     onClick={() => handleMarkAsReadAndRedirect(notification)}
                   >
@@ -150,11 +151,11 @@ export default function Notification({ children }: { children: React.ReactNode }
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className={`text-sm truncate ${!notification.hasRead ? "font-medium" : ""}`}>
+                        <h4 className={`text-sm truncate ${!notification.has_read ? "font-medium" : ""}`}>
                           {notification.title}
                         </h4>
                         <span className="text-[10px] text-muted-foreground mt-1 block w-20 text-end">
-                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: false })}
+                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: false })}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">{notification.content} </p>

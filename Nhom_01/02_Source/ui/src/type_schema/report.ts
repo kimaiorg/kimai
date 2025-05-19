@@ -1,3 +1,4 @@
+import { Role } from "@/type_schema/role";
 import { TaskResponseType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
 import { ComponentType } from "react";
@@ -166,4 +167,5 @@ export type ReportViewType = {
   title: string;
   icon: React.ReactNode;
   component: ComponentType<any>;
+  allowRoles: Role[];
 };
