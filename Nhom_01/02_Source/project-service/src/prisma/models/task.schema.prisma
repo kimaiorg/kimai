@@ -9,6 +9,8 @@ model Task {
   billable    Boolean   @default(false)
   is_paid     Boolean   @default(false)
 
+  request_status RequestStatus @default(PROCESSING)
+
   activity_id Int
   activity    Activity @relation(fields: [activity_id], references: [id])
 

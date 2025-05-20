@@ -151,6 +151,7 @@ export class RequestService {
         await this.taskRepository.update({
           where: { id: request.target_id },
           data: {
+            request_status: RequestStatus.APPROVED,
             quantity: requestData.quantity,
           },
         });
@@ -180,6 +181,11 @@ export class RequestService {
             },
           },
         );
+      } else if (request.type === RequestType.CHANGE_EXPENSE_QUANTITY) {
+        await this.taskRepository.update({
+          where: { id: request.target_id },
+          data: { request_status: RequestStatus.REJECTED },
+        });
       }
     }
 
