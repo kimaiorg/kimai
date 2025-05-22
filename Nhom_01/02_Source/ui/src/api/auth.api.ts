@@ -79,11 +79,6 @@ export async function getAllSystemPermissions(): Promise<PermissionType[]> {
 }
 
 export async function getUsersForEachRole(roles: RoleType[]): Promise<RoleUserType[]> {
-  // return roles.map((role, index) => ({
-  //   role: role,
-  //   userCount: [1, 10, 2, 4][index]
-  // }));
-
   const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
   const fetchPromises = roles.map((role) =>
     fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/roles/${role.id}/users`, {
@@ -103,6 +98,7 @@ export async function getUsersForEachRole(roles: RoleType[]): Promise<RoleUserTy
 
       return {
         role: roles[index],
+        users,
         userCount: users.length || 99
       };
     })

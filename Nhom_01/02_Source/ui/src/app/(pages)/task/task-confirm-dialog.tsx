@@ -14,7 +14,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { getNextTaskStatus, TaskStatus, TaskType } from "@/type_schema/task";
+import { getNextTaskStatus, TaskStatus, TaskStatusRequest, TaskType } from "@/type_schema/task";
 import { formatDate } from "date-fns";
 import { ArrowRight, Briefcase, Calendar, CheckCircle2, DollarSign, FileText, RefreshCcwDot, User } from "lucide-react";
 import type React from "react";
@@ -57,15 +57,6 @@ export function TaskConfirmDialog({
             Done
           </Badge>
         );
-      case TaskStatus.PROCESSING:
-        return (
-          <Badge
-            variant="outline"
-            className="bg-main text-white"
-          >
-            Processing
-          </Badge>
-        );
       case TaskStatus.DOING:
         return (
           <Badge
@@ -91,8 +82,8 @@ export function TaskConfirmDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const payload = {
-        status: nextStatus
+      const payload: TaskStatusRequest = {
+        status: TaskStatus.DONE
       };
       const response = await confirmTaskStatus(payload, targetTask.id);
 

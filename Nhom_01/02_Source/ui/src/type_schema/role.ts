@@ -1,3 +1,5 @@
+import { UserType } from "@/type_schema/user.schema";
+
 export enum Role {
   SUPER_ADMIN = "superadmin",
   ADMIN = "admin",
@@ -27,5 +29,6 @@ export type RolePermissionType = {
 
 export type RoleUserType = {
   role: RoleType;
+  users?: UserType[];
   userCount: number;
 };

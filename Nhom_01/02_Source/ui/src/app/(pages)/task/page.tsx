@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Pagination } from "@/type_schema/common";
+import { ApprovalStatus } from "@/type_schema/request";
 import { Role, RolePermissionType } from "@/type_schema/role";
 import { TaskStatus, TaskType } from "@/type_schema/task";
 import { UserType } from "@/type_schema/user.schema";
@@ -164,7 +165,49 @@ function Task() {
             Done
           </Badge>
         );
-      case TaskStatus.PROCESSING:
+      case TaskStatus.DOING:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-500 text-yellow-50"
+          >
+            Doing
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-gray-500 text-gray-50"
+          >
+            N/A
+          </Badge>
+        );
+    }
+  };
+
+  const getTimesheetApprovalStatusBadge = (status?: string) => {
+    if (!status || status === "") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-gray-500 text-white"
+        >
+          N/A
+        </Badge>
+      );
+    }
+    switch (status) {
+      case ApprovalStatus.APPROVED:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-500 text-green-50"
+          >
+            Confirmed
+          </Badge>
+        );
+      case ApprovalStatus.PROCESSING:
         return (
           <Badge
             variant="outline"
@@ -173,13 +216,13 @@ function Task() {
             Processing
           </Badge>
         );
-      case TaskStatus.DOING:
+      case ApprovalStatus.REJECTED:
         return (
           <Badge
             variant="outline"
-            className="bg-yellow-500 text-yellow-50"
+            className="bg-rose-500 text-yellow-50"
           >
-            Doing
+            Rejected
           </Badge>
         );
       default:
@@ -257,10 +300,13 @@ function Task() {
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Assignee</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Due date</th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
+              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                Approval Status
+              </th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
             </tr>
           </thead>
-          {isLoading && <TableSkeleton columns={7} />}
+          {isLoading && <TableSkeleton columns={8} />}
           <tbody>
             {taskList && taskList.data.length === 0 && (
               <tr className="h-48 text-center">
@@ -295,6 +341,9 @@ function Task() {
                   </td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
                     {getTaskStatusBadge(task.status)}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
+                    {getTimesheetApprovalStatusBadge(task.request_status)}
                   </td>
                   <td className="px-4 py-2 text-center">
                     <DropdownMenu>

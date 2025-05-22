@@ -2,7 +2,6 @@
 
 import { addNewTeam } from "@/api/team.api";
 import { getAllUsers } from "@/api/user.api";
-import DefaultAvatar from "@/components/shared/default-avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -235,12 +234,11 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
                             id={user.user_id}
                             className="border border-gray-200"
                           />
-                          <div className={`flex items-center justify-center w-8 h-8 rounded`}>
-                            <DefaultAvatar
-                              name={user.name}
-                              size={40}
-                              textSize={20}
-                              index={index}
+                          <div className={`flex items-center justify-center rounded`}>
+                            <img
+                              src={user!.picture!}
+                              alt={user!.name!}
+                              className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
                             />
                           </div>
                           <div>

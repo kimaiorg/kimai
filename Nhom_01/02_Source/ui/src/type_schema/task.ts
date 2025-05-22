@@ -5,7 +5,6 @@ import { UserType } from "@/type_schema/user.schema";
 import { string, z } from "zod";
 
 export enum TaskStatus {
-  PROCESSING = "PROCESSING",
   DONE = "DONE",
   DOING = "DOING",
   OVERDUE = "OVERDUE",
@@ -17,7 +16,6 @@ export const getNextTaskStatus = (currentStatus?: string) => {
   if (!currentStatus) return TaskStatus.UNDEFINED;
   switch (currentStatus) {
     case TaskStatus.DOING:
-    case TaskStatus.PROCESSING:
       return TaskStatus.DONE;
     case TaskStatus.DONE:
       return TaskStatus.DOING;
@@ -38,7 +36,7 @@ export type TaskSimpleType = {
   updated_at: string;
   user_id: string;
   status: TaskStatus;
-  approval_status?: ApprovalStatus;
+  request_status?: ApprovalStatus;
   billable: boolean; // true, false. => true
   is_paid: boolean; // true, false. => false
   expense_id: number; // => query expense => cost
@@ -60,7 +58,7 @@ export type TaskResponseType = {
   user_id: string;
   user?: UserType;
   status: TaskStatus;
-  approval_status?: ApprovalStatus;
+  request_status?: ApprovalStatus;
   billable: boolean;
 };
 
@@ -78,7 +76,7 @@ export type TaskType = {
   quantity: number;
   user: UserType;
   status: TaskStatus;
-  approval_status?: ApprovalStatus;
+  request_status?: ApprovalStatus;
   billable: boolean;
 };
 
@@ -173,4 +171,8 @@ export type TaskExpenseUpdateRequestType = {
 
 export type TaskUpdateStatusRequestType = {
   status: ApprovalStatus.APPROVED | ApprovalStatus.REJECTED;
+};
+
+export type TaskStatusRequest = {
+  status: TaskStatus;
 };

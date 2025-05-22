@@ -1,9 +1,5 @@
 "use client";
 
-"use client";
-
-import type React from "react";
-
 import { format, isAfter, isBefore, parseISO } from "date-fns";
 import {
   Activity,

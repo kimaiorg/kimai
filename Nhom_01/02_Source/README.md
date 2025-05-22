@@ -9,6 +9,8 @@
 
 ### Running Services
 
+0. **Run docker desktop.**
+
 1. Start the repository:
 
    ```bash

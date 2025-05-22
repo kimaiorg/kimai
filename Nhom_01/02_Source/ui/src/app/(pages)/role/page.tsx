@@ -7,7 +7,7 @@ import {
   getAllSystemPermissions,
   getUsersForEachRole
 } from "@/api/auth.api";
-import Loading from "@/app/loading";
+import { MemberHoverCard } from "@/app/(pages)/team/member-hover-card";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { RoleCardSkeleton } from "@/components/skeleton/card-skeleton";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
@@ -139,15 +139,46 @@ function RolePage() {
         <div className="grid grid-cols-2 gap-4 lg:gap-2 mb-8 ">
           {!roleUsers && <RoleCardSkeleton roleCount={4} />}
           {roleUsers &&
-            roleUsers.map((roleUser, index) => (
-              <div
-                key={index}
-                className="p-4 border rounded-lg shadow-sm bg-white dark:bg-slate-800 border-gray-200"
-              >
-                <h2 className="text-lg font-semibold">{roleUser.role.name}</h2>
-                <p>Quantity: {roleUser.userCount}</p>
-              </div>
-            ))}
+            roleUsers.map((roleUser, index) => {
+              const users = roleUser.users || [];
+              const displayUsers = users.slice(0, 6);
+              const extraCount = users.length - 6;
+              return (
+                <div
+                  key={index}
+                  className="p-4 border rounded-lg shadow-sm bg-white dark:bg-slate-800 border-gray-200"
+                >
+                  <h2 className="text-lg font-semibold">{roleUser.role.name}</h2>
+                  <div className="flex items-center gap-2 justify-between mt-2">
+                    <div className="flex -space-x-1">
+                      {displayUsers.map((user, idx) => (
+                        <MemberHoverCard
+                          member={user}
+                          key={idx}
+                        >
+                          <div
+                            className={`flex items-center justify-center h-8 w-8 cursor-pointer hover:ring-indigo-600 hover:ring-2 rounded-full`}
+                          >
+                            <img
+                              key={idx}
+                              src={user.picture}
+                              alt={user.name}
+                              className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
+                            />
+                          </div>
+                        </MemberHoverCard>
+                      ))}
+                      {extraCount > 0 && (
+                        <span className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 dark:bg-slate-700 text-xs font-semibold border-2 border-white dark:border-slate-800">
+                          +{extraCount}
+                        </span>
+                      )}
+                    </div>
+                    <span className="ml-3 text-gray-600 dark:text-gray-300">Quantity: {roleUser.userCount}</span>
+                  </div>
+                </div>
+              );
+            })}
         </div>
 
         <table className="min-w-full bg-white dark:bg-slate-800 border rounded-lg shadow-sm table-layout border-gray-200">
@@ -184,8 +215,8 @@ function RolePage() {
                         className={`py-2 px-4 text-center`}
                       >
                         <span
-                          className={`inline-block px-2 py-1 rounded-full ${
-                            isAllowed ? "bg-lime-500 text-white" : "bg-gray-200 dark:bg-slate-900"
+                          className={`inline-block px-2 py-1 rounded-md ${
+                            isAllowed ? "bg-main text-white" : "bg-gray-200 dark:bg-slate-900"
                           } ${canUpdate ? "cursor-pointer" : "cursor-not-allowed"}`}
                           onClick={() => updatePermissionForRole(rolePermission, allSystemPermission, isAllowed)}
                         >

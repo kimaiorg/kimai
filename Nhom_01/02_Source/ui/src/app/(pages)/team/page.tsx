@@ -8,7 +8,6 @@ import { MemberHoverCard } from "@/app/(pages)/team/member-hover-card";
 import TeamUpdateDialog from "@/app/(pages)/team/team-update-dialog";
 import TeamViewDialog from "@/app/(pages)/team/team-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
-import DefaultAvatar from "@/components/shared/default-avatar";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -239,10 +238,10 @@ function Team() {
                               priority
                             />
                           ) : (
-                            <DefaultAvatar
-                              name={team.lead?.name || ""}
-                              size={35}
-                              className="rounded-full"
+                            <img
+                              src={team.lead!.picture!}
+                              alt={team.lead!.name!}
+                              className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
                             />
                           )}
                         </div>
@@ -272,11 +271,10 @@ function Team() {
                                 priority
                               />
                             ) : (
-                              <DefaultAvatar
-                                name={member?.name}
-                                size={35}
-                                className="border-gray-200"
-                                index={idx}
+                              <img
+                                src={member!.picture!}
+                                alt={member!.name!}
+                                className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
                               />
                             )}
                           </div>

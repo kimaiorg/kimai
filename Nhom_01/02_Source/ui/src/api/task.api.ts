@@ -7,6 +7,7 @@ import {
   CreateTaskRequestDTO,
   TaskExpenseUpdateRequestType,
   TaskResponseType,
+  TaskStatusRequest,
   UpdateTaskRequestDTO
 } from "@/type_schema/task";
 
@@ -87,12 +88,11 @@ export async function updateTask(request: UpdateTaskRequestDTO, taskId: number):
   }
 }
 
-export async function confirmTaskStatus(request: any, taskId: number): Promise<number> {
+export async function confirmTaskStatus(request: TaskStatusRequest, taskId: number): Promise<number> {
   const token = await getManagementAccessToken();
 
-  return 200;
   try {
-    const response = await projectAxios.put(`/api/v1/tasks/${taskId}/status`, request, {
+    const response = await projectAxios.put(`/api/v1/tasks/${taskId}`, request, {
       headers: {
         Authorization: `Bearer ${token}`
       }

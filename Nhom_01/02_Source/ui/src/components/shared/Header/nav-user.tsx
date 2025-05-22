@@ -1,6 +1,6 @@
 "use client";
 
-import DefaultAvatar from "@/components/shared/default-avatar";
+import Notification from "@/components/shared/Header/notification";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ import { Bell, LogOut, UserRoundSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "./language-switcher";
-import Notification from "@/components/shared/Header/notification";
 
 export function NavUser() {
   const { user, isLoading } = useUser();
@@ -63,11 +62,11 @@ export function NavUser() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-2 flex-row-reverse cursor-pointer">
-                <div className="h-8 w-8 rounded-full">
-                  {/* <img src={defaultAvatar} alt="Default Avatar" className="w-full h-full" /> */}
-                  <DefaultAvatar
-                    name={user!.name!}
-                    size={40}
+                <div className="rounded-full">
+                  <img
+                    src={user!.picture!}
+                    alt={user!.name!}
+                    className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
                   />
                 </div>
                 <div className="grid flex-1 text-end text-sm leading-tight">
@@ -83,9 +82,10 @@ export function NavUser() {
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <div className="h-7 w-7 rounded-full">
-                    <DefaultAvatar
-                      name={user!.name!}
-                      size={30}
+                    <img
+                      src={user!.picture!}
+                      alt={user!.name!}
+                      className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
                     />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">

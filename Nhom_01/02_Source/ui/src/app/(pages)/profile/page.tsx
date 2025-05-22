@@ -2,7 +2,6 @@
 import { UpdateUserForm } from "@/app/(pages)/profile/update-user-form";
 import UploadFileModal from "@/app/(pages)/profile/upload-file-modal";
 import ErrorPage from "@/app/error";
-import DefaultAvatar from "@/components/shared/default-avatar";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { Upload } from "lucide-react";
@@ -95,7 +94,11 @@ export default function UserDetails() {
                     alt="Woman looking front"
                   />
                 ) : (
-                  <DefaultAvatar name={user.name || ""} />
+                  <img
+                    src={user!.picture!}
+                    alt={user!.name!}
+                    className="w-52 h-52 rounded-full border-2 border-white dark:border-slate-800 object-cover"
+                  />
                 )}
                 <div className="absolute bottom-3 right-3 hidden group-hover:flex items-center justify-center bg-black border border-white p-2 rounded-full shadow-lg cursor-pointer">
                   <UploadFileModal onUploadFile={handleUploadAvatar}>

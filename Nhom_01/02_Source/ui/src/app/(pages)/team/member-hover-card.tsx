@@ -2,7 +2,7 @@
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { UserType } from "@/type_schema/user.schema";
-import { Mail, Phone, Star } from "lucide-react";
+import { Calendar, Mail, Star } from "lucide-react";
 
 export function MemberHoverCard({
   children,
@@ -11,7 +11,7 @@ export function MemberHoverCard({
 }: {
   children: React.ReactNode;
   member: UserType;
-  lead: UserType;
+  lead?: UserType;
 }) {
   return (
     <HoverCard
@@ -37,8 +37,8 @@ export function MemberHoverCard({
               <span className="text-xs text-muted-foreground">{member?.email}</span>
             </div>
             <div className="flex items-center">
-              <Phone className="h-3.5 w-3.5 text-muted-foreground mr-1" />
-              <span className="text-xs text-muted-foreground">{member?.updated_at}</span>
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+              <span className="text-xs text-muted-foreground">{member?.created_at}</span>
             </div>
           </div>
         </div>

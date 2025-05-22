@@ -6,7 +6,6 @@ import AddUserModal from "@/app/(pages)/user/user-add-dialog";
 import UserUpdateDialog from "@/app/(pages)/user/user-update-dialog";
 import UserViewDialog from "@/app/(pages)/user/user-view-dialog";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
-import DefaultAvatar from "@/components/shared/default-avatar";
 import { TableSkeleton } from "@/components/skeleton/table-skeleton";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -160,10 +159,12 @@ function User() {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell className="font-medium">
-                    <div className="w-7 h-7 rounded-full overflow-hidden">
-                      <DefaultAvatar
-                        name={userItem.name}
-                        size={30}
+                    <div className="rounded-full overflow-hidden">
+                      <img
+                        key={index}
+                        src={userItem.picture}
+                        alt={userItem.name || "User"}
+                        className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 object-cover"
                       />
                     </div>
                   </TableCell>
