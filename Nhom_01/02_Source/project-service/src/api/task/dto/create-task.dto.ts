@@ -15,6 +15,7 @@ export const createTaskSchema = z.object({
   expense_id: z.number(),
   quantity: z.number().optional(),
   color: z.string().optional(),
+  billable: z.boolean().default(false),
 });
 
 export type CreateTaskDto = z.infer<typeof createTaskSchema>;
