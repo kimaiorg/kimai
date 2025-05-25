@@ -52,6 +52,12 @@ export class CreateTaskSwagger {
     description: 'Color of the task',
   })
   color?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Billable status of the task',
+  })
+  billable?: boolean;
 }
 
 export class UpdateTaskSwagger {
