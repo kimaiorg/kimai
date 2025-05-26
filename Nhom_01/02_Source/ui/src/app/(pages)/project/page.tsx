@@ -207,7 +207,7 @@ function ProjectPage() {
                     </div>
                   </TableCell>
                   <TableCell className="">{project.customer?.name}</TableCell>
-                  <TableCell className="">{project.budget ? `$${project.budget}` : "-"}</TableCell>
+                  <TableCell className="">{project.budget ? `${project.budget}$` : "-"}</TableCell>
                   <TableCell className="">
                     {formatDate(project.start_date!, "dd/MM/yyyy")}
                     <span> - </span>

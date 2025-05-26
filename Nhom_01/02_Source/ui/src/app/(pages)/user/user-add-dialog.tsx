@@ -75,7 +75,7 @@ export default function AddUserModal({ children, fetchUsers }: { children: React
       onOpenChange={setOpen}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="border border-gray-300 bg-gray-50 dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw]">
+      <DialogContent className="border border-gray-300 bg-gray-50 dark:bg-slate-800 overflow-y-auto py-3 rounded-lg w-[95vw] lg:w-[60vw]">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl">Add User</DialogTitle>
         </DialogHeader>

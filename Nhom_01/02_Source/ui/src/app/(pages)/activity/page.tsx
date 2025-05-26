@@ -207,7 +207,7 @@ function Activity() {
                       <span className="ml-2">{activity.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.budget}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.budget}$</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.project.name}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{activity.team.name}</td>
                   <td className="px-4 py-2 text-center">

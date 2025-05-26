@@ -6,10 +6,13 @@
 - Node.js v18+
 - npm v9+
 - PostgreSQL (for local development)
+- RabbitMQ
 
 ### Running Services
 
 0. **Run docker desktop.**
+
+- NOTE: **Please delete all volumes related to postgres and rabbitmq before running before continue**.
 
 1. Start the repository:
 
@@ -103,6 +106,11 @@
   ```cmd
   run.bat
   ```
+- After all services are running, the seed data to the database container by running the following command:
+
+```
+docker-compose exec postgres_database_for_project_service psql -U postgres -d project -f /docker-entrypoint-initdb.d/init.sql
+```
 
 ### Running UI
 
