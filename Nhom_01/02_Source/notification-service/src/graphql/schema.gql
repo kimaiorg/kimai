@@ -1,0 +1,60 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input ListNotificationsInput {
+  endDate: DateTime
+  hasRead: Boolean
+  limit: Int! = 10
+  page: Int! = 1
+  sortBy: String! = "created_at"
+  sortOrder: String! = "desc"
+  startDate: DateTime
+  targetId: String
+  type: NotificationType
+  userId: String!
+}
+
+type Notification {
+  content: String!
+  created_at: DateTime!
+  deleted_at: DateTime
+  has_read: Boolean!
+  id: Int!
+  target_id: String!
+  title: String!
+  type: NotificationType!
+  updated_at: DateTime!
+  user_id: String!
+}
+
+type NotificationListMetadata {
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+type NotificationListResult {
+  data: [Notification!]!
+  metadata: NotificationListMetadata
+}
+
+enum NotificationType {
+  ABSENCE_REQUEST
+  ABSENCE_REQUEST_STATUS
+  CHANGE_STATUS_REQUEST
+  EXPENSE_REQUEST
+  EXPENSE_REQUEST_STATUS
+  TIMESHEET_REQUEST
+  TIMESHEET_REQUEST_STATUS
+}
+
+type Query {
+  listNotifications(input: ListNotificationsInput!): NotificationListResult!
+}
