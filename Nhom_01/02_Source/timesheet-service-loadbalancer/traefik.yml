@@ -3,6 +3,8 @@ entryPoints:
     address: ":80"
   websecure:
     address: ":443"
+    http:
+      tls: {}  # Enable TLS for HTTPS
 
 providers:
   file:
@@ -11,4 +13,8 @@ providers:
 
 api:
   dashboard: true
-  insecure: true
+  insecure: true  # Enable dashboard on port 8080 (for debugging)
+
+log:
+  level: DEBUG  # Enable debug logging for troubleshooting
+accessLog: {}

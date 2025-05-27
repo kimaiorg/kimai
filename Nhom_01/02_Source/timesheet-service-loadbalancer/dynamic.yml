@@ -1,12 +1,27 @@
 http:
+  middlewares:
+    cloudflare-headers:
+      headers:
+        customRequestHeaders:
+          User-Agent: "Traefik/3.0"  # Avoid Cloudflare bot detection
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - "*"
+        accessControlAllowOriginList:
+          - "*"
+        accessControlAllowHeaders:
+          - "*"
   routers:
     my-router:
-      # rule: "Host(`timesheet-service-load-balancer.onrender.com`)"
-      rule: "PathPrefix(`/`)"
+      rule: "Host(`timesheet-service-load-balancer.onrender.com`)"  # Replace with your Render domain
       entryPoints:
-        - websecure
+        - websecure  # Use HTTPS
       service: my-service
-
+      middlewares:
+        - cloudflare-headers
+        - cors
+      tls: {}  # Enable TLS for the router
   services:
     my-service:
       loadBalancer:
@@ -15,7 +30,12 @@ http:
           - url: "https://timesheet-service-2.onrender.com"
         passHostHeader: true
         serversTransport: my-transport
-
+        healthCheck:
+          path: "/health"  # Replace with actual health check endpoint
+          interval: "10s"
+          timeout: "3s"
   serversTransports:
     my-transport:
-      insecureSkipVerify: true  # Because Render uses self-signed certs on internal traffic
+      insecureSkipVerify: true  # Required for Render’s self-signed certs
+      dialTimeout: 30s
+      responseHeaderTimeout: 30s
