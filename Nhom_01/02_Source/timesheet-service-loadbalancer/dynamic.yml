@@ -1,0 +1,21 @@
+http:
+  routers:
+    my-router:
+      # rule: "Host(`timesheet-service-load-balancer.onrender.com`)"
+      rule: "PathPrefix(`/`)"
+      entryPoints:
+        - websecure
+      service: my-service
+
+  services:
+    my-service:
+      loadBalancer:
+        servers:
+          - url: "https://timesheet-service.onrender.com"
+          - url: "https://timesheet-service-2.onrender.com"
+        passHostHeader: true
+        serversTransport: my-transport
+
+  serversTransports:
+    my-transport:
+      insecureSkipVerify: true  # Because Render uses self-signed certs on internal traffic
