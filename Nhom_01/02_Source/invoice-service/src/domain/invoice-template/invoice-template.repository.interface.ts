@@ -14,6 +14,9 @@ export interface InvoiceTemplateRepositoryInterface {
       isActive?: boolean;
     };
   }): Promise<PaginationResponse<InvoiceTemplate>>;
-  update(id: number, data: Partial<InvoiceTemplate>): Promise<InvoiceTemplate | null>;
+  update(
+    id: number,
+    data: Partial<InvoiceTemplate>,
+  ): Promise<InvoiceTemplate | null>;
   delete(id: number): Promise<boolean>;
 }

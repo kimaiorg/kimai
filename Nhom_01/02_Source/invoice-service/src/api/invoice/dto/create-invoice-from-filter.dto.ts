@@ -2,34 +2,59 @@ import { z } from 'zod';
 
 // Schema cho request tạo invoice từ kết quả filter
 export const createInvoiceFromFilterSchema = z.object({
-  customer_id: z.number(),
-  project_id: z.number(),
-  activities: z.array(z.number()),
-  from: z.string(),
-  to: z.string(),
-  items: z.array(z.object({
-    description: z.string(),
-    quantity: z.number(),
-    unit_price: z.number(),
-    tax_rate: z.number(),
-    date: z.string().optional(),
-  })).optional(),
+  // ID of the filtered invoice to generate a permanent invoice from
+  filteredInvoiceId: z.number(),
+  
+  // Optional fields that can override values from the filtered invoice
+  userId: z.number().optional(),
+  dueDays: z.number().optional().default(14),
+  comment: z.string().optional(),
+  timesheetIds: z.array(z.number()).optional().default([]),
+  
+  // Legacy fields - kept for backward compatibility
+  customer_id: z.number().optional(),
+  project_id: z.number().optional(),
+  activities: z.array(z.number()).optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  items: z
+    .array(
+      z.object({
+        description: z.string(),
+        quantity: z.number(),
+        unit_price: z.number(),
+        tax_rate: z.number(),
+        date: z.string().optional(),
+      }),
+    )
+    .optional(),
   notes: z.string().optional(),
-  currency: z.string().default('USD'),
-  status: z.string().default('NEW'),
+  currency: z.string().optional().default('USD'),
+  status: z.string().optional().default('NEW'),
 });
 
-export type CreateInvoiceFromFilterDto = z.infer<typeof createInvoiceFromFilterSchema>;
+export type CreateInvoiceFromFilterDto = z.infer<
+  typeof createInvoiceFromFilterSchema
+>;
 
 // Hàm chuyển đổi từ DTO (snake_case) sang model (camelCase)
-export function transformCreateInvoiceFromFilterDto(dto: CreateInvoiceFromFilterDto): any {
+export function transformCreateInvoiceFromFilterDto(
+  dto: CreateInvoiceFromFilterDto,
+): any {
   return {
+    filteredInvoiceId: dto.filteredInvoiceId,
+    userId: dto.userId,
+    dueDays: dto.dueDays,
+    comment: dto.comment,
+    timesheetIds: dto.timesheetIds,
+    
+    // Legacy fields
     customerId: dto.customer_id,
     projectId: dto.project_id,
     activityIds: dto.activities,
     fromDate: dto.from,
     toDate: dto.to,
-    items: dto.items?.map(item => ({
+    items: dto.items?.map((item) => ({
       description: item.description,
       quantity: item.quantity,
       unitPrice: item.unit_price,

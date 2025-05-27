@@ -10,7 +10,9 @@ export class InvoiceTemplateService {
     private readonly invoiceTemplateRepository: InvoiceTemplateRepository,
   ) {}
 
-  async createTemplate(data: Partial<InvoiceTemplate>): Promise<InvoiceTemplate> {
+  async createTemplate(
+    data: Partial<InvoiceTemplate>,
+  ): Promise<InvoiceTemplate> {
     return this.invoiceTemplateRepository.create(data);
   }
 
@@ -18,20 +20,25 @@ export class InvoiceTemplateService {
     return this.invoiceTemplateRepository.findById(id);
   }
 
-  async listTemplates(params: ListInvoiceTemplateDto): Promise<PaginationResponse<InvoiceTemplate>> {
+  async listTemplates(
+    params: ListInvoiceTemplateDto,
+  ): Promise<PaginationResponse<InvoiceTemplate>> {
     // Đảm bảo params có đủ thông tin cần thiết
     const queryParams = {
       page: params.page || 1,
       limit: params.limit || 10,
       sortBy: params.sortBy || 'createdAt',
       sortOrder: params.sortOrder || 'desc',
-      filters: params.filters || {}
+      filters: params.filters || {},
     };
-    
+
     return this.invoiceTemplateRepository.findAll(queryParams);
   }
 
-  async updateTemplate(id: number, data: Partial<InvoiceTemplate>): Promise<InvoiceTemplate | null> {
+  async updateTemplate(
+    id: number,
+    data: Partial<InvoiceTemplate>,
+  ): Promise<InvoiceTemplate | null> {
     return this.invoiceTemplateRepository.update(id, data);
   }
 

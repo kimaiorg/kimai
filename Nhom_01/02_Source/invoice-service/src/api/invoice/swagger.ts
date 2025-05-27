@@ -65,15 +65,24 @@ export class CreateInvoiceSwagger {
 }
 
 export class UpdateInvoiceSwagger {
-  @ApiProperty({ enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'], required: false })
+  @ApiProperty({
+    enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'],
+    required: false,
+  })
   status?: string;
 
-  @ApiProperty({ example: 'Payment received via bank transfer', required: false })
+  @ApiProperty({
+    example: 'Payment received via bank transfer',
+    required: false,
+  })
   comment?: string;
 }
 
 export class ListInvoiceFiltersSwagger {
-  @ApiProperty({ enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'], required: false })
+  @ApiProperty({
+    enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'],
+    required: false,
+  })
   status?: string;
 
   @ApiProperty({ example: 42, required: false })
@@ -112,20 +121,40 @@ export class ListInvoiceSwaggerDto {
   sortOrder?: string;
 
   // Các trường filter có thể được gửi trực tiếp
-  @ApiProperty({ enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'], required: false, description: 'Filter by status (direct)' })
+  @ApiProperty({
+    enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'],
+    required: false,
+    description: 'Filter by status (direct)',
+  })
   status?: string;
 
-  @ApiProperty({ example: 42, required: false, description: 'Filter by customer ID (direct)' })
+  @ApiProperty({
+    example: 42,
+    required: false,
+    description: 'Filter by customer ID (direct)',
+  })
   customerId?: number;
 
-  @ApiProperty({ example: 1, required: false, description: 'Filter by user ID (direct)' })
+  @ApiProperty({
+    example: 1,
+    required: false,
+    description: 'Filter by user ID (direct)',
+  })
   userId?: number;
 
-  @ApiProperty({ example: 'INV-2025', required: false, description: 'Filter by keyword (direct)' })
+  @ApiProperty({
+    example: 'INV-2025',
+    required: false,
+    description: 'Filter by keyword (direct)',
+  })
   keyword?: string;
 
   // Hoặc được đặt trong thuộc tính filters
-  @ApiProperty({ type: ListInvoiceFiltersSwagger, required: false, description: 'Nested filters object' })
+  @ApiProperty({
+    type: ListInvoiceFiltersSwagger,
+    required: false,
+    description: 'Nested filters object',
+  })
   filters?: ListInvoiceFiltersSwagger;
 }
 
@@ -134,16 +163,26 @@ export class FilterInvoiceSwaggerDto {
   @ApiProperty({ example: 42, description: 'Customer ID' })
   customer_id: number;
 
-  @ApiProperty({ example: '2025-03-01T00:00:00Z', description: 'Start date (ISO format)' })
+  @ApiProperty({
+    example: '2025-03-01T00:00:00Z',
+    description: 'Start date (ISO format)',
+  })
   from: string;
 
-  @ApiProperty({ example: '2025-03-31T23:59:59Z', description: 'End date (ISO format)' })
+  @ApiProperty({
+    example: '2025-03-31T23:59:59Z',
+    description: 'End date (ISO format)',
+  })
   to: string;
 
   @ApiProperty({ example: 123, description: 'Project ID' })
   project_id: number;
 
-  @ApiProperty({ example: 'month', required: false, description: 'Period type (day, week, month, etc.)' })
+  @ApiProperty({
+    example: 'month',
+    required: false,
+    description: 'Period type (day, week, month, etc.)',
+  })
   period?: string;
 
   @ApiProperty({ example: [456, 789], description: 'List of activity IDs' })
@@ -152,13 +191,23 @@ export class FilterInvoiceSwaggerDto {
 
 // Thêm UpdateInvoiceStatusSwaggerDto dựa trên cấu trúc của frontend
 export class UpdateInvoiceStatusSwaggerDto {
-  @ApiProperty({ example: 'Payment received via bank transfer', required: false })
+  @ApiProperty({
+    example: 'Payment received via bank transfer',
+    required: false,
+  })
   description?: string;
 
-  @ApiProperty({ example: 'PAID', enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'], description: 'Invoice status' })
+  @ApiProperty({
+    example: 'PAID',
+    enum: ['NEW', 'PENDING', 'PAID', 'CANCELED', 'OVERDUE'],
+    description: 'Invoice status',
+  })
   status: string;
 
-  @ApiProperty({ example: '2025-04-30T00:00:00Z', description: 'Payment date (ISO format)' })
+  @ApiProperty({
+    example: '2025-04-30T00:00:00Z',
+    description: 'Payment date (ISO format)',
+  })
   paymentDate: string;
 }
 

@@ -8,4 +8,6 @@ export const createInvoiceTemplateSchema = z.object({
   description: z.string().optional(),
 });
 
-export type CreateInvoiceTemplateDto = z.infer<typeof createInvoiceTemplateSchema>;
+export type CreateInvoiceTemplateDto = z.infer<
+  typeof createInvoiceTemplateSchema
+>;

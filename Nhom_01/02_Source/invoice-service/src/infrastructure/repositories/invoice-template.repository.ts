@@ -6,7 +6,9 @@ import { InvoiceTemplateRepositoryInterface } from '@/domain/invoice-template/in
 import { PaginationResponse } from '@/libs/response/pagination';
 
 @Injectable()
-export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInterface {
+export class InvoiceTemplateRepository
+  implements InvoiceTemplateRepositoryInterface
+{
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Partial<InvoiceTemplate>): Promise<InvoiceTemplate> {
@@ -27,7 +29,7 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
         isActive: data.isActive,
       },
     });
-    
+
     return result as unknown as InvoiceTemplate;
   }
 
@@ -35,7 +37,7 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
     const result = await this.prisma.invoiceTemplate.findUnique({
       where: { id },
     });
-    
+
     return result as unknown as InvoiceTemplate | null;
   }
 
@@ -49,22 +51,28 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
       isActive?: boolean;
     };
   }): Promise<PaginationResponse<InvoiceTemplate>> {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', filters = {} } = params;
-    
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      filters = {},
+    } = params;
+
     // Build where conditions based on filters
     const where: any = {};
-    
+
     if (filters.name) {
       where.name = { contains: filters.name, mode: 'insensitive' };
     }
-    
+
     if (filters.isActive !== undefined) {
       where.isActive = filters.isActive;
     }
-    
+
     // Count total items
     const totalItems = await this.prisma.invoiceTemplate.count({ where });
-    
+
     // Get paginated data
     const items = await this.prisma.invoiceTemplate.findMany({
       where,
@@ -74,10 +82,10 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
         [sortBy]: sortOrder.toLowerCase(),
       },
     });
-    
+
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalItems / limit);
-    
+
     return {
       items: items as unknown as InvoiceTemplate[],
       meta: {
@@ -90,15 +98,18 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
     };
   }
 
-  async update(id: number, data: Partial<InvoiceTemplate>): Promise<InvoiceTemplate | null> {
+  async update(
+    id: number,
+    data: Partial<InvoiceTemplate>,
+  ): Promise<InvoiceTemplate | null> {
     const template = await this.prisma.invoiceTemplate.findUnique({
       where: { id },
     });
-    
+
     if (!template) {
       return null;
     }
-    
+
     const result = await this.prisma.invoiceTemplate.update({
       where: { id },
       data: {
@@ -117,7 +128,7 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
         isActive: data.isActive,
       },
     });
-    
+
     return result as unknown as InvoiceTemplate;
   }
 
@@ -125,15 +136,15 @@ export class InvoiceTemplateRepository implements InvoiceTemplateRepositoryInter
     const template = await this.prisma.invoiceTemplate.findUnique({
       where: { id },
     });
-    
+
     if (!template) {
       return false;
     }
-    
+
     await this.prisma.invoiceTemplate.delete({
       where: { id },
     });
-    
+
     return true;
   }
 }

@@ -27,8 +27,10 @@ model Invoice {
   paymentDate   DateTime?
   timesheetIds  Int[]
   items         InvoiceItem[]
+  filteredInvoiceId Int?      @unique
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  filteredInvoice FilteredInvoice? @relation(fields: [filteredInvoiceId], references: [id])
 }
 
 model InvoiceItem {
@@ -73,4 +75,26 @@ enum InvoiceStatus {
   PAID
   CANCELED
   OVERDUE
+}
+
+model FilteredInvoice {
+  id            Int           @id @default(autoincrement())
+  filterHash    String        @unique
+  customerId    Int
+  projectId     Int?
+  fromDate      DateTime
+  toDate        DateTime
+  activities    Int[]
+  totalPrice    Decimal       @db.Decimal(10, 2)
+  taxRate       Decimal       @db.Decimal(5, 2) @default(10)
+  taxPrice      Decimal       @db.Decimal(10, 2)
+  finalPrice    Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  isSaved       Boolean       @default(false)
+  filterData    Json          // Store the complete filter data for regeneration if needed
+  responseData  Json          // Store the complete response data
+  expiresAt     DateTime      // TTL for temporary records
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  invoice       Invoice?
 }

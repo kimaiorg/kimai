@@ -1,5 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UsePipes, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiBody, ApiQuery, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UsePipes,
+  ParseIntPipe,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiBody,
+  ApiQuery,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { InvoiceTemplateService } from '@/domain/invoice-template/invoice-template.service';
 import { InvoiceTemplate } from '@/types';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
@@ -11,18 +28,27 @@ import {
   ListInvoiceTemplateDto,
   createInvoiceTemplateSchema,
   updateInvoiceTemplateSchema,
-  listInvoiceTemplateSchema
+  listInvoiceTemplateSchema,
 } from './dto';
-import { CreateTemplateSwagger, UpdateTemplateSwagger, ListTemplateSwagger } from './swagger';
+import {
+  CreateTemplateSwagger,
+  UpdateTemplateSwagger,
+  ListTemplateSwagger,
+} from './swagger';
 
 @ApiTags('invoice-templates')
 @Controller('invoice-templates')
 export class InvoiceTemplateController {
-  constructor(private readonly invoiceTemplateService: InvoiceTemplateService) {}
+  constructor(
+    private readonly invoiceTemplateService: InvoiceTemplateService,
+  ) {}
 
   @Post()
   @ApiBody({ type: CreateTemplateSwagger })
-  @ApiResponse({ status: 201, description: 'The invoice template has been successfully created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The invoice template has been successfully created.',
+  })
   @Permissions(['create:invoice-templates'])
   @UsePipes(new ZodValidationPipe(createInvoiceTemplateSchema))
   async createTemplate(
@@ -43,13 +69,46 @@ export class InvoiceTemplateController {
   }
 
   @Get()
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'sort_by', required: false, type: String, description: 'Field to sort by' })
-  @ApiQuery({ name: 'sort_order', required: false, enum: ['asc', 'desc'], description: 'Sort direction' })
-  @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by template name' })
-  @ApiQuery({ name: 'is_active', required: false, type: Boolean, description: 'Filter by active status' })
-  @ApiResponse({ status: 200, description: 'Return the list of invoice templates.' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'sort_by',
+    required: false,
+    type: String,
+    description: 'Field to sort by',
+  })
+  @ApiQuery({
+    name: 'sort_order',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort direction',
+  })
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    type: String,
+    description: 'Filter by template name',
+  })
+  @ApiQuery({
+    name: 'is_active',
+    required: false,
+    type: Boolean,
+    description: 'Filter by active status',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the list of invoice templates.',
+  })
   @Permissions(['read:invoice-templates'])
   @UsePipes(new ZodValidationPipe(listInvoiceTemplateSchema))
   async listTemplates(
@@ -61,7 +120,10 @@ export class InvoiceTemplateController {
   @Put(':id')
   @ApiParam({ name: 'id', description: 'Invoice template ID' })
   @ApiBody({ type: UpdateTemplateSwagger })
-  @ApiResponse({ status: 200, description: 'The invoice template has been successfully updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The invoice template has been successfully updated.',
+  })
   @ApiResponse({ status: 404, description: 'Invoice template not found.' })
   @Permissions(['update:invoice-templates'])
   @UsePipes(new ZodValidationPipe(updateInvoiceTemplateSchema))
@@ -74,7 +136,10 @@ export class InvoiceTemplateController {
 
   @Delete(':id')
   @ApiParam({ name: 'id', description: 'Invoice template ID' })
-  @ApiResponse({ status: 200, description: 'The invoice template has been successfully deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The invoice template has been successfully deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Invoice template not found.' })
   @Permissions(['delete:invoice-templates'])
   async deleteTemplate(

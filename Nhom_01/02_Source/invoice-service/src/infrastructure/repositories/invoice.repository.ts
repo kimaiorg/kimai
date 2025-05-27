@@ -28,25 +28,27 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         dueDate: data.dueDate!,
         timesheetIds: data.timesheetIds || [],
         paymentDate: null,
-        items: data.items ? {
-          create: data.items.map(item => ({
-            description: item.description,
-            amount: item.amount,
-            rate: item.rate,
-            total: item.total,
-            timesheetId: item.timesheetId,
-            projectId: item.projectId,
-            activityId: item.activityId,
-            begin: item.begin,
-            end: item.end,
-          }))
-        } : undefined,
+        items: data.items
+          ? {
+              create: data.items.map((item) => ({
+                description: item.description,
+                amount: item.amount,
+                rate: item.rate,
+                total: item.total,
+                timesheetId: item.timesheetId,
+                projectId: item.projectId,
+                activityId: item.activityId,
+                begin: item.begin,
+                end: item.end,
+              })),
+            }
+          : undefined,
       },
       include: {
         items: true,
       },
     });
-    
+
     return result as unknown as Invoice;
   }
 
@@ -57,42 +59,48 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         items: true,
       },
     });
-    
+
     return result as unknown as Invoice | null;
   }
 
   async findAll(params: ListInvoiceDto): Promise<PaginationResponse<Invoice>> {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', filters = {} } = params;
-    
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      filters = {},
+    } = params;
+
     // Build where conditions based on filters
     const where: any = {};
-    
+
     if (filters.status) {
       where.status = filters.status;
     }
-    
+
     if (filters.customerId) {
       where.customerId = filters.customerId;
     }
-    
+
     if (filters.userId) {
       where.userId = filters.userId;
     }
-    
+
     if (filters.createdAt) {
       where.createdAt = filters.createdAt;
     }
-    
+
     if (filters.keyword) {
       where.OR = [
         { invoiceNumber: { contains: filters.keyword, mode: 'insensitive' } },
         { comment: { contains: filters.keyword, mode: 'insensitive' } },
       ];
     }
-    
+
     // Count total items
     const totalItems = await this.prisma.invoice.count({ where });
-    
+
     // Get paginated data
     const items = await this.prisma.invoice.findMany({
       where,
@@ -105,10 +113,10 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         items: true,
       },
     });
-    
+
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalItems / limit);
-    
+
     return {
       items: items as unknown as Invoice[],
       meta: {
@@ -125,11 +133,11 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
     });
-    
+
     if (!invoice) {
       return null;
     }
-    
+
     const result = await this.prisma.invoice.update({
       where: { id },
       data: {
@@ -141,7 +149,7 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         items: true,
       },
     });
-    
+
     return result as unknown as Invoice;
   }
 
@@ -149,15 +157,15 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
     });
-    
+
     if (!invoice) {
       return false;
     }
-    
+
     await this.prisma.invoice.delete({
       where: { id },
     });
-    
+
     return true;
   }
 
@@ -165,11 +173,11 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
     });
-    
+
     if (!invoice) {
       return null;
     }
-    
+
     const result = await this.prisma.invoice.update({
       where: { id },
       data: {
@@ -180,7 +188,7 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         items: true,
       },
     });
-    
+
     return result as unknown as Invoice;
   }
 
@@ -195,7 +203,7 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         items: true,
       },
     });
-    
+
     return results as unknown as Invoice[];
   }
 }
