@@ -1,27 +1,16 @@
 http:
   middlewares:
-    # cloudflare-headers:
-    #   headers:
-    #     customRequestHeaders:
-    #       Host: "timesheet-service.onrender.com"
-    #       User-Agent: "Traefik/3.0"
-    # cors-headers:
-    #   headers:
-    #     customResponseHeaders:
-    #       Access-Control-Allow-Origin: "*"
-    #       Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS"
-    #       Access-Control-Allow-Headers: "Content-Type,Authorization"
-    cookie-friendly-headers:
+    cloudflare-headers:
       headers:
         customRequestHeaders:
-          # Don't override Host header to preserve cookie domains
+          Host: "timesheet-service.onrender.com"
           User-Agent: "Traefik/3.0"
-          X-Forwarded-For: ""  # Traefik will populate this
-          X-Forwarded-Proto: "https"
+    cors-headers:
+      headers:
         customResponseHeaders:
-          Access-Control-Allow-Credentials: "true"
-          Access-Control-Expose-Headers: "Set-Cookie"
-          Vary: "Origin, Cookie, Authorization"
+          Access-Control-Allow-Origin: "*"
+          Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS"
+          Access-Control-Allow-Headers: "Content-Type,Authorization"
 
   routers:
     # Main application router
@@ -31,7 +20,8 @@ http:
         - web
       service: my-service
       middlewares:
-        - cookie-friendly-headers
+        - cloudflare-headers
+        - cors-headers
     
     # HTTPS router (if you need HTTPS)
     app-router-secure:
@@ -40,7 +30,8 @@ http:
         - websecure
       service: my-service
       middlewares:
-        - cookie-friendly-headers
+        - cloudflare-headers
+        - cors-headers
       tls: {}
 
   services:
@@ -49,7 +40,7 @@ http:
         servers:
           - url: "https://timesheet-service.onrender.com"
           - url: "https://timesheet-service-2.onrender.com"
-        passHostHeader: true  # Changed to false since you're modifying Host header
+        passHostHeader: false  # Changed to false since you're modifying Host header
         serversTransport: my-transport
 
   serversTransports:
