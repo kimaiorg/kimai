@@ -1,45 +1,27 @@
-# http:
-#   middlewares:
-#     cloudflare-headers:
-#       headers:
-#         customRequestHeaders:
-#           Host: "timesheet-service.onrender.com"
-#           User-Agent: "Traefik/3.0"  # Avoid Cloudflare bot detection
-#   routers:
-#     my-router:
-#       # rule: "Host(`timesheet-service-load-balancer.onrender.com`)"  # Replace with your Render domain
-#       rule: "Host(`localhost`) && PathPrefix(`/`)"  # Replace with your Render domain
-#       entryPoints:
-#         - web  # Use HTTPS
-#       service: my-service
-#       middlewares:
-#         - cloudflare-headers
-#       tls: {}  # Enable TLS for the router
-#   services:
-#     my-service:
-#       loadBalancer:
-#         servers:
-#           - url: "https://timesheet-service.onrender.com"
-#           - url: "https://timesheet-service-2.onrender.com"
-#         passHostHeader: true
-#         serversTransport: my-transport
-#   serversTransports:
-#     my-transport:
-#       insecureSkipVerify: true  # Required for Render’s self-signed certs
-
 http:
   middlewares:
-    cloudflare-headers:
+    # cloudflare-headers:
+    #   headers:
+    #     customRequestHeaders:
+    #       Host: "timesheet-service.onrender.com"
+    #       User-Agent: "Traefik/3.0"
+    # cors-headers:
+    #   headers:
+    #     customResponseHeaders:
+    #       Access-Control-Allow-Origin: "*"
+    #       Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS"
+    #       Access-Control-Allow-Headers: "Content-Type,Authorization"
+    cookie-friendly-headers:
       headers:
         customRequestHeaders:
-          Host: "timesheet-service.onrender.com"
+          # Don't override Host header to preserve cookie domains
           User-Agent: "Traefik/3.0"
-    cors-headers:
-      headers:
+          X-Forwarded-For: ""  # Traefik will populate this
+          X-Forwarded-Proto: "https"
         customResponseHeaders:
-          Access-Control-Allow-Origin: "*"
-          Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS"
-          Access-Control-Allow-Headers: "Content-Type,Authorization"
+          Access-Control-Allow-Credentials: "true"
+          Access-Control-Expose-Headers: "Set-Cookie"
+          Vary: "Origin, Cookie, Authorization"
 
   routers:
     # Main application router
@@ -49,8 +31,7 @@ http:
         - web
       service: my-service
       middlewares:
-        - cloudflare-headers
-        - cors-headers
+        - cookie-friendly-headers
     
     # HTTPS router (if you need HTTPS)
     app-router-secure:
@@ -59,8 +40,7 @@ http:
         - websecure
       service: my-service
       middlewares:
-        - cloudflare-headers
-        - cors-headers
+        - cookie-friendly-headers
       tls: {}
 
   services:
@@ -69,7 +49,7 @@ http:
         servers:
           - url: "https://timesheet-service.onrender.com"
           - url: "https://timesheet-service-2.onrender.com"
-        passHostHeader: false  # Changed to false since you're modifying Host header
+        passHostHeader: true  # Changed to false since you're modifying Host header
         serversTransport: my-transport
 
   serversTransports:
