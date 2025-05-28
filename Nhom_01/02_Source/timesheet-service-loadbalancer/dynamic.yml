@@ -1,41 +1,77 @@
+# http:
+#   middlewares:
+#     cloudflare-headers:
+#       headers:
+#         customRequestHeaders:
+#           Host: "timesheet-service.onrender.com"
+#           User-Agent: "Traefik/3.0"  # Avoid Cloudflare bot detection
+#   routers:
+#     my-router:
+#       # rule: "Host(`timesheet-service-load-balancer.onrender.com`)"  # Replace with your Render domain
+#       rule: "Host(`localhost`) && PathPrefix(`/`)"  # Replace with your Render domain
+#       entryPoints:
+#         - web  # Use HTTPS
+#       service: my-service
+#       middlewares:
+#         - cloudflare-headers
+#       tls: {}  # Enable TLS for the router
+#   services:
+#     my-service:
+#       loadBalancer:
+#         servers:
+#           - url: "https://timesheet-service.onrender.com"
+#           - url: "https://timesheet-service-2.onrender.com"
+#         passHostHeader: true
+#         serversTransport: my-transport
+#   serversTransports:
+#     my-transport:
+#       insecureSkipVerify: true  # Required for Render’s self-signed certs
+
 http:
   middlewares:
     cloudflare-headers:
       headers:
         customRequestHeaders:
-          User-Agent: "Traefik/3.0"  # Avoid Cloudflare bot detection
-    cors:
+          Host: "timesheet-service.onrender.com"
+          User-Agent: "Traefik/3.0"
+    cors-headers:
       headers:
-        accessControlAllowMethods:
-          - "*"
-        accessControlAllowOriginList:
-          - "*"
-        accessControlAllowHeaders:
-          - "*"
+        customResponseHeaders:
+          Access-Control-Allow-Origin: "*"
+          Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS"
+          Access-Control-Allow-Headers: "Content-Type,Authorization"
+
   routers:
-    my-router:
-      rule: "Host(`timesheet-service-load-balancer.onrender.com`)"  # Replace with your Render domain
+    # Main application router
+    app-router:
+      rule: "Host(`timesheet-service-load-balancer.onrender.com`)"  # Use your actual Render domain
       entryPoints:
-        - websecure  # Use HTTPS
+        - web
       service: my-service
       middlewares:
         - cloudflare-headers
-        - cors
-      tls: {}  # Enable TLS for the router
+        - cors-headers
+    
+    # HTTPS router (if you need HTTPS)
+    app-router-secure:
+      rule: "Host(`timesheet-service-load-balancer.onrender.com`)"
+      entryPoints:
+        - websecure
+      service: my-service
+      middlewares:
+        - cloudflare-headers
+        - cors-headers
+      tls: {}
+
   services:
     my-service:
       loadBalancer:
         servers:
           - url: "https://timesheet-service.onrender.com"
           - url: "https://timesheet-service-2.onrender.com"
-        passHostHeader: true
+        passHostHeader: false  # Changed to false since you're modifying Host header
         serversTransport: my-transport
-        healthCheck:
-          path: "/health"  # Replace with actual health check endpoint
-          interval: "10s"
-          timeout: "3s"
+
   serversTransports:
     my-transport:
-      insecureSkipVerify: true  # Required for Render’s self-signed certs
-      dialTimeout: 30s
-      responseHeaderTimeout: 30s
+      insecureSkipVerify: true

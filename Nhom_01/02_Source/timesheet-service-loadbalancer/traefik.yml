@@ -1,10 +1,29 @@
+# entryPoints:
+#   web:
+#     address: ":80"
+#   websecure:
+#     address: ":443"
+#     http:
+#       tls: {}  # Enable TLS for HTTPS
+
+# providers:
+#   file:
+#     filename: /etc/traefik/dynamic.yml
+#     watch: true
+
+# api:
+#   dashboard: true
+#   insecure: true  # Enable dashboard on port 8080 (for debugging)
+
+# log:
+#   level: DEBUG  # Enable debug logging for troubleshooting
+# accessLog: {}
+
 entryPoints:
   web:
     address: ":80"
   websecure:
     address: ":443"
-    http:
-      tls: {}  # Enable TLS for HTTPS
 
 providers:
   file:
@@ -13,8 +32,17 @@ providers:
 
 api:
   dashboard: true
-  insecure: true  # Enable dashboard on port 8080 (for debugging)
+  insecure: true
+
+# Certificate resolvers (if you want automatic HTTPS)
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: your-email@example.com
+#       storage: acme.json
+#       httpChallenge:
+#         entryPoint: web
 
 log:
-  level: DEBUG  # Enable debug logging for troubleshooting
+  level: DEBUG
 accessLog: {}
