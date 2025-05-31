@@ -242,9 +242,9 @@ function TimesheetUpdateRequestPage() {
           <table className="w-full border-collapse">
             <thead className="bg-gray-100 dark:bg-slate-900">
               <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Requester</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Task</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Start</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">End</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
                   Requested At
                 </th>
@@ -277,6 +277,9 @@ function TimesheetUpdateRequestPage() {
                       }}
                     >
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                        {timesheetUpdate.previous_data.user.name}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                         {timesheetUpdate.previous_data.task?.title}
                       </td>
 
@@ -284,12 +287,7 @@ function TimesheetUpdateRequestPage() {
                         {format(timesheetUpdate.previous_data.start_time, "dd/MM/yyyy HH:mm")}
                       </td>
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                        {timesheetUpdate.previous_data.end_time
-                          ? format(timesheetUpdate.previous_data.end_time, "dd/MM/yyyy HH:mm")
-                          : "N/A"}
-                      </td>
-                      <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                        {formatDistanceToNow(timesheetUpdate.created_at)}
+                        {formatDistanceToNow(timesheetUpdate.created_at, { addSuffix: true })}
                       </td>
                       <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
                         <Link href={`/request`}>{getTimesheetApprovalStatusBadge(timesheetUpdate.status)}</Link>

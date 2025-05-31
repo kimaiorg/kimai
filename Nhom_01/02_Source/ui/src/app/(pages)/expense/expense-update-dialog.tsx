@@ -97,9 +97,14 @@ export function ExpenseUpdateDialog({
   useEffect(() => {
     const fetchUsersAndActivities = async () => {
       try {
-        const [projects, categories] = await Promise.all([getAllProjects(), getAllCategories()]);
+        const [projects, activities, categories] = await Promise.all([
+          getAllProjects(1, 250),
+          getAllActivities(1, 260),
+          getAllCategories(1, 260)
+        ]);
         setProjectList(projects.data);
         setCategoryList(categories.data);
+        setActivityList(activities.data);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
@@ -117,14 +122,7 @@ export function ExpenseUpdateDialog({
 
     const fetchActivities = async () => {
       try {
-        const activities = await getAllActivities(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          selectedProjectId
-        );
+        const activities = await getAllActivities(1, 299, undefined, undefined, undefined, selectedProjectId);
         setActivityList(activities.data);
       } catch (error) {
         console.error("Error fetching activities:", error);

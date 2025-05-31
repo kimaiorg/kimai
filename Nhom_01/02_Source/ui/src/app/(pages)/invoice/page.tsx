@@ -2,12 +2,10 @@
 
 import { getAllActivities } from "@/api/activity.api";
 import { getAllCustomers } from "@/api/customer.api";
-import { filterInvoices, getAllInvoiceTemplates, saveInvoice } from "@/api/invoice.api";
+import { filterInvoices, saveInvoice } from "@/api/invoice.api";
 import { getAllProjects } from "@/api/project.api";
-import { getInvoiceTemplateFormatIcon } from "@/app/(pages)/invoice-template/page";
 import InvoiceActivityViewDialog from "@/app/(pages)/invoice/invoice-activity-view-dialog";
 import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
-import { periods } from "@/app/(pages)/invoice/period";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
@@ -24,13 +22,10 @@ import {
   FilterInvoiceRequestSchema,
   FilterInvoiceValidation,
   InvoiceHistoryRequestType,
-  InvoiceHistoryType,
-  InvoiceTemplateType
+  InvoiceHistoryResponseType
 } from "@/type_schema/invoice";
 import { ProjectType } from "@/type_schema/project";
 import { Role } from "@/type_schema/role";
-import { TaskType } from "@/type_schema/task";
-import { useUser } from "@auth0/nextjs-auth0/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, FileCheck, MoreHorizontal, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -40,17 +35,16 @@ import { toast } from "sonner";
 
 function InvoiceContent() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [noteInput, setNoteInput] = useState<string>("No note");
 
-  const [invoiceHistory, setInvoiceHistory] = useState<InvoiceHistoryType | null>(null);
+  const [invoiceHistory, setInvoiceHistory] = useState<InvoiceHistoryResponseType | null>(null);
 
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
   const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
-  const [invoiceTemplateList, setInvoiceTemplateList] = useState<InvoiceTemplateType[] | null>(null);
-  const [invoiceTemplateId, setInvoiceTemplateId] = useState<number>(1);
+  // const [invoiceTemplateList, setInvoiceTemplateList] = useState<InvoiceTemplateType[] | null>(null);
 
   const router = useRouter();
-  const { user: currentUser } = useUser();
 
   const activityOptions = (activityList || []).map((activity) => ({
     label: `${activity.name}`,
@@ -63,8 +57,8 @@ function InvoiceContent() {
     defaultValues: {
       from: "",
       to: "",
-      customer_id: "9",
-      project_id: "16",
+      customer_id: "95",
+      project_id: "",
       period: "",
       activities: []
     }
@@ -80,32 +74,10 @@ function InvoiceContent() {
         project_id: Number(project_id),
         activities: activities.map((activity) => Number(activity))
       };
-      const targetInvoice: InvoiceHistoryType = await filterInvoices(payload);
+      const targetInvoice: InvoiceHistoryResponseType = await filterInvoices(payload);
       console.log(targetInvoice);
-      // const exportableInvoices: InvoiceHistoryType = {
-      //   id: customerList.find((customer) => customer.id === payload.customer_id)!.id.toString(),
-      //   customer: customerList.find((customer) => customer.id === payload.customer_id)!,
-      //   project: (projectList || []).find((project) => project.id === payload.project_id)!,
-      //   fromDate: values.from,
-      //   toDate: values.to,
-      //   status: "NEW",
-      //   totalPrice: Math.round(Math.random() * 40000) + 5000,
-      //   taxRate: 10,
-      //   taxPrice: Math.round(Math.random() * 100),
-      //   finalPrice: Math.round(Math.random() * 40000) + 10000,
-      //   currency: "USD",
-      //   notes: "",
-      //   createdBy: currentUser!.sub!,
-      //   createdAt: new Date(2025, 4, 7).toISOString(),
-      //   template: invoiceTemplateList!.find((template) => template.id === invoiceTemplateId)!,
-      //   activities: (activityList || []).map((activity) => ({
-      //     ...activity,
-      //     tasks: fakeTaskData(),
-      //     totalPrice: Math.round(Math.random() * 10000) + 10000
-      //   }))
-      // };
       setInvoiceHistory(targetInvoice);
-      if (targetInvoice.hasOwnProperty("id")) {
+      if (targetInvoice.success) {
         toast("Success", {
           description: "Filter invoice successfully",
           duration: 2000,
@@ -132,10 +104,10 @@ function InvoiceContent() {
   const handleSaveInvoice = async () => {
     try {
       const payload: InvoiceHistoryRequestType = {
-        invoiceTempId: invoiceHistory!.invoiceId!,
-        currency: invoiceHistory!.currency,
-        notes: invoiceHistory!.notes,
-        templateId: Number(invoiceHistory!.template.id)
+        filteredInvoiceId: invoiceHistory!.filteredInvoiceId!,
+        userId: invoiceHistory!.data.customer.id.toString(),
+        comment: noteInput,
+        dueDays: 30
       };
       const result = await saveInvoice(payload);
       if (result == 201 || result == 200) {
@@ -163,7 +135,7 @@ function InvoiceContent() {
 
   const fetchCustomerData = async () => {
     try {
-      const customers = await getAllCustomers();
+      const customers = await getAllCustomers(1, 200);
       setCustomerList(customers.data);
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -172,14 +144,7 @@ function InvoiceContent() {
 
   const fetchProjectData = async (customerId: number) => {
     try {
-      const projects = await getAllProjects(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        customerId.toString()
-      );
+      const projects = await getAllProjects(1, 111, undefined, undefined, undefined, customerId.toString());
       setProjectList(projects.data);
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -187,7 +152,7 @@ function InvoiceContent() {
   };
   const fetchActivityData = async (projectId: string) => {
     try {
-      const activities = await getAllActivities(undefined, undefined, undefined, undefined, undefined, projectId);
+      const activities = await getAllActivities(1, 100, undefined, undefined, undefined, projectId);
       setActivityList(activities.data);
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -203,18 +168,18 @@ function InvoiceContent() {
     name: "project_id"
   });
 
-  const fetchInvoiceTemplates = async () => {
-    try {
-      const templates = await getAllInvoiceTemplates();
-      setInvoiceTemplateList(templates.data);
-    } catch (error) {
-      console.error("Error fetching templates:", error);
-    }
-  };
+  // const fetchInvoiceTemplates = async () => {
+  //   try {
+  //     const templates = await getAllInvoiceTemplates();
+  //     setInvoiceTemplateList(templates.data);
+  //   } catch (error) {
+  //     console.error("Error fetching templates:", error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchCustomerData();
-    fetchInvoiceTemplates();
+    // fetchInvoiceTemplates();
   }, []);
 
   useEffect(() => {
@@ -252,7 +217,7 @@ function InvoiceContent() {
                 control={filterInvoiceForm.control}
                 name="from"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem className="col-span-3">
                     <FormLabel>Start date</FormLabel>
                     <FormControl>
                       <DateTimePicker
@@ -264,43 +229,11 @@ function InvoiceContent() {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={filterInvoiceForm.control}
-                name="period"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>Period time</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      {...field}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full !mt-0 border border-gray-200">
-                          <SelectValue placeholder="Select a period" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="border border-gray-200">
-                        {periods.map((period, index) => (
-                          <SelectItem
-                            key={index}
-                            value={period.value}
-                          >
-                            {period.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={filterInvoiceForm.control}
                 name="to"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem className="col-span-3">
                     <FormLabel>End date</FormLabel>
                     <FormControl>
                       <DateTimePicker
@@ -446,7 +379,7 @@ function InvoiceContent() {
               </thead>
               <tbody>
                 {invoiceHistory &&
-                  invoiceHistory.activities.map((invoiceActivity, index) => (
+                  invoiceHistory.data.activities.map((invoiceActivity, index) => (
                     <Fragment key={index}>
                       <tr className={`border-t dark:border-slate-700 font-semibold text-md`}>
                         <td className="px-4 py-2 text-sm">{index + 1}</td>
@@ -504,30 +437,26 @@ function InvoiceContent() {
                             </div>
                           </td>
                           <td className="px-4 py-2 text-center">{task.quantity || "45"}</td>
-                          <td className="px-4 py-2 text-center">
-                            {currencyFormat(task.expense.cost, "USD") || "1235"}
-                          </td>
-                          <td className="text-center">
-                            {currencyFormat(Number(task.quantity) * Number(task.expense.cost), "USD")}
-                          </td>
+                          <td className="px-4 py-2 text-center">{currencyFormat(task.price, "USD") || "1235"}</td>
+                          <td className="text-center">{currencyFormat(Number(task.quantity) * task.price, "USD")}</td>
                           <td className="px-4 py-2 text-center"></td>
                         </tr>
                       ))}
                     </Fragment>
                   ))}
-                {invoiceHistory && invoiceHistory.activities && invoiceHistory.activities.length > 0 && (
+                {invoiceHistory && invoiceHistory.data.activities && invoiceHistory.data.activities.length > 0 && (
                   <tr className={`border-gray-200 border`}>
                     <td></td>
                     <td></td>
                     <td></td>
                     <td className="px-4 py-2 text-end text-lg">Total:</td>
                     <td className="px-4 py-2 text-center text-[#6e44ff] font-semibold text-lg">
-                      {currencyFormat(invoiceHistory!.totalPrice!, "USD")}
+                      {currencyFormat(invoiceHistory!.data.totalPrice!, "USD")}
                     </td>
                     <td></td>
                   </tr>
                 )}
-                {(!invoiceHistory || !invoiceHistory?.activities?.length) && (
+                {(!invoiceHistory || !invoiceHistory?.data.activities?.length) && (
                   <tr>
                     <td
                       colSpan={6}
@@ -541,9 +470,9 @@ function InvoiceContent() {
             </table>
           </div>
 
-          {invoiceHistory && invoiceHistory.activities && invoiceHistory.activities.length > 0 && (
+          {invoiceHistory && invoiceHistory.data.activities && invoiceHistory.data.activities.length > 0 && (
             <div className="pb-6 pt-1 space-y-4">
-              <div className="flex flex-col gap-2">
+              {/* <div className="flex flex-col gap-2">
                 <Label className="text-md font-semibold">Template:</Label>
                 {invoiceTemplateList && (
                   <Select
@@ -569,7 +498,7 @@ function InvoiceContent() {
                     </SelectContent>
                   </Select>
                 )}
-              </div>
+              </div> */}
               <div className="flex flex-col gap-2">
                 <Label
                   id="notes"
@@ -581,20 +510,15 @@ function InvoiceContent() {
                   id="notes"
                   className="w-full border border-gray-200 rounded-md p-2"
                   rows={2}
-                  value={invoiceHistory?.notes || ""}
+                  value={noteInput}
                   placeholder="Enter notes"
                   onChange={(e) => {
-                    if (invoiceHistory) {
-                      setInvoiceHistory({
-                        ...invoiceHistory,
-                        notes: e.target.value
-                      });
-                    }
+                    setNoteInput(e.target.value);
                   }}
                 />
               </div>
               <div className="flex justify-end gap-3 py-3">
-                <InvoicePreviewDialog invoice={invoiceHistory!}>
+                <InvoicePreviewDialog invoice={invoiceHistory!.data}>
                   <Button
                     variant="outline"
                     className="border border-gray-200 cursor-pointer text-[#6e44ff]"

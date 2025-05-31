@@ -24,7 +24,7 @@ export default function InvoicePreviewDialog({
           <DialogHeader>
             <DialogTitle>Preview</DialogTitle>
           </DialogHeader>
-          {invoice && invoice.templateId && invoice.templateId === 1 && <InvoicePDFPreview invoice={invoice} />}
+          {invoice && <InvoicePDFPreview invoice={invoice} />}
           {!invoice && (
             <div className="h-full flex items-center justify-center">
               <p className="text-center">No invoice found</p>

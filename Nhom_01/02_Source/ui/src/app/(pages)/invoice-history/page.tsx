@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useTranslation } from "@/lib/i18n";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { Pagination } from "@/type_schema/common";
+import { PaginationV2 } from "@/type_schema/common";
 import { InvoiceHistoryType } from "@/type_schema/invoice";
 import { Role } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
@@ -121,7 +121,7 @@ function InvoiceHistoryContent() {
   };
 
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
-  const [invoiceHistories, setInvoiceHistories] = useState<Pagination<InvoiceHistoryType> | null>(null);
+  const [invoiceHistories, setInvoiceHistories] = useState<PaginationV2<InvoiceHistoryType> | null>(null);
 
   // Load invoices when component mounts
   useEffect(() => {
@@ -240,13 +240,13 @@ function InvoiceHistoryContent() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {invoiceHistories && invoiceHistories.data.length > 0 ? (
-                invoiceHistories.data.map((invoice, index) => (
+              {invoiceHistories && invoiceHistories.items.length > 0 ? (
+                invoiceHistories.items.map((invoice, index) => (
                   <tr
                     key={index}
                     className="hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.createdAt}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.customer.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -328,9 +328,9 @@ function InvoiceHistoryContent() {
       {invoiceHistories && (
         <div className="mt-4">
           <PaginationWithLinks
-            page={invoiceHistories.metadata.page}
-            pageSize={invoiceHistories.metadata.limit}
-            totalCount={invoiceHistories.metadata.total}
+            page={invoiceHistories.page}
+            pageSize={invoiceHistories.limit}
+            totalCount={invoiceHistories.total}
             callback={goToPage}
           />
         </div>
@@ -392,7 +392,7 @@ const downloadInvoicePreviewPDF = (invoice: InvoiceHistoryType, filename?: strin
     const doc = generateInvoiceTemplatePDF(invoice);
 
     // Set filename
-    const defaultFilename = `Invoice-${invoice.id || "INV-2025-0001"}.pdf`;
+    const defaultFilename = `Invoice-${"INV-2025-0001"}.pdf`;
     const finalFilename = filename || defaultFilename;
 
     // Download PDF

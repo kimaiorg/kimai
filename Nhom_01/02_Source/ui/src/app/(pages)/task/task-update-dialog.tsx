@@ -97,7 +97,7 @@ export function TaskUpdateDialog({
   useEffect(() => {
     const fetchUsersAndActivities = async () => {
       try {
-        const [activities, expenses] = await Promise.all([getAllActivities(), getAllExpenses()]);
+        const [activities, expenses] = await Promise.all([getAllActivities(1, 200), getAllExpenses(1, 200)]);
         setActivityList(activities.data);
         setExpenseList(expenses.data);
       } catch (error) {

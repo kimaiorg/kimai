@@ -23,6 +23,14 @@ export type Pagination<T> = {
   data: T[];
 };
 
+export type PaginationV2<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
 // ================== Customer =====================
 // List of common currencies
 export const currencies = [

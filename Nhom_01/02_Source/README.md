@@ -107,9 +107,16 @@
   run.bat
   ```
 - After all services are running, the seed data to the database container by running the following command:
+  - Seed data for project service:
 
 ```
 docker-compose exec postgres_database_for_project_service psql -U postgres -d project -f /docker-entrypoint-initdb.d/init.sql
+```
+
+- Seed data for timesheet service:
+
+```
+docker-compose exec postgres_database_for_timesheet_service psql -U postgres -d timesheet -f /docker-entrypoint-initdb.d/init.sql
 ```
 
 ### Running UI

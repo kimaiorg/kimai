@@ -90,7 +90,7 @@ export function ExpenseCreateDialog({
   useEffect(() => {
     const fetchUsersAndActivities = async () => {
       try {
-        const [projects, categories] = await Promise.all([getAllProjects(), getAllCategories()]);
+        const [projects, categories] = await Promise.all([getAllProjects(1, 299), getAllCategories(1, 299)]);
         setProjectList(projects.data);
         setCategoryList(categories.data);
       } catch (error) {
@@ -110,14 +110,7 @@ export function ExpenseCreateDialog({
 
     const fetchActivities = async () => {
       try {
-        const activities = await getAllActivities(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          selectedProjectId
-        );
+        const activities = await getAllActivities(1, 299, undefined, undefined, undefined, selectedProjectId);
         setActivityList(activities.data);
       } catch (error) {
         console.error("Error fetching activities:", error);

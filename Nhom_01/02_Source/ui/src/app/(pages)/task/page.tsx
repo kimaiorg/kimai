@@ -45,6 +45,7 @@ function Task() {
   const { replace } = useRouter();
   const userList: UserType[] = useAppSelector((state) => state.userListState.users) as UserType[];
   const { user: currentUser } = useUser();
+
   const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
   const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
 

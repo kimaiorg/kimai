@@ -96,9 +96,9 @@ export function ActivityUpdateDialog({
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const projects = await getAllProjects();
+        const projects = await getAllProjects(1, 200);
         setProjectList(projects.data);
-        const teams = await getAllTeams();
+        const teams = await getAllTeams(1, 100);
         setTeamList(teams.data);
       } catch (error) {
         console.error("Error fetching projects:", error);

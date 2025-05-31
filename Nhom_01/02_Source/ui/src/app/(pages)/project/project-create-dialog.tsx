@@ -106,11 +106,11 @@ export function ProjectCreateDialog({
 
   useEffect(() => {
     const fetchCustomers = async () => {
-      const result = await getAllCustomers();
+      const result = await getAllCustomers(1, 200);
       setCustomerList(result.data);
     };
     const fetchAllTeams = async () => {
-      const result = await getAllTeams();
+      const result = await getAllTeams(1, 100);
       const teams: TeamType[] = result.data.map((simpleTeam) => {
         const { users, lead, ...data } = simpleTeam;
         const userMembers = users.map((userId) => userList.find((user) => user.user_id == userId)) as UserType[];

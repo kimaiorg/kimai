@@ -1,4 +1,5 @@
 import { ActivityType } from "@/type_schema/activity";
+import { PaginationV2 } from "@/type_schema/common";
 import { CustomerType } from "@/type_schema/customer";
 import { ProjectType } from "@/type_schema/project";
 import { TaskType } from "@/type_schema/task";
@@ -7,11 +8,10 @@ import { z } from "zod";
 // Invoice history item type
 export type InvoiceHistoryItemType = Omit<ActivityType, "tasks"> & {
   totalPrice: number; // Total price of tasks in the activity
-  tasks: TaskType[]; // Tasks in the activity
+  tasks: (TaskType & { price: number })[]; // Tasks in the activity
 };
 
 export type InvoiceHistoryType = {
-  invoiceId: number;
   customer: CustomerType;
   project: ProjectType;
   fromDate: string;
@@ -27,6 +27,17 @@ export type InvoiceHistoryType = {
   createdAt: string;
   template: InvoiceTemplateType; // ID of the invoice template
   activities: InvoiceHistoryItemType[];
+};
+
+export type InvoiceHistoryResponseType = {
+  data: InvoiceHistoryType;
+  filteredInvoiceId: number;
+  success: boolean;
+};
+
+export type InvoiceHistoryDataResponseType = {
+  data: PaginationV2<InvoiceHistoryType>;
+  success: boolean;
 };
 
 // Invoice status options
@@ -120,10 +131,10 @@ export type UpdateInvoiceRequestDTO = {
 };
 
 export type InvoiceHistoryRequestType = {
-  invoiceTempId: number;
-  currency: string; // Currency of the invoice: USD, VND, etc.
-  notes?: string; // Additional notes
-  templateId: number; // ID of the invoice template
+  filteredInvoiceId: number;
+  userId: string; // Currency of the invoice: USD, VND, etc.
+  comment?: string; // Additional notes
+  dueDays: number; // ID of the invoice template
 };
 // export type InvoiceHistoryRequestType = {
 //   customerId: number;

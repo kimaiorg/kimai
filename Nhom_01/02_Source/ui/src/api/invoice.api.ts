@@ -1,15 +1,17 @@
 import { getManagementAccessToken } from "@/api/auth.api";
-import { Pagination } from "@/type_schema/common";
+import { invoiceAxios } from "@/api/axios";
+import { Pagination, PaginationV2 } from "@/type_schema/common";
 import {
   FilterInvoiceRequestDTO,
+  InvoiceHistoryDataResponseType,
   InvoiceHistoryRequestType,
+  InvoiceHistoryResponseType,
   InvoiceHistoryType,
   InvoiceTemplateType,
   UpdateInvoiceRequestDTO
 } from "@/type_schema/invoice";
-import { invoiceAxios } from "@/api/axios";
 
-export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<InvoiceHistoryType> {
+export async function filterInvoices(request: FilterInvoiceRequestDTO): Promise<InvoiceHistoryResponseType> {
   const token = await getManagementAccessToken();
 
   try {
@@ -49,7 +51,7 @@ export async function getAllInvoiceHistories(
   toDate?: string,
   customerId?: string,
   status?: string
-): Promise<Pagination<InvoiceHistoryType>> {
+): Promise<PaginationV2<InvoiceHistoryType>> {
   const token = await getManagementAccessToken();
 
   const params = new URLSearchParams();
@@ -65,41 +67,21 @@ export async function getAllInvoiceHistories(
   if (toDate) params.append("to_date", toDate);
   if (customerId) params.append("customer_id", customerId);
   if (status) params.append("status", status);
-
-  return {
-    metadata: {
-      total: 4,
-      page: 1,
-      limit: 10,
-      totalPages: 1
-    },
-    data: JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[]
-  };
-
-  const response = await invoiceAxios.get<Pagination<InvoiceHistoryType>>(`/api/v1/invoices?${params.toString()}`, {
+  const response = await invoiceAxios.get<InvoiceHistoryDataResponseType>(`/api/v1/invoices?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"
     }
   });
 
-  const data = response.data;
+  console.log(response.data);
+  const data = response.data.data;
   return data;
 }
 
 export async function updateInvoiceStatus(request: UpdateInvoiceRequestDTO, invoiceId: string): Promise<any> {
   const token = await getManagementAccessToken();
 
-  // const invoiceHistories = JSON.parse(localStorage.getItem("invoiceHistoryList") || "[]") as InvoiceHistoryType[];
-  // const invoiceHistory = invoiceHistories.findIndex((item) => item.id === invoiceId);
-  // if (invoiceHistory !== -1) {
-  //   invoiceHistories[invoiceHistory].status = request.status;
-  //   invoiceHistories[invoiceHistory].dueDate = request.paymentDate;
-  //   invoiceHistories[invoiceHistory].notes = request.description;
-  // }
-  // localStorage.setItem("invoiceHistoryList", JSON.stringify(invoiceHistories));
-
-  // return 200;
   try {
     const response = await invoiceAxios.post(`/api/v1/invoices/generate`, request, {
       headers: {

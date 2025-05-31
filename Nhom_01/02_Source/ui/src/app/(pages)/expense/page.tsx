@@ -43,10 +43,10 @@ function ExpensePage() {
     sortOrder?: string
   ) => {
     try {
-      const [projects] = await Promise.all([getAllProjects()]);
+      const [projects] = await Promise.all([getAllProjects(1, 200)]);
       const result = await getAllExpenses(page, limit, keyword, sortBy, sortOrder);
       const { data, metadata } = result;
-      console.log(projects);
+
       const expenses = data.map((expense) => {
         const project = projects.data.find((project) => project.id === expense.project_id)!;
         return {
@@ -54,7 +54,7 @@ function ExpensePage() {
           project: project
         };
       });
-      console.log(expenses);
+
       setExpenseList({
         metadata: metadata,
         data: expenses

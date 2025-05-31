@@ -132,15 +132,15 @@ export const timesheetNavMain = [
         icon: Menu,
         isActive: false,
         allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
-      },
-      {
-        title: "Invoice template",
-        translationKey: "sidebar.invoiceTemplate",
-        url: "/invoice-template",
-        icon: FileSpreadsheet,
-        isActive: false,
-        allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
       }
+      // {
+      //   title: "Invoice template",
+      //   translationKey: "sidebar.invoiceTemplate",
+      //   url: "/invoice-template",
+      //   icon: FileSpreadsheet,
+      //   isActive: false,
+      //   allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
+      // }
     ]
   },
   {
