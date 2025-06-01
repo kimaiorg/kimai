@@ -358,28 +358,37 @@ export class InvoiceController {
   @Put(':id')
   @ApiOperation({ summary: 'Update an invoice' })
   @ApiParam({ name: 'id', description: 'Invoice ID', type: 'number' })
-  @ApiBody({ type: UpdateInvoiceSwagger, required: false })
+  @ApiBody({ type: UpdateInvoiceSwagger })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The invoice has been successfully updated.',
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request.' })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Invoice not found.',
   })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request.' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: 'Unauthorized.',
   })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden.' })
   @Permissions(['update:invoices'])
-  @UsePipes(new ZodValidationPipe(updateInvoiceSchema))
   async updateInvoice(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateInvoiceDto,
+    @Body(new ZodValidationPipe(updateInvoiceSchema)) dto: UpdateInvoiceDto,
   ): Promise<any> {
-    return await this.invoiceService.updateInvoice(id, dto);
+    try {
+      return await this.invoiceService.updateInvoice(id, dto);
+    } catch (error) {
+      console.error(`Error updating invoice ${id}:`, error);
+      return {
+        success: false,
+        message: error.message || 'Failed to update invoice',
+        error: error.stack,
+        statusCode: 500
+      };
+    }
   }
 
   @Delete(':id')

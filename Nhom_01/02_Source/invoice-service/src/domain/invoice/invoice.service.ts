@@ -414,7 +414,17 @@ export class InvoiceService {
         };
       }
       
-      const customerInfo = await this.getCustomerInfo(invoice.customerId);
+      // Get customer info from the API - no fallback to mock data
+      let customerInfo;
+      try {
+        customerInfo = await this.getCustomerInfo(invoice.customerId);
+      } catch (error) {
+        console.error(`Failed to get customer info for invoice ${id}: ${error.message}`);
+        return {
+          success: false,
+          message: `Failed to retrieve customer information: ${error.message}`,
+        };
+      }
       
       return {
         success: true,
@@ -426,7 +436,7 @@ export class InvoiceService {
           status: invoice.status,
           totalPrice: invoice.total.toString(),
           currency: invoice.currency,
-          notes: invoice.comment || '',
+          comment: invoice.comment || '',
           createdBy: invoice.userId.toString(),
           createdAt: invoice.createdAt.toISOString(),
           paymentDate: invoice.paymentDate ? invoice.paymentDate.toISOString() : undefined,
@@ -440,10 +450,11 @@ export class InvoiceService {
         }
       };
     } catch (error) {
-      console.error('Failed to get invoice:', error);
+      console.error(`Failed to get invoice ${id}: ${error.message}`);
       return {
         success: false,
         message: 'An error occurred while getting invoice',
+        error: error.message,
       };
     }
   }
@@ -542,6 +553,13 @@ export class InvoiceService {
 
   async updateInvoice(id: number, dto: UpdateInvoiceDto): Promise<any> {
     try {
+      if (!id || isNaN(id)) {
+        return {
+          success: false,
+          message: 'Invalid invoice ID',
+        };
+      }
+
       // Kiểm tra xem invoice có tồn tại không
       const existingInvoice: any = await this.invoiceRepository.findById(id);
       if (!existingInvoice) {
@@ -551,12 +569,28 @@ export class InvoiceService {
         };
       }
       
+      // Prepare update data - only include fields that are provided
+      const updateData: any = {};
+      
+      if (dto.status !== undefined) {
+        updateData.status = dto.status;
+      }
+      
+      if (dto.comment !== undefined) {
+        updateData.comment = dto.comment;
+      }
+      
+      // If status is PAID and no payment date is provided, set it to current date
+      if (dto.status === 'PAID') {
+        updateData.paymentDate = dto.paymentDate || new Date();
+      } else if (dto.paymentDate) {
+        updateData.paymentDate = dto.paymentDate;
+      }
+      
+      console.log(`Updating invoice ${id} with data:`, updateData);
+      
       // Cập nhật invoice
-      const updatedInvoice: any = await this.invoiceRepository.update(id, {
-        status: dto.status,
-        comment: dto.comment,
-        paymentDate: dto.paymentDate
-      });
+      const updatedInvoice: any = await this.invoiceRepository.update(id, updateData);
       
       // Kiểm tra nếu updatedInvoice là null
       if (!updatedInvoice) {
@@ -566,38 +600,18 @@ export class InvoiceService {
         };
       }
       
-  
-      // Get customer info - if this fails, the error will be propagated
-      const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
+      // Get customer info from the API - no fallback to mock data
+      
       
       return {
         success: true,
-        data: {
-          id: updatedInvoice.id.toString(),
-          customer: customerInfo,
-          date: updatedInvoice.createdAt.toISOString(),
-          dueDate: updatedInvoice.dueDate.toISOString(),
-          status: updatedInvoice.status,
-          totalPrice: updatedInvoice.total.toString(),
-          currency: updatedInvoice.currency,
-          notes: updatedInvoice.comment || '',
-          createdBy: updatedInvoice.userId.toString(),
-          createdAt: updatedInvoice.createdAt.toISOString(),
-          paymentDate: updatedInvoice.paymentDate ? updatedInvoice.paymentDate.toISOString() : undefined,
-          items: (updatedInvoice.items || []).map((item: any) => ({
-            description: item.description,
-            quantity: Number(item.amount),
-            unitPrice: Number(item.rate),
-            taxRate: 10, // Mặc định 10%
-            date: item.begin.toISOString(),
-          })),
-        }
       };
     } catch (error) {
-      console.error('Failed to update invoice:', error);
+      console.error(`Failed to update invoice ${id}: ${error.message}`);
       return {
         success: false,
         message: 'An error occurred while updating invoice',
+        error: error.message,
       };
     }
   }
