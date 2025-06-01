@@ -477,19 +477,34 @@ export class InvoiceController {
   @Permissions(['create:invoices'])
   async createInvoiceFromFilter(@Body() body: any): Promise<any> {
     try {
+      console.log('[INVOICE_DEBUG] Creating invoice from filter with data:', JSON.stringify(body, null, 2));
+      
+      // Validate the incoming data
       const validatedData = createInvoiceFromFilterSchema.parse(body);
-      return await this.invoiceService.createInvoiceFromFilter(validatedData);
+      console.log('[INVOICE_DEBUG] Validated data:', JSON.stringify(validatedData, null, 2));
+      
+      // Call the service to create the invoice
+      const result = await this.invoiceService.createInvoiceFromFilter(validatedData);
+      console.log('[INVOICE_DEBUG] Service result:', JSON.stringify(result, null, 2));
+      
+      return result;
     } catch (error) {
+      console.error('[INVOICE_DEBUG] Error creating invoice from filter:', error);
+      
       if (error instanceof z.ZodError) {
         return {
           success: false,
-          message: 'Validation error',
-          errors: error.errors,
+          message: 'Validation failed',
+          error: JSON.stringify(error.errors),
+          statusCode: 400
         };
       }
+      
       return {
         success: false,
-        message: 'Failed to create invoice from filter',
+        message: error.message || 'Failed to create invoice from filter',
+        error: error.stack,
+        statusCode: 500
       };
     }
   }

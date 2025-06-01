@@ -11,6 +11,12 @@ export const createInvoiceFromFilterSchema = z.object({
   comment: z.string().optional(),
   timesheetIds: z.array(z.number()).optional().default([]),
   
+  // These fields are extracted from the filtered invoice, so they're optional in the request
+  customerId: z.number().optional(),
+  total: z.number().optional(),
+  tax: z.number().optional(),
+  subtotal: z.number().optional(),
+  
   // Legacy fields - kept for backward compatibility
   customer_id: z.number().optional(),
   project_id: z.number().optional(),

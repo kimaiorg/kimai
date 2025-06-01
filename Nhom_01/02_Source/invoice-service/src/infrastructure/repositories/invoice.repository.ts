@@ -12,6 +12,17 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: any): Promise<Invoice> {
+    // Check if we have metadata to store
+    let comment = data.comment || '';
+    
+    // If we have metadata, append it to the comment field in a way that we can extract it later
+    if (data.metadata) {
+      console.log('[INVOICE_REPOSITORY] Adding metadata to comment field');
+      // Add a special marker to identify this as containing metadata
+      comment = `${comment}\n<!--METADATA:${data.metadata}-->`;
+    }
+    
+    // Create the invoice with all fields
     const result = await this.prisma.invoice.create({
       data: {
         invoiceNumber: data.invoiceNumber!,
@@ -23,7 +34,7 @@ export class InvoiceRepository implements InvoiceRepositoryInterface {
         currency: data.currency || 'USD',
         vat: data.vat || 0,
         status: 'NEW',
-        comment: data.comment || null,
+        comment: comment, // Use the comment with metadata if available
         dueDays: data.dueDays || 14,
         dueDate: data.dueDate!,
         timesheetIds: data.timesheetIds || [],

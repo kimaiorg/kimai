@@ -18,10 +18,34 @@ import { ProjectType } from '@/type_schema/project';
 import { TaskType } from '@/type_schema/task';
 import { InvoiceHistoryType, InvoiceHistoryItemType, InvoiceTemplateType } from '@/type_schema/invoice';
 
+// Define a type for customer information
+interface CustomerInfo {
+  id: number;
+  name: string;
+  company?: string;
+  address?: string;
+  comment?: string;
+  vatId?: string;
+  number?: string;
+  country?: string;
+  currency?: string;
+  phone?: string;
+  fax?: string;
+  mobile?: string;
+  email?: string;
+  homepage?: string;
+  timezone?: string;
+  color?: string;
+  [key: string]: any; // Allow for additional properties
+}
+
 @Injectable()
 export class InvoiceService {
   private readonly timesheetServiceUrl: string;
   private readonly projectServiceUrl: string;
+  private readonly logger = new Logger(InvoiceService.name);
+  private readonly invoiceNumberFormat: string;
+  private customerCache: Map<number, { data: CustomerInfo; timestamp: number }> = new Map();
 
   constructor(
     private readonly invoiceRepository: InvoiceRepository,
@@ -31,42 +55,69 @@ export class InvoiceService {
   ) {
 
     const env = this.configService.get<string>('NODE_ENV') || 'development';
+    console.log(`[INVOICE_SERVICE] Current environment: ${env}`);
   
+    // Define default URLs for different environments
     const defaultUrls = {
       production: {
         timesheet: 'https://timesheet-service.onrender.com',
         project: 'https://project-service-6067.onrender.com'
       },
       development: {
+        // Update default development URLs to match your local setup
         timesheet: 'http://localhost:3334',
         project: 'http://localhost:3333'
       }
     };
     
-
-    if (env === 'production') {
+    console.log(`[INVOICE_SERVICE] Default URLs for ${env}:`, JSON.stringify(defaultUrls[env]));
+    
+    // First check for generic service URLs that override environment-specific ones
+    const timesheetUrl = this.configService.get<string>('TIMESHEET_SERVICE_URL');
+    const projectUrl = this.configService.get<string>('PROJECT_SERVICE_URL');
+    
+    console.log(`[INVOICE_SERVICE] Environment variables:`);
+    console.log(`  - TIMESHEET_SERVICE_URL: ${timesheetUrl || 'not set'}`);
+    console.log(`  - PROJECT_SERVICE_URL: ${projectUrl || 'not set'}`);
+    console.log(`  - TIMESHEET_SERVICE_URL_${env.toUpperCase()}: ${this.configService.get<string>(`TIMESHEET_SERVICE_URL_${env.toUpperCase()}`) || 'not set'}`);
+    console.log(`  - PROJECT_SERVICE_URL_${env.toUpperCase()}: ${this.configService.get<string>(`PROJECT_SERVICE_URL_${env.toUpperCase()}`) || 'not set'}`);
+    
+    if (timesheetUrl) {
+      this.timesheetServiceUrl = timesheetUrl;
+      console.log(`[INVOICE_SERVICE] Using TIMESHEET_SERVICE_URL override: ${this.timesheetServiceUrl}`);
+    } else if (env === 'production') {
       const timesheetUrlProd = this.configService.get<string>('TIMESHEET_SERVICE_URL_PROD');
       this.timesheetServiceUrl = timesheetUrlProd || defaultUrls.production.timesheet;
-      
-      const projectUrlProd = this.configService.get<string>('PROJECT_SERVICE_URL_PROD');
-      this.projectServiceUrl = projectUrlProd || defaultUrls.production.project;
+      console.log(`[INVOICE_SERVICE] Using production timesheet URL: ${this.timesheetServiceUrl}`);
     } else {
       const timesheetUrlDev = this.configService.get<string>('TIMESHEET_SERVICE_URL_DEV');
       this.timesheetServiceUrl = timesheetUrlDev || defaultUrls.development.timesheet;
-      
-      const projectUrlDev = this.configService.get<string>('PROJECT_SERVICE_URL_DEV');
-      this.projectServiceUrl = projectUrlDev || defaultUrls.development.project;
+      console.log(`[INVOICE_SERVICE] Using development timesheet URL: ${this.timesheetServiceUrl}`);
     }
     
-    const timesheetUrl = this.configService.get<string>('TIMESHEET_SERVICE_URL');
-    if (timesheetUrl) {
-      this.timesheetServiceUrl = timesheetUrl;
-    }
-    
-    const projectUrl = this.configService.get<string>('PROJECT_SERVICE_URL');
     if (projectUrl) {
       this.projectServiceUrl = projectUrl;
+      console.log(`[INVOICE_SERVICE] Using PROJECT_SERVICE_URL override: ${this.projectServiceUrl}`);
+    } else if (env === 'production') {
+      const projectUrlProd = this.configService.get<string>('PROJECT_SERVICE_URL_PROD');
+      this.projectServiceUrl = projectUrlProd || defaultUrls.production.project;
+      console.log(`[INVOICE_SERVICE] Using production project URL: ${this.projectServiceUrl}`);
+    } else {
+      const projectUrlDev = this.configService.get<string>('PROJECT_SERVICE_URL_DEV');
+      this.projectServiceUrl = projectUrlDev || defaultUrls.development.project;
+      console.log(`[INVOICE_SERVICE] Using development project URL: ${this.projectServiceUrl}`);
     }
+    
+    // Verify URLs are set
+    if (!this.timesheetServiceUrl) {
+      console.error(`[INVOICE_SERVICE] WARNING: Timesheet service URL is not set!`);
+    }
+    
+    if (!this.projectServiceUrl) {
+      console.error(`[INVOICE_SERVICE] WARNING: Project service URL is not set!`);
+    }
+    
+    // Service URLs are already set above
     
     console.log(`[${env}] Using Timesheet Service URL: ${this.timesheetServiceUrl}`);
     console.log(`[${env}] Using Project Service URL: ${this.projectServiceUrl}`);
@@ -93,24 +144,226 @@ export class InvoiceService {
     }
   }
 
+  /**
+   * Extract metadata from comment field if it exists
+   */
+  private extractMetadataFromComment(comment: string): any {
+    if (!comment) return null;
+    
+    // Look for the metadata marker
+    const metadataMatch = comment.match(/<!--METADATA:(.+?)-->/s);
+    if (metadataMatch && metadataMatch[1]) {
+      try {
+        // Parse the JSON string back to an object
+        return JSON.parse(metadataMatch[1]);
+      } catch (error) {
+        console.error('[INVOICE_SERVICE] Error parsing metadata from comment:', error);
+        return null;
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Extract user comment without metadata
+   */
+  private extractUserComment(comment: string): string {
+    if (!comment) return '';
+    
+    // Remove the metadata part if it exists
+    return comment.replace(/\n?<!--METADATA:.+?-->/s, '');
+  }
+
   async getInvoices(params: ListInvoiceDto): Promise<any> {
     try {
-      // Tạo query params cho repository - ListInvoiceDto đã được transform
-      // nên đã có đầy đủ các trường cần thiết: page, limit, sortBy, sortOrder, filters
-      const result = await this.invoiceRepository.findAll(params);
+      console.log('[INVOICE_SERVICE] Getting invoices with params:', JSON.stringify(params, null, 2));
       
-      // Chuyển đổi dữ liệu để phù hợp với cấu trúc của frontend
+      // Get invoices from repository
+      const result = await this.invoiceRepository.findAll(params);
+      console.log(`[INVOICE_SERVICE] Found ${result.items.length} invoices`);
+      
+      // Transform data to match frontend structure
       const invoices = await Promise.all(result.items.map(async (invoice: any) => {
-        const customerInfo = await this.getCustomerInfo(invoice.customerId);
+        console.log(`[INVOICE_SERVICE] Processing invoice ${invoice.id} with filteredInvoiceId: ${invoice.filteredInvoiceId || 'none'}`);
+        console.log(`[INVOICE_SERVICE] Invoice comment: ${invoice.comment ? 'Present' : 'None'}`);
+        
+        // Try to extract metadata from comment field first
+        const metadata = this.extractMetadataFromComment(invoice.comment);
+        console.log(`[INVOICE_SERVICE] Metadata extraction result: ${metadata ? 'Found' : 'Not found'}`);
+        
+        let customerInfo: CustomerInfo | null = null;
+        let customerSource = 'unknown';
+        
+        // Try multiple sources for customer data in order of preference
+        // 1. Metadata in comment
+        if (metadata && metadata.customerData) {
+          console.log(`[INVOICE_SERVICE] Using customer data from invoice metadata for invoice ${invoice.id}`);
+          customerInfo = metadata.customerData;
+          customerSource = 'metadata';
+          console.log(`[INVOICE_SERVICE] Customer from metadata: ${customerInfo?.name || 'Unknown name'}`);
+        }
+        // 2. Filtered invoice
+        else if (invoice.filteredInvoiceId) {
+          try {
+            console.log(`[INVOICE_SERVICE] Fetching filtered invoice ${invoice.filteredInvoiceId}`);
+            const filteredInvoice = await this.filteredInvoiceRepository.findById(invoice.filteredInvoiceId);
+            console.log(`[INVOICE_SERVICE] Filtered invoice found: ${filteredInvoice ? 'Yes' : 'No'}`);
+            
+            if (filteredInvoice) {
+              console.log(`[INVOICE_SERVICE] Filtered invoice response data: ${filteredInvoice.responseData ? 'Present' : 'Missing'}`);
+              console.log(`[INVOICE_SERVICE] Full filtered invoice data:`, JSON.stringify(filteredInvoice, null, 2));
+              
+              // Improved extraction of customer data from filtered invoice
+              if (filteredInvoice.responseData) {
+                // Try to extract customer from different possible locations in the response
+                let customerFromResponse: any = null;
+                
+                console.log(`[INVOICE_SERVICE] Examining filtered invoice response data structure:`, JSON.stringify(filteredInvoice.responseData, null, 2));
+                
+                if (filteredInvoice.responseData.customer) {
+                  customerFromResponse = filteredInvoice.responseData.customer;
+                  console.log(`[INVOICE_SERVICE] Found customer directly in responseData.customer`);
+                } else if (filteredInvoice.responseData.data && filteredInvoice.responseData.data.customer) {
+                  customerFromResponse = filteredInvoice.responseData.data.customer;
+                  console.log(`[INVOICE_SERVICE] Found customer in responseData.data.customer`);
+                } else if (Array.isArray(filteredInvoice.responseData.activities)) {
+                  // Try to extract from first activity if available
+                  const firstActivity = filteredInvoice.responseData.activities[0];
+                  if (firstActivity && firstActivity.customer) {
+                    customerFromResponse = firstActivity.customer;
+                    console.log(`[INVOICE_SERVICE] Found customer in first activity`);
+                  }
+                }
+                
+                if (customerFromResponse) {
+                  console.log(`[INVOICE_SERVICE] Customer found in filtered invoice:`, typeof customerFromResponse, 
+                    customerFromResponse.id ? `ID: ${customerFromResponse.id}` : 'No ID', 
+                    customerFromResponse.name ? `Name: ${customerFromResponse.name}` : 'No name');
+                  
+                  // Ensure customerFromResponse has the required fields for CustomerInfo
+                  const validCustomerInfo: CustomerInfo = {
+                    id: customerFromResponse.id || invoice.customerId,
+                    name: customerFromResponse.name || `Customer ${invoice.customerId}`,
+                    company: customerFromResponse.company || '',
+                    address: customerFromResponse.address || '',
+                    comment: customerFromResponse.comment || '',
+                    vatId: customerFromResponse.vatId || '',
+                    number: customerFromResponse.number || '',
+                    country: customerFromResponse.country || '',
+                    currency: customerFromResponse.currency || 'USD',
+                    phone: customerFromResponse.phone || '',
+                    fax: customerFromResponse.fax || '',
+                    mobile: customerFromResponse.mobile || '',
+                    email: customerFromResponse.email || '',
+                    homepage: customerFromResponse.homepage || '',
+                    timezone: customerFromResponse.timezone || 'UTC',
+                    color: customerFromResponse.color || '#000000',
+                  };
+                  
+                  customerInfo = validCustomerInfo;
+                  customerSource = 'filtered_invoice';
+                  
+                  // Store this in the cache for future use
+                  await this.storeCustomerData(invoice.customerId, customerInfo);
+                  console.log(`[INVOICE_SERVICE] Stored customer data in cache for ID ${invoice.customerId}`);
+                } else {
+                  console.log(`[INVOICE_SERVICE] No customer data found in any expected location in filtered invoice response`);
+                }
+              } else {
+                console.log(`[INVOICE_SERVICE] No response data in filtered invoice`);
+              }
+            }
+            
+            // If we still don't have customer info, try cache
+            if (!customerInfo) {
+              const cachedCustomer = this.customerCache.get(invoice.customerId);
+              if (cachedCustomer) {
+                console.log(`[INVOICE_SERVICE] Using cached customer data for ID ${invoice.customerId}`);
+                customerInfo = cachedCustomer.data;
+                customerSource = 'cache';
+              }
+            }
+          } catch (error) {
+            console.error(`[INVOICE_SERVICE] Error getting filtered invoice ${invoice.filteredInvoiceId}:`, error);
+          }
+        }
+        
+        // 3. Cache
+        if (!customerInfo) {
+          const cachedCustomer = this.customerCache.get(invoice.customerId);
+          if (cachedCustomer) {
+            console.log(`[INVOICE_SERVICE] Using cached customer data for ID ${invoice.customerId}`);
+            customerInfo = cachedCustomer.data;
+            customerSource = 'cache';
+          }
+        }
+        
+        // 4. API call as last resort
+        if (!customerInfo) {
+          console.log(`[INVOICE_SERVICE] Fetching customer from API for ID ${invoice.customerId}`);
+          try {
+            customerInfo = await this.getCustomerInfo(invoice.customerId);
+            customerSource = 'api';
+          } catch (error) {
+            console.error(`[INVOICE_SERVICE] Error fetching customer from API: ${error.message}`);
+            // Throw error since we can't proceed without customer data
+            throw new Error(`Failed to get customer data for invoice ${invoice.id}: ${error.message}`);
+          }
+        }
+        
+        // Log the final customer info source
+        console.log(`[INVOICE_SERVICE] Final customer source for invoice ${invoice.id}: ${customerSource}`);
+        console.log(`[INVOICE_SERVICE] Using customer: ${customerInfo?.name || 'Unknown'} (ID: ${customerInfo?.id || invoice.customerId})`);
+        
+        // For existing invoices that don't have proper customer data, let's update them
+        if (customerSource === 'default' && invoice.filteredInvoiceId) {
+          console.log(`[INVOICE_SERVICE] Scheduling background update of customer data for invoice ${invoice.id}`);
+          // We'll do this asynchronously to not block the current request
+          setTimeout(async () => {
+            try {
+              // Try to get better customer data and update the invoice
+              const filteredInvoice = await this.filteredInvoiceRepository.findById(invoice.filteredInvoiceId);
+              if (filteredInvoice?.responseData?.customer) {
+                const betterCustomerInfo = filteredInvoice.responseData.customer;
+                // Store in cache for future use
+                await this.storeCustomerData(invoice.customerId, betterCustomerInfo);
+                console.log(`[INVOICE_SERVICE] Updated cache with better customer data for invoice ${invoice.id}`);
+              }
+            } catch (error) {
+              console.error(`[INVOICE_SERVICE] Error in background customer data update:`, error);
+            }
+          }, 0);
+        }
+        
+        // Extract user comment without metadata
+        const userComment = this.extractUserComment(invoice.comment || '');
+        
+        // Customer info must be available at this point
+        if (!customerInfo) {
+          throw new Error(`No customer information available for invoice ${invoice.id}`);
+        }
+        const safeCustomerInfo = customerInfo;
         
         return {
           id: invoice.id.toString(),
           invoiceNumber: invoice.invoiceNumber || `INV-${invoice.id}`,
           customer: {
-            id: customerInfo.id,
-            name: customerInfo.name,
-            company: customerInfo.company,
-            address: customerInfo.address
+            id: safeCustomerInfo.id || invoice.customerId,
+            name: safeCustomerInfo.name || `Customer ${invoice.customerId}`,
+            company: safeCustomerInfo.company || '',
+            address: safeCustomerInfo.address || '',
+            comment: safeCustomerInfo.comment || '',
+            vatId: safeCustomerInfo.vatId || '',
+            number: safeCustomerInfo.number || '',
+            country: safeCustomerInfo.country || '',
+            currency: safeCustomerInfo.currency || 'USD',
+            phone: safeCustomerInfo.phone || '',
+            fax: safeCustomerInfo.fax || '',
+            mobile: safeCustomerInfo.mobile || '',
+            email: safeCustomerInfo.email || '',
+            homepage: safeCustomerInfo.homepage || '',
+            timezone: safeCustomerInfo.timezone || 'UTC',
+            color: safeCustomerInfo.color || '#000000'
           },
           date: invoice.createdAt.toISOString(),
           dueDate: invoice.dueDate ? invoice.dueDate.toISOString() : null,
@@ -118,13 +371,13 @@ export class InvoiceService {
           status: invoice.status,
           totalAmount: invoice.total.toString(),
           currency: invoice.currency || 'USD',
-          comment: invoice.comment || '',
+          comment: userComment, // Use the user comment without metadata
           items: (invoice.items || []).map((item: any) => ({
             id: item.id.toString(),
             description: item.description || '',
             quantity: Number(item.amount || 0),
             unitPrice: Number(item.rate || 0),
-            totalPrice: Number((Number(item.amount) || 0) * (Number(item.rate) || 0)),
+            totalPrice: Number(item.total || 0),
             taxRate: Number(item.taxRate || 0)
           }))
         };
@@ -141,7 +394,7 @@ export class InvoiceService {
         }
       };
     } catch (error) {
-      console.error('Error getting invoices:', error);
+      console.error('[INVOICE_SERVICE] Error getting invoices:', error);
       return {
         success: false,
         message: 'Failed to get invoices',
@@ -209,12 +462,6 @@ export class InvoiceService {
       // Extract authHeader separately (it may not exist in the type)
       const authHeader = (params as any).authHeader;
       
-      // Log the authHeader for debugging
-      console.log('listInvoices received authHeader:', authHeader ? 'YES (length: ' + authHeader.length + ')' : 'NO');
-      if (authHeader) {
-        console.log('First 20 chars of authHeader:', authHeader.substring(0, 20));
-      }
-      
       // Sử dụng repository để truy vấn dữ liệu
       const paginationResult = await this.invoiceRepository.findAll({
         page,
@@ -224,115 +471,27 @@ export class InvoiceService {
         filters
       });
       
-
       const invoices = paginationResult.items;
       const total = paginationResult.meta.totalItems;
       
-    
       const processedInvoices = await Promise.all(invoices.map(async (invoice: any) => {
-    
-        let customerInfo = {
-          id: invoice.customerId,
-          name: `Customer ${invoice.customerId}`,
-          company: 'Unknown Company',
-          address: 'Unknown Address',
-          comment: '',
-          vatId: '',
-          number: '',
-          country: '',
-          currency: 'USD',
-          phone: '',
-          fax: '',
-          mobile: '',
-          email: '',
-          homepage: '',
-          timezone: 'UTC',
-          color: '#000000'
-        };
-        
-        // Try to get customer info from the API first
+        // Get customer info using our improved method
+        let customerInfo;
         try {
-          console.log(`Attempting to fetch customer info for ID ${invoice.customerId} with auth header`);
-          
-          // Create a mock customer with detailed information for testing
-          if (process.env.NODE_ENV === 'development' || process.env.MOCK_CUSTOMER_DATA === 'true') {
-            console.log(`Using mock customer data for ID ${invoice.customerId} in development mode`);
-            customerInfo = {
-              id: invoice.customerId,
-              name: `John Doe (Customer ${invoice.customerId})`,
-              company: "Tech Corp",
-              address: "123 Main St, New York, USA",
-              comment: "VIP customer",
-              vatId: "VAT123456",
-              number: "1234567890",
-              country: "United States",
-              currency: "USD",
-              phone: "1234567890",
-              fax: "",
-              mobile: "",
-              email: "johndoe@example.com",
-              homepage: "https://johndoe.com",
-              timezone: "America/New_York",
-              color: "#FF5733"
-            };
-          } else {
-            // Try to get real customer data from the API
-            try {
-              // Make a direct API call with the auth header
-              console.log(`Making direct API call for customer ID ${invoice.customerId}`);
-              console.log(`Using authorization header: ${authHeader ? 'YES' : 'NO'}`);
-              
-              // Create headers manually to ensure the auth header is included
-              const headers = {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              };
-              
-              if (authHeader) {
-                headers['Authorization'] = authHeader;
-                console.log('Authorization header added to request');
-              } else {
-                console.log('No authorization header available to add to request');
-              }
-              
-              console.log('Request headers:', headers);
-              
-              const response = await firstValueFrom(
-                this.httpService.get(`${this.projectServiceUrl}/api/v1/customers/${invoice.customerId}`, {
-                  headers: headers,
-                  timeout: 5000
-                })
-              );
-              
-              if (response && response.data) {
-                console.log(`Successfully fetched customer data for ID ${invoice.customerId}`);
-                customerInfo = {
-                  id: response.data.id,
-                  name: response.data.name || `Customer ${invoice.customerId}`,
-                  company: response.data.company || 'Unknown Company',
-                  address: response.data.address || 'Unknown Address',
-                  comment: response.data.comment || '',
-                  vatId: response.data.vatId || '',
-                  number: response.data.number || '',
-                  country: response.data.country || '',
-                  currency: response.data.currency || 'USD',
-                  phone: response.data.phone || '',
-                  fax: response.data.fax || '',
-                  mobile: response.data.mobile || '',
-                  email: response.data.email || '',
-                  homepage: response.data.homepage || '',
-                  timezone: response.data.timezone || 'UTC',
-                  color: response.data.color || '#000000',
-                };
-              }
-            } catch (apiError) {
-              console.error(`API call failed for customer ID ${invoice.customerId}:`, apiError.message);
-              // Continue with default customer info
-            }
-          }
+          customerInfo = await this.getCustomerInfo(invoice.customerId, authHeader);
         } catch (error) {
-          console.error(`Error handling customer info for ID ${invoice.customerId}:`, error);
-          // Continue with default customer info
+          // Log the error but continue processing the invoice
+          console.error(`Error fetching customer data for invoice ${invoice.id}: ${error.message}`);
+          
+          // Use minimal customer info when API call fails
+          customerInfo = {
+            id: invoice.customerId,
+            name: `Customer ${invoice.customerId}`,
+            company: '',
+            address: '',
+            comment: '',
+            visible: true
+          };
         }
         
         // Trả về dữ liệu đã được xử lý
@@ -346,7 +505,7 @@ export class InvoiceService {
           status: invoice.status,
           totalAmount: invoice.total.toString(),
           currency: invoice.currency,
-          comment: invoice.comment || '',
+          comment: '',
           items: Array.isArray(invoice.items) ? invoice.items.map((item: any) => ({
             id: item.id.toString(),
             description: item.description,
@@ -408,8 +567,8 @@ export class InvoiceService {
       }
       
   
+      // Get customer info - if this fails, the error will be propagated
       const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
-      
       
       return {
         success: true,
@@ -478,7 +637,7 @@ export class InvoiceService {
         };
       }
 
-      // Lấy thông tin customer mẫu
+      // Lấy thông tin customer từ API
       const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
       
       // Chuyển đổi dữ liệu để phù hợp với cấu trúc của frontend
@@ -574,13 +733,12 @@ export class InvoiceService {
       }
       
       // Fetch tasks by activities
-      console.log(`[Task Service] Fetching tasks for activities:`, dto.activities || []);
       const tasks = await this.fetchTasksByActivities(dto.activities || [], authHeader) as any[];
-      console.log('[Task Service] Response:', JSON.stringify(tasks, null, 2));
+      
       // Fetch expenses for tasks
-      console.log(`[Expense Service] Fetching expenses for ${tasks.length} tasks`);
+      console.log(`[EXPENSE_API] Fetching expenses for ${tasks.length} tasks`);
       const expenses = await this.fetchExpensesFromTasks(tasks, authHeader) as any[];
-      console.log('[Expense Service] Response:', JSON.stringify(expenses, null, 2));
+      console.log(`[EXPENSE_API] Fetched ${expenses.length} expenses with costs: ${expenses.map(e => `ID:${e.id}=${e.cost}`).join(', ')}`);
       
       const taskToExpenseMap = new Map<number | string, any>();
       expenses.forEach(expense => {
@@ -591,9 +749,31 @@ export class InvoiceService {
       
       const processedTasks: any[] = [];
       const activityToTasksMap = new Map<number | string, any[]>();
+      
+      console.log(`[PRICE_DEBUG] Processing ${tasks.length} tasks for pricing`);
+      
       tasks.forEach(task => {
         const taskExpense = taskToExpenseMap.get(task.id);
-        const expenseAmount = taskExpense ? (parseFloat(String(taskExpense.amount)) || 100) : 100;
+        
+        // Use the cost field from the expense API response if available
+        // Otherwise fall back to amount or default value
+        let expenseAmount = 45; // Default cost from the example
+        
+        if (taskExpense) {
+          console.log(`[PRICE_DEBUG] Found expense for task ${task.id}: cost=${taskExpense.cost}, amount=${taskExpense.amount}`);
+          
+          if (taskExpense.cost !== undefined && taskExpense.cost !== null) {
+            expenseAmount = parseFloat(String(taskExpense.cost)) || 45;
+            console.log(`[PRICE_DEBUG] Using cost field for task ${task.id}: ${expenseAmount}`);
+          } else if (taskExpense.amount !== undefined && taskExpense.amount !== null) {
+            expenseAmount = parseFloat(String(taskExpense.amount)) || 45;
+            console.log(`[PRICE_DEBUG] Using amount field for task ${task.id}: ${expenseAmount}`);
+          } else {
+            console.log(`[PRICE_DEBUG] Neither cost nor amount found for task ${task.id}, using default: ${expenseAmount}`);
+          }
+        } else {
+          console.log(`[PRICE_DEBUG] No expense found for task ${task.id}, using default cost: ${expenseAmount}`);
+        }
         
         const processedTask = {
           ...task,
@@ -601,6 +781,7 @@ export class InvoiceService {
           expense_id: task.expense_id || (taskExpense ? taskExpense.id : null)
         };
         
+        console.log(`[PRICE_DEBUG] Final price for task ${task.id}: ${processedTask.price}`);
         processedTasks.push(processedTask);
         
         if (task.activity_id) {
@@ -791,6 +972,8 @@ export class InvoiceService {
 
   async createInvoiceFromFilter(dto: CreateInvoiceFromFilterDto): Promise<any> {
     try {
+      console.log('[INVOICE_SERVICE] Creating invoice from filter with DTO:', JSON.stringify(dto, null, 2));
+      
       // Check if we have a filteredInvoiceId
       if (!dto.filteredInvoiceId) {
         return {
@@ -801,6 +984,7 @@ export class InvoiceService {
       
       // Get the filtered invoice from the database
       const filteredInvoice = await this.filteredInvoiceRepository.findById(dto.filteredInvoiceId);
+      console.log('[INVOICE_SERVICE] Found filtered invoice:', filteredInvoice ? 'yes' : 'no');
       
       if (!filteredInvoice) {
         return {
@@ -819,6 +1003,20 @@ export class InvoiceService {
       
       // Extract the response data from the filtered invoice
       const responseData = filteredInvoice.responseData;
+      console.log('[INVOICE_SERVICE] Response data from filtered invoice:', 
+        responseData ? 'Available' : 'Not available');
+      
+      if (!responseData) {
+        return {
+          success: false,
+          message: 'Filtered invoice data is missing or invalid',
+        };
+      }
+      
+      console.log('[INVOICE_SERVICE] Customer ID:', filteredInvoice.customerId);
+      console.log('[INVOICE_SERVICE] Total price:', filteredInvoice.totalPrice);
+      console.log('[INVOICE_SERVICE] Tax price:', filteredInvoice.taxPrice);
+      console.log('[INVOICE_SERVICE] Final price:', filteredInvoice.finalPrice);
       
       // Generate invoice number
       const invoiceNumber = await this.generateInvoiceNumber(filteredInvoice.customerId);
@@ -840,15 +1038,28 @@ export class InvoiceService {
       
       // Extract activities and tasks from the response data
       if (responseData.activities && responseData.activities.length > 0) {
+        console.log('[INVOICE_SERVICE] Processing activities:', responseData.activities.length);
         for (const activity of responseData.activities) {
+          console.log(`[INVOICE_SERVICE] Activity ${activity.id} (${activity.name}) has ${activity.tasks?.length || 0} tasks`);
           if (activity.tasks && activity.tasks.length > 0) {
             for (const task of activity.tasks) {
               if (task.status === 'COMPLETED' || task.status === 'DONE' || task.status === 'DOING') {
+                // Log the task details for debugging
+                console.log(`[INVOICE_SERVICE] Processing task: ${task.id} - ${task.title}`);
+                console.log(`[INVOICE_SERVICE] Task price: ${task.price}, quantity: ${task.quantity}`);
+                
+                // Use the actual price from the task data
+                const taskPrice = task.price || 0;
+                const taskQuantity = task.quantity || 1;
+                const taskTotal = taskQuantity * taskPrice;
+                
+                console.log(`[INVOICE_SERVICE] Calculated total: ${taskTotal}`);
+                
                 items.push({
                   description: task.title || 'No description',
-                  amount: task.quantity || 1,
-                  rate: task.price || 0,
-                  total: (task.quantity || 1) * (task.price || 0),
+                  amount: taskQuantity,
+                  rate: taskPrice,
+                  total: taskTotal,
                   projectId: filteredInvoice.projectId || 0,
                   activityId: activity.id,
                   begin: new Date(filteredInvoice.fromDate),
@@ -860,31 +1071,84 @@ export class InvoiceService {
         }
       }
       
-      // Create the invoice
-      const newInvoice = await this.invoiceRepository.create({
+      console.log('[INVOICE_SERVICE] Created', items.length, 'invoice items');
+      
+      // Ensure we have all required data for creating an invoice
+      if (!filteredInvoice.customerId) {
+        return {
+          success: false,
+          message: 'Customer ID is missing in the filtered invoice data',
+        };
+      }
+      
+      // Extract customer data from the filtered invoice
+      const customerData = responseData.customer;
+      if (customerData) {
+        console.log('[INVOICE_SERVICE] Found customer data in filtered invoice:', customerData.name);
+        // Store the customer data in a cache for later retrieval
+        await this.storeCustomerData(filteredInvoice.customerId, customerData);
+      } else {
+        console.log('[INVOICE_SERVICE] No customer data found in filtered invoice');
+      }
+      
+      // Create a metadata object to store additional data that's not in the invoice schema
+      const metadata = {
+        customerData: customerData || null,
+        projectData: responseData.project || null,
+        source: 'filtered_invoice'
+      };
+      
+      console.log('[INVOICE_SERVICE] Creating invoice with customer:', 
+        customerData ? customerData.name : 'No customer data');
+      
+      // Create the invoice with data from the filtered invoice
+      // The comment will be used to store metadata
+      const userComment = dto.comment || '';
+      
+      const invoiceData = {
         invoiceNumber,
         customerId: filteredInvoice.customerId,
         userId: dto.userId || 1, // Default to user ID 1 if not provided
         total: filteredInvoice.finalPrice,
         tax: filteredInvoice.taxPrice,
         subtotal: filteredInvoice.totalPrice,
-        currency: filteredInvoice.currency,
-        vat: filteredInvoice.taxRate,
+        currency: filteredInvoice.currency || 'USD',
+        vat: filteredInvoice.taxRate || 0,
         status: 'NEW',
-        comment: dto.comment || '',
+        comment: userComment, // The repository will append metadata to this
         dueDays: dto.dueDays || 14,
         dueDate,
         timesheetIds: dto.timesheetIds || [],
         items,
         filteredInvoiceId: filteredInvoice.id,
-      });
+        // Store metadata as JSON string - will be appended to comment by repository
+        metadata: JSON.stringify(metadata),
+      };
+      
+      console.log('[INVOICE_SERVICE] Creating invoice with data:', JSON.stringify({
+        invoiceNumber,
+        customerId: filteredInvoice.customerId,
+        userId: dto.userId || 1,
+        total: filteredInvoice.finalPrice,
+        tax: filteredInvoice.taxPrice,
+        subtotal: filteredInvoice.totalPrice,
+        currency: filteredInvoice.currency || 'USD',
+        vat: filteredInvoice.taxRate || 0,
+        items: items.length,
+      }, null, 2));
+      
+      // Create the invoice
+      const newInvoice = await this.invoiceRepository.create(invoiceData);
+      console.log('[INVOICE_SERVICE] Invoice created with ID:', newInvoice?.id);
       
       // Mark the filtered invoice as saved
       await this.filteredInvoiceRepository.markAsSaved(filteredInvoice.id);
+      console.log('[INVOICE_SERVICE] Marked filtered invoice as saved');
       
       // Mark timesheets as exported if provided
       if (dto.timesheetIds && dto.timesheetIds.length > 0) {
         await this.markTimesheetsAsExported(dto.timesheetIds);
+        console.log('[INVOICE_SERVICE] Marked timesheets as exported');
       }
       
       return {
@@ -898,11 +1162,12 @@ export class InvoiceService {
         }
       };
     } catch (error) {
-      console.error('Failed to create invoice from filter:', error);
+      console.error('[INVOICE_SERVICE] Failed to create invoice from filter:', error);
       return {
         success: false,
         message: 'An error occurred while creating invoice from filter',
         error: error.message,
+        stack: error.stack,
       };
     }
   }
@@ -1182,33 +1447,41 @@ export class InvoiceService {
     try {
       const expenses: any[] = [];
       
-     
+      // Extract expense IDs from tasks
       const expenseIds = tasks
         .filter(task => task.expense_id)
         .map(task => task.expense_id);
       
+      console.log(`[EXPENSE_DEBUG] Tasks with expense IDs: ${expenseIds.length}/${tasks.length}`);
+      
       if (expenseIds.length === 0) {
-        console.log('No expense IDs found in tasks, creating default expenses');
-        tasks.forEach((task, index) => {
+        console.log('[EXPENSE_DEBUG] No expense IDs found in tasks, creating default expenses');
+        // Create default expenses for all tasks
+        tasks.forEach(task => {
+          const defaultCost = 45; // Use the same default cost as in the example
+          
           const defaultExpense = {
             id: `default-${task.id}`,
             name: `Expense for ${task.title}`,
             description: task.description || `Default expense for task ${task.id}`,
-            amount: (index + 1) * 100, // Mỗi task có một giá khác nhau
+            amount: defaultCost,
+            cost: defaultCost, // Add cost field to match API response structure
             created_at: task.created_at,
             task_id: task.id
           };
+          console.log(`[EXPENSE_DEBUG] Created default expense for task ${task.id} with cost=${defaultCost}`);
           expenses.push(defaultExpense);
         });
         return expenses;
       }
       
+      // Get unique expense IDs to avoid duplicate API calls
       const uniqueExpenseIds = [...new Set(expenseIds)];
+      console.log(`[EXPENSE_DEBUG] Unique expense IDs to fetch: ${uniqueExpenseIds.join(', ')}`);
       
+      // Fetch each expense from the API
       for (const expenseId of uniqueExpenseIds) {
-        console.log(`Fetching expense data for ID ${expenseId} from ${this.projectServiceUrl}/api/v1/expenses/${expenseId}`);
-        
-        console.log(`Request URL: ${this.projectServiceUrl}/api/v1/expenses/${expenseId}`);
+        console.log(`[EXPENSE_DEBUG] Fetching expense data for ID ${expenseId} from ${this.projectServiceUrl}/api/v1/expenses/${expenseId}`);
         
         try {
           const response = await firstValueFrom(
@@ -1219,54 +1492,73 @@ export class InvoiceService {
           );
           
           if (response.data) {
-            console.log(`Received expense data for ID ${expenseId}`);
+            // Find the task related to this expense
             const relatedTask = tasks.find(task => task.expense_id === expenseId);
             if (relatedTask) {
+              // Extract cost from response
+              const cost = response.data.cost;
+              console.log(`[EXPENSE_DEBUG] API response for expense ID ${expenseId}: cost=${cost}`);
+              
+              // Add task_id to the expense data for mapping
               response.data.task_id = relatedTask.id;
+              
+              // Ensure cost is properly set
+              if (cost === undefined || cost === null) {
+                response.data.cost = 45;
+                console.log(`[EXPENSE_DEBUG] Cost not found in API response, using default cost=45 for task ${relatedTask.id}`);
+              }
+              
+              expenses.push(response.data);
+              console.log(`[EXPENSE_DEBUG] Added expense with cost=${response.data.cost} for task ${relatedTask.id}`);
             }
-            expenses.push(response.data);
           }
         } catch (error) {
-          console.error(`Failed to fetch expense with ID ${expenseId}:`, error.message);
+          console.error(`[EXPENSE_DEBUG] Failed to fetch expense with ID ${expenseId}:`, error.message);
+          
+          // Create a default expense if API call fails
           const relatedTask = tasks.find(task => task.expense_id === expenseId);
           if (relatedTask) {
+            const defaultCost = 45; // Use the same default cost as in the example
+            
             const defaultExpense = {
               id: expenseId,
               name: `Expense for ${relatedTask.title}`,
               description: relatedTask.description || `Default expense for task ${relatedTask.id}`,
-              amount: '100',
+              amount: defaultCost,
+              cost: defaultCost, // Add cost field to match API response structure
               created_at: relatedTask.created_at,
               task_id: relatedTask.id
             };
+            console.log(`[EXPENSE_DEBUG] Created default expense for task ${relatedTask.id} with cost=${defaultCost} (API failure)`);
             expenses.push(defaultExpense);
           }
         }
       }
       
+      // Create default expenses for tasks without expense_id
       const tasksWithoutExpense = tasks.filter(task => !task.expense_id);
-      tasksWithoutExpense.forEach((task, index) => {
+      tasksWithoutExpense.forEach(task => {
+        // Use the same default cost as in the example (45)
+        const defaultCost = 45;
+        
         const defaultExpense = {
           id: `default-${task.id}`,
           name: `Expense for ${task.title}`,
           description: task.description || `Default expense for task ${task.id}`,
-          amount: (index + 1) * 100, // Mỗi task có một giá khác nhau
+          amount: defaultCost,
+          cost: defaultCost, // Add cost field to match API response structure
           created_at: task.created_at,
           task_id: task.id
         };
+        console.log(`[EXPENSE_DEBUG] Created default expense for task ${task.id} with cost=${defaultCost} (no expense_id)`);
         expenses.push(defaultExpense);
       });
       
-      console.log(`Fetched ${expenses.length} expenses from ${tasks.length} tasks`);
+      console.log(`[EXPENSE_DEBUG] Fetched ${expenses.length} expenses from ${tasks.length} tasks`);
+      console.log(`[EXPENSE_DEBUG] Expense costs: ${expenses.map(e => e.cost).join(', ')}`);
       return expenses;
     } catch (error) {
-      console.error('Failed to fetch expenses from tasks:', error);
-      if (error.response) {
-        console.error('Error response:', {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data
-        });
-      }
+      console.error('[EXPENSE_DEBUG] Failed to fetch expenses from tasks:', error);
       return [];
     }
   }
@@ -1318,96 +1610,123 @@ export class InvoiceService {
   }
 
   /**
-   * Lấy thông tin customer từ project-service
+   * Store customer data for later retrieval
    */
-  private async getCustomerInfo(customerId: number, authHeader?: string): Promise<any> {
+  private storeCustomerData(customerId: number, customerData: CustomerInfo): void {
     try {
-      console.log(`Fetching customer info for ID ${customerId} from ${this.projectServiceUrl}/api/v1/customers/${customerId}`);
-      console.log(`Authorization token received: ${authHeader}`);
+      console.log(`[INVOICE_SERVICE] Storing customer data for ID ${customerId}`);
       
-      // Use the getHeaders method to ensure consistent header handling
-      const headers = this.getHeaders(authHeader);
+      // Store in the customerCache map
+      this.customerCache.set(customerId, {
+        data: customerData,
+        timestamp: new Date().getTime()
+      });
       
-      console.log(`Request URL: ${this.projectServiceUrl}/api/v1/customers/${customerId}`);
-      console.log(`Request headers:`, headers);
-      
+      console.log(`[INVOICE_SERVICE] Customer data stored for ID ${customerId}`);
+    } catch (error) {
+      console.error(`[INVOICE_SERVICE] Failed to store customer data for ID ${customerId}:`, error);
+    }
+  }
+
+  /**
+   * Lấy thông tin customer từ project-service hoặc từ cache
+   */
+  /**
+   * Fetches customer information from the project service API
+   * If data cannot be retrieved, an error is thrown (no fallback to mock data)
+   */
+  private async getCustomerInfo(customerId: number, authHeader?: string): Promise<CustomerInfo> {
+    // Check if we have cached customer data that's less than 1 hour old
+    const cachedCustomer = this.customerCache.get(customerId);
+    if (cachedCustomer && (new Date().getTime() - cachedCustomer.timestamp < 3600000)) {
+      return cachedCustomer.data;
+    }
+    
+    // Check if project service URL is set
+    if (!this.projectServiceUrl) {
+      throw new Error(`Project service URL is not configured. Please check environment variables.`);
+    }
+    
+    // Construct the URL with proper path
+    let url = this.projectServiceUrl;
+    // Make sure URL doesn't end with a slash
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1);
+    }
+    // Add the API path
+    url = `${url}/api/v1/customers/${customerId}`;
+    
+    // Use the getHeaders method to ensure consistent header handling
+    const headers = this.getHeaders(authHeader);
+    
+    try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.projectServiceUrl}/api/v1/customers/${customerId}`, {
+        this.httpService.get(url, {
           headers: headers,
-          timeout: 5000 // Timeout sau 5 giây nếu không nhận được response
+          timeout: 10000 // Increased timeout to 10 seconds
         })
       );
       
-      console.log('Customer response status:', response.status);
-      
-      // Kiểm tra nếu response có dữ liệu
-      if (response.data) {
-        console.log('Customer data from API:', response.data);
-        
-        // Project-service trả về trực tiếp dữ liệu Customer, không có wrapper success/data
-        return {
-          id: response.data.id,
-          name: response.data.name || `Customer ${customerId}`,
-          company: response.data.company || '',
-          address: response.data.address || '',
-          comment: response.data.comment || '',
-          visible: response.data.visible,
-          vatId: response.data.vatId || '',
-          number: response.data.number || '',
-          country: response.data.country || '',
-          currency: response.data.currency || 'USD',
-          phone: response.data.phone || '',
-          fax: response.data.fax || '',
-          mobile: response.data.mobile || '',
-          email: response.data.email || '',
-          homepage: response.data.homepage || '',
-          timezone: response.data.timezone || 'UTC',
-          color: response.data.color || '#000000',
-        };
+      // Check if response has data
+      if (!response.data) {
+        throw new Error(`API returned empty response for customer ID ${customerId}`);
       }
       
-      // Trả về dữ liệu mẫu nếu không lấy được từ service
-      console.log(`No customer data found for ID ${customerId}`);
-      return this.createDefaultCustomerInfo(customerId);
-    } catch (error) {
-      console.error(`Failed to fetch customer info for ID ${customerId}:`, error.message);
+      // Map the API response fields to our CustomerInfo interface
+      // The API uses snake_case but our interface uses camelCase
+      const customerData: CustomerInfo = {
+        id: response.data.id,
+        name: response.data.name || `Customer ${customerId}`,
+        company: response.data.company_name || '',
+        address: response.data.address || '',
+        comment: response.data.description || '',
+        visible: true,
+        vatId: response.data.vat_id || '',
+        number: response.data.account_number || '',
+        country: response.data.country || '',
+        currency: response.data.currency || 'USD',
+        phone: response.data.phone || '',
+        fax: response.data.fax || '',
+        mobile: response.data.mobile || '',
+        email: response.data.email || '',
+        homepage: response.data.homepage || '',
+        timezone: response.data.timezone || 'UTC',
+        color: response.data.color || '#000000',
+      };
+      
+      // Store the customer data in the cache
+      this.storeCustomerData(customerId, customerData);
+      
+      return customerData;
+    } catch (error: any) {
+      // Provide detailed error information
+      let errorMessage = `Failed to fetch customer data from ${url}: `;
+      
       if (error.response) {
-        console.error('Error response:', {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data
-        });
+        // The request was made and the server responded with a status code outside of 2xx range
+        errorMessage += `Server responded with status ${error.response.status}. `;
+        if (error.response.data) {
+          errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += `No response received from server. Check if project service is running at ${this.projectServiceUrl}.`;
+      } else {
+        // Something happened in setting up the request
+        errorMessage += error.message;
       }
       
-      // Trả về dữ liệu mẫu trong trường hợp lỗi
-      return this.createDefaultCustomerInfo(customerId);
+      console.error(`[INVOICE_SERVICE] ${errorMessage}`);
+      throw new Error(errorMessage);
     }
   }
   
   /**
-   * Tạo thông tin customer mặc định khi không lấy được từ service
+   * Tạo dữ liệu mẫu cho customer khi không lấy được từ service
    */
-  private createDefaultCustomerInfo(customerId: number): any {
-    return {
-      id: customerId,
-      name: `Customer ${customerId}`,
-      company: 'Unknown Company',
-      address: 'Unknown Address',
-      comment: '',
-      visible: true,
-      vatId: '',
-      number: '',
-      country: '',
-      currency: 'USD',
-      phone: '',
-      fax: '',
-      mobile: '',
-      email: '',
-      homepage: '',
-      timezone: 'UTC',
-      color: '#000000',
-    };
-  }
+  // Method removed - we no longer use default customer data
+
+
 
   private getHeaders(authHeader?: string): Record<string, string> {
     const headers: Record<string, string> = {
