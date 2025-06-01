@@ -73,12 +73,16 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
   doc.setFont("helvetica", "bold");
   doc.text("From date:", margin + 3, detailsStartY);
   doc.setFont("helvetica", "normal");
-  doc.text(formatDate(invoice.fromDate, "dd.MM.yyyy HH:mm"), margin + 25, detailsStartY);
+  doc.text(formatDate(invoice?.fromDate || Date.now(), "dd.MM.yyyy HH:mm"), margin + 25, detailsStartY);
 
   doc.setFont("helvetica", "bold");
   doc.text("To date:", margin + 3, detailsStartY + lineHeight);
   doc.setFont("helvetica", "normal");
-  doc.text(formatDate(invoice.toDate, "dd.MM.yyyy HH:mm"), margin + 25, detailsStartY + lineHeight);
+  doc.text(
+    formatDate(invoice.toDate || invoice.dueDate || Date.now(), "dd.MM.yyyy HH:mm"),
+    margin + 25,
+    detailsStartY + lineHeight
+  );
 
   doc.setFont("helvetica", "bold");
   doc.text("Status:", margin + 3, detailsStartY + lineHeight * 2);
@@ -216,6 +220,7 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
       lineColor: [229, 231, 235],
       lineWidth: 0.1
     },
+    tableWidth: "wrap",
     columnStyles: {
       0: { cellWidth: 35, fontStyle: "bold" },
       1: { cellWidth: 25, halign: "right" }

@@ -76,27 +76,27 @@ export const CreateManualTimesheetRequestSchema = z
         message: "Task is required"
       }),
     description: z.string().optional(),
-    from: z.string().nonempty({
+    start_time: z.string().nonempty({
       message: "Start time is required"
     }),
-    end: z.string().nonempty({
+    end_time: z.string().nonempty({
       message: "End time is required"
     })
   })
   .strict()
-  .superRefine(({ from, end }, ctx) => {
-    if (from > end) {
+  .superRefine(({ start_time, end_time }, ctx) => {
+    if (start_time > end_time) {
       ctx.addIssue({
         code: "custom",
         message: "End time must be after the start time",
-        path: ["end"]
+        path: ["end_time"]
       });
     }
-    if (new Date(from) > new Date()) {
+    if (new Date(start_time) > new Date()) {
       ctx.addIssue({
         code: "custom",
         message: "Start time must not be in the feature",
-        path: ["from"]
+        path: ["start_time"]
       });
     }
   });
@@ -104,10 +104,10 @@ export const CreateManualTimesheetRequestSchema = z
 export type CreateManualTimesheetValidation = z.infer<typeof CreateManualTimesheetRequestSchema>;
 export type CreateManualTimesheetRequestDTO = {
   task_id: number;
-  from: string;
+  start_time: string;
   description?: string;
-  end: string;
-  user_name: string;
+  end_time: string;
+  username: string;
   project_id: number;
   activity_id: number;
 };

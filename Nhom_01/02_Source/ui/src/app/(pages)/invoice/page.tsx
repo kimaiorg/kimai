@@ -42,7 +42,6 @@ function InvoiceContent() {
   const [customerList, setCustomerList] = useState<CustomerType[]>([]);
   const [projectList, setProjectList] = useState<ProjectType[] | null>(null);
   const [activityList, setActivityList] = useState<ActivityType[] | null>(null);
-  // const [invoiceTemplateList, setInvoiceTemplateList] = useState<InvoiceTemplateType[] | null>(null);
 
   const router = useRouter();
 
@@ -55,12 +54,11 @@ function InvoiceContent() {
   const filterInvoiceForm = useForm<FilterInvoiceValidation>({
     resolver: zodResolver(FilterInvoiceRequestSchema),
     defaultValues: {
-      from: "",
-      to: "",
-      customer_id: "95",
-      project_id: "",
-      period: "",
-      activities: []
+      from: "2025-04-01",
+      to: "2025-07-01",
+      customer_id: "99",
+      project_id: "129",
+      activities: ["160", "148"]
     }
   });
   async function handleSubmitFilterInvoice(values: FilterInvoiceValidation) {
@@ -75,7 +73,7 @@ function InvoiceContent() {
         activities: activities.map((activity) => Number(activity))
       };
       const targetInvoice: InvoiceHistoryResponseType = await filterInvoices(payload);
-      console.log(targetInvoice);
+
       setInvoiceHistory(targetInvoice);
       if (targetInvoice.success) {
         toast("Success", {
@@ -99,7 +97,6 @@ function InvoiceContent() {
       setLoading(false);
     }
   }
-
   // Handle save invoice status
   const handleSaveInvoice = async () => {
     try {
@@ -109,6 +106,7 @@ function InvoiceContent() {
         comment: noteInput,
         dueDays: 30
       };
+      // console.log(payload);
       const result = await saveInvoice(payload);
       if (result == 201 || result == 200) {
         toast("Success", {
@@ -542,5 +540,5 @@ function InvoiceContent() {
 }
 
 const AuthenticatedInvoice = AuthenticatedRoute(InvoiceContent, [Role.ADMIN, Role.SUPER_ADMIN, Role.TEAM_LEAD]);
-
+export { InvoiceContent };
 export default AuthenticatedInvoice;

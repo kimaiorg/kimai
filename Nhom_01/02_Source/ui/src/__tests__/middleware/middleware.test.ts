@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
 import { expectAny } from "../utils/testUtils";
 
 // Mock the middleware module directly
