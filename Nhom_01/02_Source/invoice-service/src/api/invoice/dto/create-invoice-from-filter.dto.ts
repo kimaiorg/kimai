@@ -6,7 +6,7 @@ export const createInvoiceFromFilterSchema = z.object({
   filteredInvoiceId: z.number(),
   
   // Optional fields that can override values from the filtered invoice
-  userId: z.number().optional(),
+  userId: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseInt(val, 10) : val).optional(),
   dueDays: z.number().optional().default(14),
   comment: z.string().optional(),
   timesheetIds: z.array(z.number()).optional().default([]),
