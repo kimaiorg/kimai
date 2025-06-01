@@ -28,8 +28,13 @@ import {
   StartTimesheetSwagger,
   ListTimesheetsMeSwaggerDto,
   ListTimesheetsSwaggerDto,
+  StartTimesheetManuallySwagger,
 } from '@/api/timesheet/swagger';
 import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  StartTimesheetManuallyDto,
+  startTimesheetManuallySchema,
+} from './dto/start-timesheet-manually.dto';
 
 @Controller('timesheets')
 export class TimesheetController {
@@ -43,6 +48,17 @@ export class TimesheetController {
   ): Promise<Timesheet | null> {
     const userId = req['user'] as { sub: string };
     return await this.timesheetService.startTimesheet(userId.sub, dto);
+  }
+
+  @Post('start/manually')
+  @ApiBody({ type: StartTimesheetManuallySwagger })
+  @UsePipes(new ZodValidationPipe(startTimesheetManuallySchema))
+  async startTimesheetManually(
+    @Req() req: Request,
+    @Body() dto: StartTimesheetManuallyDto,
+  ): Promise<Timesheet | null> {
+    const userId = req['user'] as { sub: string };
+    return await this.timesheetService.startTimesheetManually(userId.sub, dto);
   }
 
   @Post('end')
