@@ -81,7 +81,7 @@ export class InvoiceController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get invoice by ID' })
+  @ApiOperation({ summary: 'Get an invoice by ID' })
   @ApiParam({ name: 'id', description: 'Invoice ID', type: 'number' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -97,8 +97,36 @@ export class InvoiceController {
   })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden.' })
   @Permissions(['read:invoices'])
-  async getInvoice(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return await this.invoiceService.getInvoice(id);
+  async getInvoice(@Param('id', ParseIntPipe) id: number, @Req() request: Request): Promise<any> {
+    try {
+      // Extract authorization header
+      let authHeader = request.headers['authorization'];
+
+      if (!authHeader && request.headers['authorization']) {
+        authHeader = request.headers['authorization'] as string;
+      }
+      if (!authHeader && request.headers['Authorization']) {
+        authHeader = request.headers['Authorization'] as string;
+      }
+
+      if (!authHeader && request.query && request.query['access_token']) {
+        authHeader = `Bearer ${request.query['access_token']}`;
+      }
+
+      if (!authHeader && request.cookies && request.cookies['access_token']) {
+        authHeader = `Bearer ${request.cookies['access_token']}`;
+      }
+
+      return await this.invoiceService.getInvoice(id, authHeader);
+    } catch (error) {
+      console.error(`Error getting invoice ${id}:`, error);
+      return {
+        success: false,
+        message: error.message || 'Failed to get invoice',
+        error: error.stack,
+        statusCode: 500,
+      };
+    }
   }
 
   @Get()

@@ -403,7 +403,7 @@ export class InvoiceService {
     }
   }
 
-  async getInvoice(id: number): Promise<any> {
+  async getInvoice(id: number, authHeader?: string): Promise<any> {
     try {
       const invoice: any = await this.invoiceRepository.findById(id);
       
@@ -417,7 +417,7 @@ export class InvoiceService {
       // Get customer info from the API - no fallback to mock data
       let customerInfo;
       try {
-        customerInfo = await this.getCustomerInfo(invoice.customerId);
+        customerInfo = await this.getCustomerInfo(invoice.customerId, authHeader);
       } catch (error) {
         console.error(`Failed to get customer info for invoice ${id}: ${error.message}`);
         return {
