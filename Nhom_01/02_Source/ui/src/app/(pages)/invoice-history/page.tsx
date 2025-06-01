@@ -162,7 +162,7 @@ function InvoiceHistoryContent() {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Invoice template</h1>
+        <h1 className="text-2xl font-bold">Invoice history</h1>
         <div className="flex items-center space-x-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

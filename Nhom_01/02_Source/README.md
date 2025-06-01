@@ -119,7 +119,15 @@ docker-compose exec postgres_database_for_project_service psql -U postgres -d pr
 docker-compose exec postgres_database_for_timesheet_service psql -U postgres -d timesheet -f /docker-entrypoint-initdb.d/init.sql
 ```
 
+- Seed data for invoice service:
+
+```
+docker-compose exec postgres_database_for_invoice_service psql -U postgres -d invoice -f /docker-entrypoint-initdb.d/init.sql
+```
+
 ### Running UI
+
+- Navigate to the `ui` directory and run the following command:
 
 ```cmd
 cd ui

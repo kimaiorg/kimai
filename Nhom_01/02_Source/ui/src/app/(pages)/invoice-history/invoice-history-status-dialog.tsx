@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 const statusList = [
   { name: "New", value: "NEW" },
-  { name: "Pending", value: "PENDING" },
+  // { name: "Pending", value: "PENDING" },
   { name: "Paid", value: "PAID" },
   { name: "Cancelled", value: "CANCELLED" }
 ];
@@ -35,7 +35,7 @@ export default function InvoiceStatusUpdateDialog({
     resolver: zodResolver(UpdateInvoiceRequestSchema),
     defaultValues: {
       comment: "",
-      status: targetInvoice.status
+      status: "PAID"
     }
   });
   async function onSubmit(values: UpdateInvoiceRequestDTO) {
