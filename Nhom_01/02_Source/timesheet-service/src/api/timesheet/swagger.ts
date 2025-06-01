@@ -17,19 +17,63 @@ export class StartTimesheetSwagger {
     example: 1,
     description: 'ID of the project',
   })
-  project_id?: Number;
+  project_id?: number;
 
   @ApiPropertyOptional({
     example: 1,
     description: 'ID of the activity',
   })
-  activity_id?: Number;
+  activity_id?: number;
 
   @ApiPropertyOptional({
     example: 2,
     description: 'ID of the task',
   })
-  task_id?: Number;
+  task_id?: number;
+}
+
+export class StartTimesheetManuallySwagger {
+  @ApiPropertyOptional({
+    example: 'Description of the timesheet',
+    description: 'Description of the timesheet',
+  })
+  description?: string;
+
+  @ApiPropertyOptional({
+    example: 'User123',
+    description: 'Username of the user',
+  })
+  username?: string;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID of the project',
+  })
+  project_id?: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID of the activity',
+  })
+  activity_id?: number;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description: 'ID of the task',
+  })
+  task_id?: number;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00.000Z',
+    description: 'Start date for filtering timesheets',
+  })
+  start_time: Date;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00.000Z',
+    description: 'End date for filtering timesheets',
+  })
+  end_time: Date;
 }
 
 export class ListTimesheetsMeSwaggerDto {
@@ -99,19 +143,19 @@ export class ListTimesheetsSwaggerDto {
     example: 1,
     description: 'ID of the project',
   })
-  project_id?: Number;
+  project_id?: number;
 
   @ApiPropertyOptional({
     example: 1,
     description: 'ID of the activity',
   })
-  activity_id?: Number;
+  activity_id?: number;
 
   @ApiPropertyOptional({
     example: 2,
     description: 'ID of the task',
   })
-  task_id?: Number;
+  task_id?: number;
 
   @ApiPropertyOptional({
     example: 'running | stopped',

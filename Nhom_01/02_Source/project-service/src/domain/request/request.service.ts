@@ -52,7 +52,7 @@ export class RequestService {
       await this.rabbitmqService.emit(
         { cmd: 'create_notification' },
         {
-          title: 'Request Change Expense Quantity',
+          title: 'Change Expense Quantity',
           content: `One of your team members has requested to change the quantity of ${target?.title} from ${target?.quantity} to ${dto.request_data?.quantity}`,
           type: 'expense_request',
           target_id: target?.id.toString(),
@@ -192,7 +192,7 @@ export class RequestService {
     await this.rabbitmqService.emit(
       { cmd: 'create_notification' },
       {
-        title: 'Request Change Request Status',
+        title: 'Change Request Status',
         content: `Your team lead has just ${dto.status === RequestStatus.APPROVED ? 'approved' : 'rejected'} your request`,
         type: 'change_status_request',
         target_id: request.target_id.toString(),

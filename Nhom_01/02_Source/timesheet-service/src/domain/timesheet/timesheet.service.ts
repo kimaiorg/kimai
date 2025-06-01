@@ -16,6 +16,7 @@ import { ProjectHttpService } from '@/libs/http/project-http.service';
 import { RabbitmqService } from '@/libs/rabbitmq/rabbitmq.service';
 import { ENV } from '@/libs/configs/env';
 import { ActivityResponse } from './response';
+import { StartTimesheetManuallyDto } from '@/api/timesheet/dto/start-timesheet-manually.dto';
 @Injectable()
 export class TimesheetService {
   constructor(
@@ -62,8 +63,65 @@ export class TimesheetService {
     await this.rabbitmqService.emit(
       { cmd: 'create_notification' },
       {
-        title: 'Request Start Timesheet',
+        title: 'Start Timesheet',
         content: `${dto.username} has requested to start a timesheet`,
+        type: 'timesheet_request',
+        target_id: timesheet.id.toString(),
+        user_id: activity.team.lead,
+      },
+    );
+
+    return timesheet;
+  }
+
+  async startTimesheetManually(
+    userId: string,
+    dto: StartTimesheetManuallyDto,
+  ): Promise<Timesheet | null> {
+    const latestTimesheet = await this.timesheetRepository.findAll({
+      where: {
+        user_id: userId,
+        end_time: null,
+      },
+    });
+    if (latestTimesheet.length > 0) {
+      throw new Error('You have not ended the previous timesheet.');
+    }
+
+    const activity: ActivityResponse = await this.projectHttpService.callApi(
+      `api/v1/activities/${dto.activity_id}`,
+      'get',
+      {},
+      {
+        headers: {
+          'X-Internal-Code': ENV.internal_code,
+        },
+      },
+    );
+
+    const start_time = new Date(dto.start_time);
+    const end_time = new Date(dto.end_time);
+    const duration = Math.floor(
+      (end_time.getTime() - start_time.getTime()) / 1000,
+    );
+
+    const timesheet = await this.timesheetRepository.create({
+      user_id: userId,
+      username: dto.username,
+      description: dto.description,
+      project_id: dto.project_id,
+      activity_id: dto.activity_id,
+      task_id: dto.task_id,
+      start_time: dto.start_time,
+      end_time: dto.end_time,
+      duration: duration,
+    });
+
+    await this.rabbitmqService.emit(
+      { cmd: 'create_notification' },
+      {
+        title: 'Track Timesheet Manually',
+        content: `${dto.username} has requested to track a timesheet manually from ${start_time.toISOString()} to ${end_time.toISOString()}`,
         type: 'timesheet_request',
         target_id: timesheet.id.toString(),
         user_id: activity.team.lead,
