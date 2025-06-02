@@ -2,6 +2,7 @@
 /// <reference types="@testing-library/cypress" />
 
 import "./commands";
+import "./commands/auth0-commands";
 
 const app = window.top;
 if (app) {

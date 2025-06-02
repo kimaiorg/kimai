@@ -19,7 +19,11 @@
     "cypress:headless": "cypress run",
     "cypress:login": "cypress run --spec \"cypress/e2e/auth/login.cy.ts\"",
     "e2e": "start-server-and-test dev http://localhost:3000 cypress",
-    "e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless"
+    "e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless",
+    "test:pw": "playwright test",
+  "test:pw:ui": "playwright test --ui",
+  "test:pw:debug": "playwright test --debug",
+  "test:pw:report": "playwright show-report"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
@@ -79,6 +83,7 @@
   "devDependencies": {
     "@fullcalendar/bootstrap5": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
+    "@playwright/test": "^1.52.0",
     "@stylistic/eslint-plugin": "^4.2.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/cypress": "^10.0.3",
@@ -95,6 +100,7 @@
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
     "cypress": "^14.2.1",
+    "dotenv": "^16.5.0",
     "eslint": "^9.23.0",
     "eslint-config-next": "^15.2.3",
     "eslint-config-prettier": "^10.1.1",
