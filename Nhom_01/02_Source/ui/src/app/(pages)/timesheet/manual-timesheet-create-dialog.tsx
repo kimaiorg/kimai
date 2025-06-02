@@ -43,8 +43,8 @@ export function ManualTimesheetCreateDialog({
     defaultValues: {
       task_id: "",
       description: "Description about your task here",
-      from: "",
-      end: ""
+      start_time: "",
+      end_time: ""
     }
   });
   async function onSubmit(values: CreateManualTimesheetValidation) {
@@ -55,7 +55,7 @@ export function ManualTimesheetCreateDialog({
       const payload: CreateManualTimesheetRequestDTO = {
         ...rest,
         task_id: Number(task_id),
-        user_name: "Will be deleted",
+        username: "Will be deleted",
         project_id: project!.id,
         activity_id: activity!.id
       };
@@ -146,7 +146,7 @@ export function ManualTimesheetCreateDialog({
               {/* Name and Color */}
               <FormField
                 control={createTimesheetForm.control}
-                name="from"
+                name="start_time"
                 render={({ field }) => (
                   <FormItem className="col-span-6">
                     <FormLabel>Start time</FormLabel>
@@ -162,7 +162,7 @@ export function ManualTimesheetCreateDialog({
               />
               <FormField
                 control={createTimesheetForm.control}
-                name="end"
+                name="end_time"
                 render={({ field }) => (
                   <FormItem className="col-span-6">
                     <FormLabel>End time</FormLabel>

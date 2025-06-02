@@ -12,12 +12,27 @@ import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useTranslation } from "@/lib/i18n";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { formatCurrency } from "@/lib/utils";
 import { PaginationV2 } from "@/type_schema/common";
 import { InvoiceHistoryType } from "@/type_schema/invoice";
 import { Role } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
+import { formatDate } from "date-fns";
 import debounce from "debounce";
-import { Download, Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
+import {
+  BadgeDollarSign,
+  DollarSign,
+  Download,
+  Eye,
+  FileDown,
+  Filter,
+  MoreHorizontal,
+  Plus,
+  Search,
+  SquarePen,
+  Trash2,
+  Upload
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -147,7 +162,7 @@ function InvoiceHistoryContent() {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Invoice template</h1>
+        <h1 className="text-2xl font-bold">Invoice history</h1>
         <div className="flex items-center space-x-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -227,12 +242,6 @@ function InvoiceHistoryContent() {
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  Created By
-                </th>
-                <th
-                  scope="col"
                   className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
                 >
                   Actions
@@ -246,7 +255,7 @@ function InvoiceHistoryContent() {
                     key={index}
                     className="hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.createdAt}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ">{formatDate(invoice.date, "dd/MM/yyyy")}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm ">{invoice.customer.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -256,14 +265,7 @@ function InvoiceHistoryContent() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm ">
-                      {invoice.totalPrice} {invoice.currency}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`inline-flex items-center justify-center h-8 w-8 rounded-full`}>
-                        <span className="text-xs font-medium text-center">
-                          {userList.find((user) => user.user_id == invoice.createdBy)?.name || "N/A"}
-                        </span>
-                      </div>
+                      {formatCurrency(Number(invoice.totalAmount), invoice.currency)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <DropdownMenu>
@@ -289,8 +291,8 @@ function InvoiceHistoryContent() {
                             targetInvoice={invoice}
                             refetchData={() => fetchInvoiceHistories()}
                           >
-                            <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
-                              <SquarePen size={14} /> Edit
+                            <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md text-lime-600">
+                              <BadgeDollarSign size={14} /> Mark as paid
                             </div>
                           </InvoiceStatusUpdateDialog>
                           <div

@@ -1,5 +1,5 @@
 // Import Auth0Tokens interface
-import { Auth0Tokens } from './commands/auth0-commands';
+import { Auth0Tokens } from "./commands/auth0-commands";
 
 // Thêm type cho custom commands
 declare namespace Cypress {
@@ -9,13 +9,17 @@ declare namespace Cypress {
      * @example cy.loginToAuth0('username', 'password')
      * @returns Auth0Tokens object
      */
-    loginToAuth0(username?: string, password?: string, options?: {
-      domain?: string;
-      clientId?: string;
-      clientSecret?: string;
-      audience?: string;
-      scope?: string;
-    }): Chainable<Auth0Tokens>;
+    loginToAuth0(
+      username?: string,
+      password?: string,
+      options?: {
+        domain?: string;
+        clientId?: string;
+        clientSecret?: string;
+        audience?: string;
+        scope?: string;
+      }
+    ): Chainable<Auth0Tokens>;
 
     /**
      * Custom command to set Auth0 tokens in localStorage

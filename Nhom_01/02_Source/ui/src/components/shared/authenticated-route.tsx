@@ -2,7 +2,7 @@
 
 import ErrorPage from "@/app/error";
 import Loading from "@/app/loading";
-import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
+import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { Role, RolePermissionType, RoleType } from "@/type_schema/role";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
@@ -30,7 +30,7 @@ export const AuthenticatedRoute = (Component: any, roles: Role[]) => {
   return function AuthRoute(props: any) {
     const { user, error, isLoading } = useUser();
     const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
-
+    const userStat = useAppSelector((state) => state.userState);
     if (isLoading) {
       return <Loading />;
     }
@@ -44,6 +44,8 @@ export const AuthenticatedRoute = (Component: any, roles: Role[]) => {
     }
 
     if (user) {
+      console.log(user);
+      console.log(userStat);
       if (hasRole(userRolePermissions.role, roles)) {
         return <Component {...props} />;
       }

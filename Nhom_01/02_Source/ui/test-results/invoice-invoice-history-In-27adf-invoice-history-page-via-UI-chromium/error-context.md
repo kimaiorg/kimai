@@ -22,12 +22,12 @@ Call log:
 
 ```yaml
 - main:
-  - heading "401" [level=1]
-  - paragraph: Unauthorized
-  - button "Login"
+    - heading "401" [level=1]
+    - paragraph: Unauthorized
+    - button "Login"
 - region "Notifications alt+T"
 - button "Open Next.js Dev Tools":
-  - img
+    - img
 - alert
 ```
 
@@ -47,25 +47,25 @@ Call log:
   11 |     // Kiểm tra đã đăng nhập thành công
   12 |     const isAuthenticated = await page.evaluate(() => localStorage.getItem('auth0.is.authenticated'));
   13 |     expect(isAuthenticated).toBe('true');
-  14 |     
+  14 |
   15 |     // Log token để debug
   16 |     const token = await page.evaluate(() => localStorage.getItem('auth0.access_token'));
   17 |     console.log(`Access Token: ${token?.substring(0, 10)}...`);
-  18 |     
+  18 |
   19 |     // Truy cập trực tiếp trang invoice-history
   20 |     await page.goto('/en/invoice-history', { timeout: 30000 });
-  21 |     
+  21 |
   22 |     // Kiểm tra URL hiện tại
   23 |     expect(page.url()).toContain('/en/invoice-history');
-  24 |     
+  24 |
   25 |     // Kiểm tra không bị chuyển hướng đến trang đăng nhập
   26 |     expect(page.url()).not.toContain('/login');
-  27 |     
+  27 |
   28 |     // Kiểm tra không có lỗi 401
   29 |     const pageContent = await page.content();
   30 |     expect(pageContent).not.toContain('401');
   31 |     expect(pageContent).not.toContain('Unauthorized');
-  32 |     
+  32 |
   33 |     // Kiểm tra các phần tử trên trang invoice-history
   34 |     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 });
 > 35 |     await expect(page.getByText('Invoice History')).toBeVisible({ timeout: 10000 });
@@ -75,20 +75,20 @@ Call log:
   38 |   test('should display invoice data correctly', async ({ page }) => {
   39 |     // Truy cập trực tiếp trang invoice-history sau khi đã đăng nhập
   40 |     await page.goto('/en/invoice-history');
-  41 |     
+  41 |
   42 |     // Đợi dữ liệu hóa đơn được tải
   43 |     await expect(page.locator('table')).toBeVisible({ timeout: 10000 });
-  44 |     
+  44 |
   45 |     // Kiểm tra bảng dữ liệu hóa đơn
   46 |     const rows = await page.locator('table tbody tr').count();
   47 |     expect(rows).toBeGreaterThanOrEqual(1);
-  48 |     
+  48 |
   49 |     // Kiểm tra các cột trong bảng
   50 |     await expect(page.locator('table thead th')).toBeVisible();
-  51 |     
+  51 |
   52 |     // Kiểm tra chức năng tìm kiếm/lọc (nếu có)
   53 |     await expect(page.locator('input[type="search"]')).toBeVisible();
-  54 |     
+  54 |
   55 |     // Kiểm tra phân trang (nếu có)
   56 |     await expect(page.locator('.pagination')).toBeVisible();
   57 |   });
@@ -96,7 +96,7 @@ Call log:
   59 |   test('should handle empty invoice history gracefully', async ({ page }) => {
   60 |     // Giả lập trường hợp không có hóa đơn nào
   61 |     await page.goto('/en/invoice-history?search=nonexistentinvoice123456789');
-  62 |     
+  62 |
   63 |     // Kiểm tra thông báo "không có dữ liệu" hoặc bảng trống
   64 |     const noDataMessage = page.getByText('No invoices found');
   65 |     if (await noDataMessage.isVisible()) {

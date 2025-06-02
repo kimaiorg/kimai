@@ -130,7 +130,7 @@ export async function addNewManualTimesheetRecord(request: CreateManualTimesheet
   const token = await getManagementAccessToken();
   const payload = { ...request };
   try {
-    const response = await timesheetAxios.post(`/api/v1/timesheets`, payload, {
+    const response = await timesheetAxios.post(`/api/v1/timesheets/start/manually`, payload, {
       headers: {
         Authorization: `Bearer ${token}`
       }

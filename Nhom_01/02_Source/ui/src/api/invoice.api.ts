@@ -1,6 +1,6 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { invoiceAxios } from "@/api/axios";
-import { Pagination, PaginationV2 } from "@/type_schema/common";
+import { PaginationV2 } from "@/type_schema/common";
 import {
   FilterInvoiceRequestDTO,
   InvoiceHistoryDataResponseType,
@@ -69,8 +69,7 @@ export async function getAllInvoiceHistories(
   if (status) params.append("status", status);
   const response = await invoiceAxios.get<InvoiceHistoryDataResponseType>(`/api/v1/invoices?${params.toString()}`, {
     headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
+      Authorization: `Bearer ${token}`
     }
   });
 
@@ -83,7 +82,7 @@ export async function updateInvoiceStatus(request: UpdateInvoiceRequestDTO, invo
   const token = await getManagementAccessToken();
 
   try {
-    const response = await invoiceAxios.post(`/api/v1/invoices/generate`, request, {
+    const response = await invoiceAxios.put(`/api/v1/invoices/${invoiceId}`, request, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -92,51 +91,6 @@ export async function updateInvoiceStatus(request: UpdateInvoiceRequestDTO, invo
   } catch (error: any) {
     return error.response.status;
   }
-}
-
-export async function getAllInvoiceTemplates(
-  page?: number,
-  limit?: number,
-  keyword?: string,
-  sortBy?: string,
-  sortOrder?: string,
-  isActive?: boolean
-): Promise<Pagination<InvoiceTemplateType>> {
-  const token = await getManagementAccessToken();
-
-  const params = new URLSearchParams();
-  if (page) params.append("page", page.toString());
-  if (limit) params.append("limit", limit.toString());
-  if (keyword) params.append("keyword", keyword);
-  if (sortBy) {
-    params.append("sort_by", sortBy);
-    const order = sortOrder === "asc" ? "asc" : "desc";
-    params.append("sort_order", order);
-  }
-  if (isActive) params.append("is_active", isActive.toString());
-
-  return {
-    metadata: {
-      total: 2,
-      page: 1,
-      limit: 10,
-      totalPages: 1
-    },
-    data: fakeInvoiceTemplates()
-  };
-
-  const response = await invoiceAxios.get<Pagination<InvoiceTemplateType>>(
-    `/api/v1/invoice-templates?${params.toString()}`,
-    {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
-
-  const data = response.data;
-  return data;
 }
 
 export async function getInvoiceTemplateById(invoiceTemplateId: number): Promise<InvoiceTemplateType> {
@@ -151,46 +105,3 @@ export async function getInvoiceTemplateById(invoiceTemplateId: number): Promise
   const data = response.data;
   return data;
 }
-
-const fakeInvoiceTemplates = (): InvoiceTemplateType[] => {
-  return [
-    {
-      id: 1,
-      name: "Default Template",
-      format: "PDF",
-      title: "Invoice",
-      companyName: "Abbott-Gerlach",
-      vatId: "51323653524006",
-      address: "5687 Greenfelder Pine\n99349 East Zoey, Macao",
-      contact: "Phone: 857.919.4369\nEmail: leannon.cassie@example.org\nWeb: www.example.org",
-      termsOfPayment: "I would like to thank you for your confidence and will gladly be there for you again!",
-      bankAccount: "Acme Bank\nBIC: AAISANBXBW\nIBAN: DE07700111109999999999",
-      paymentTerm: "30",
-      taxRate: "0.000",
-      language: "English",
-      invoiceNumberGenerator: "Configured format",
-      invoiceTemplate: "Invoice",
-      grouping: "Default (one row per entry)",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 2,
-      name: "HTML Template",
-      format: "HTML",
-      title: "Invoice",
-      companyName: "Kimai Inc.",
-      vatId: "DE123456789",
-      address: "123 Main Street\nBerlin, Germany 10115",
-      contact: "Phone: +49 30 123456\nEmail: info@kimai.org\nWeb: www.kimai.org",
-      termsOfPayment: "Thank you for your business!",
-      bankAccount: "Deutsche Bank\nBIC: DEUTDEFFXXX\nIBAN: DE89370400440532013000",
-      paymentTerm: "14",
-      taxRate: "19.000",
-      language: "English",
-      invoiceNumberGenerator: "Configured format",
-      invoiceTemplate: "Invoice",
-      grouping: "Activity",
-      createdAt: new Date().toISOString()
-    }
-  ];
-};

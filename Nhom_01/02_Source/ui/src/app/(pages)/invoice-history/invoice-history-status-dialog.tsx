@@ -2,7 +2,6 @@
 
 import { updateInvoiceStatus } from "@/api/invoice.api";
 import { Button } from "@/components/ui/button";
-import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,7 +15,7 @@ import { toast } from "sonner";
 
 const statusList = [
   { name: "New", value: "NEW" },
-  { name: "Pending", value: "PENDING" },
+  // { name: "Pending", value: "PENDING" },
   { name: "Paid", value: "PAID" },
   { name: "Cancelled", value: "CANCELLED" }
 ];
@@ -35,9 +34,8 @@ export default function InvoiceStatusUpdateDialog({
   const updateInvoiceStatusForm = useForm<UpdateInvoiceRequestDTO>({
     resolver: zodResolver(UpdateInvoiceRequestSchema),
     defaultValues: {
-      description: "",
-      status: targetInvoice.status,
-      paymentDate: ""
+      comment: "",
+      status: "PAID"
     }
   });
   async function onSubmit(values: UpdateInvoiceRequestDTO) {
@@ -94,10 +92,10 @@ export default function InvoiceStatusUpdateDialog({
                   {/* Name and Color */}
                   <FormField
                     control={updateInvoiceStatusForm.control}
-                    name="description"
+                    name="comment"
                     render={({ field }) => (
                       <FormItem className="col-span-12">
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Comment</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Enter description"
@@ -141,22 +139,6 @@ export default function InvoiceStatusUpdateDialog({
                               ))}
                             </SelectContent>
                           </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={updateInvoiceStatusForm.control}
-                    name="paymentDate"
-                    render={({ field }) => (
-                      <FormItem className="col-span-12">
-                        <FormLabel>Payment date</FormLabel>
-                        <FormControl>
-                          <DateTimePicker
-                            date={field.value}
-                            setDate={field.onChange}
-                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
