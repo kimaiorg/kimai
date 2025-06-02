@@ -1,0 +1,27 @@
+enum NotificationType {
+  expense_request
+  absence_request
+  timesheet_request
+  expense_request_status
+  absence_request_status
+  timesheet_request_status
+  change_status_request
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+
+  title   String
+  content String
+
+  type      NotificationType
+  target_id String
+  user_id   String           @default("")
+  has_read  Boolean          @default(false)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("notifications")
+}
