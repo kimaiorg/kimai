@@ -13,7 +13,7 @@ setup("authenticate", async ({ page }) => {
   await page.waitForSelector("form", { timeout: 10000 });
 
   // Take screenshot of the login form
-  await page.screenshot({ path: "test-results/login-form.png" });
+  await page.screenshot({ path: "test-results/e2e/login-form.png" });
 
   // 3. Use a more direct approach to fill the form
   console.log("Filling login form...");
@@ -24,7 +24,7 @@ setup("authenticate", async ({ page }) => {
   await page.keyboard.insertText("Admin123@");
 
   // Take screenshot after filling
-  await page.screenshot({ path: "test-results/after-fill.png" });
+  await page.screenshot({ path: "test-results/e2e/after-fill.png" });
 
   // 4. Press Enter to submit the form
   console.log("Submitting form...");
@@ -35,7 +35,7 @@ setup("authenticate", async ({ page }) => {
 
   // Wait for the first screen after login
   await page.waitForLoadState("networkidle", { timeout: 10000 });
-  await page.screenshot({ path: "test-results/after-login-screen1.png" });
+  await page.screenshot({ path: "test-results/e2e/after-login-screen1.png" });
 
   // Click 'Get Started' button
   console.log("Clicking Get Started button...");
@@ -44,7 +44,7 @@ setup("authenticate", async ({ page }) => {
 
   // Wait for the next screen
   await page.waitForLoadState("networkidle", { timeout: 5000 });
-  await page.screenshot({ path: "test-results/after-get-started.png" });
+  await page.screenshot({ path: "test-results/e2e/after-get-started.png" });
 
   // Click first 'Continue' button
   console.log("Clicking first Continue button...");
@@ -53,7 +53,7 @@ setup("authenticate", async ({ page }) => {
 
   // Wait for the next screen
   await page.waitForLoadState("networkidle", { timeout: 5000 });
-  await page.screenshot({ path: "test-results/after-continue1.png" });
+  await page.screenshot({ path: "test-results/e2e/after-continue1.png" });
 
   // Click second 'Continue' button
   console.log("Clicking second Continue button...");
@@ -62,7 +62,7 @@ setup("authenticate", async ({ page }) => {
 
   // Wait for the next screen
   await page.waitForLoadState("networkidle", { timeout: 5000 });
-  await page.screenshot({ path: "test-results/after-continue2.png" });
+  await page.screenshot({ path: "test-results/e2e/after-continue2.png" });
 
   // Click 'Go to Dashboard' button
   console.log("Clicking Go to Dashboard button...");
@@ -74,7 +74,7 @@ setup("authenticate", async ({ page }) => {
   await page.waitForLoadState("networkidle", { timeout: 10000 });
 
   // Take screenshot of the dashboard
-  await page.screenshot({ path: "test-results/dashboard.png" });
+  await page.screenshot({ path: "test-results/e2e/dashboard.png" });
 
   // Pause for 3 seconds on the dashboard screen
   console.log("Pausing on dashboard for 3 seconds...");
