@@ -160,6 +160,7 @@ export class TimesheetService {
       start_time: dto.start_time,
       end_time: dto.end_time,
       duration: duration,
+      status: 'stopped',
     });
 
     await this.rabbitmqService.emit(
