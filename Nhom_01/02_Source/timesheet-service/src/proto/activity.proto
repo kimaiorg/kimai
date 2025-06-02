@@ -1,0 +1,23 @@
+syntax = 'proto3';
+
+package proto;
+
+service ActivityService {
+  rpc FindOne (ActivityById) returns (ActivityResponse) {}
+}
+
+message ActivityById {
+  int32 id = 1;
+}
+
+message ActivityResponse {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  TeamResponse team = 4;
+}
+
+message TeamResponse {
+  int32 id = 1;
+  string lead = 2;
+}

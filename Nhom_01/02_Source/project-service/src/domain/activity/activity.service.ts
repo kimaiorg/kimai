@@ -7,7 +7,6 @@ import { UpdateActivityDto } from '@/api/activity/dto/update-activity.dto';
 import { ListActivityDto } from '@/api/activity/dto';
 import { PaginationResponse } from '@/libs/response/pagination';
 import { buildListQuery } from './builder';
-import { GetOptions } from '@/libs/types/database.type';
 
 @Injectable()
 export class ActivityService {

@@ -7,10 +7,9 @@ import {
   Post,
   Put,
   Query,
-  Req,
   UsePipes,
 } from '@nestjs/common';
-import { Activity } from '@prisma/client';
+import { Activity, Team } from '@prisma/client';
 import { Permissions } from '@/libs/decorators';
 import { ActivityService } from '@/domain/activity/activity.service';
 import {
@@ -29,10 +28,48 @@ import {
   ListActivitySwaggerDto,
 } from '@/api/activity/swagger';
 import { PaginationResponse } from '@/libs/response/pagination';
+import { GrpcMethod } from '@nestjs/microservices';
+
+interface ActivityById {
+  id: number;
+}
+
+interface ActivityResponse {
+  id: number;
+  name: string;
+  description: string;
+  team: TeamResponse;
+}
+
+interface TeamResponse {
+  id: number;
+  lead: string;
+}
 
 @Controller('activities')
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
+
+  @GrpcMethod('ActivityService')
+  async findOne(data: ActivityById): Promise<ActivityResponse> {
+    const activity = (await this.activityService.getActivity(
+      data.id,
+    )) as Activity & { team: Team };
+    if (!activity) {
+      throw new Error('Activity not found');
+    }
+
+    return {
+      id: activity.id,
+      name: activity.name,
+      description: activity.description ?? '',
+      team: {
+        id: activity.team_id,
+        lead: activity.team.lead ?? '',
+      },
+    };
+  }
+
   @Post('')
   @ApiBody({ type: CreateActivitySwagger })
   @Permissions(['create:activities'])

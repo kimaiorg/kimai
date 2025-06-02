@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Inject, Injectable } from '@nestjs/common';
 import { TimesheetRepository } from '@/infrastructure/timesheet/timesheet.repository';
 import { Timesheet } from '@prisma/client';
@@ -15,8 +19,23 @@ import {
 import { ProjectHttpService } from '@/libs/http/project-http.service';
 import { RabbitmqService } from '@/libs/rabbitmq/rabbitmq.service';
 import { ENV } from '@/libs/configs/env';
-import { ActivityResponse } from './response';
 import { StartTimesheetManuallyDto } from '@/api/timesheet/dto/start-timesheet-manually.dto';
+import * as path from 'path';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+
+interface ActivityResponse {
+  id: number;
+  name: string;
+  description: string;
+  team: TeamResponse;
+}
+
+interface TeamResponse {
+  id: number;
+  lead: string;
+}
+
 @Injectable()
 export class TimesheetService {
   constructor(
@@ -25,6 +44,39 @@ export class TimesheetService {
     private readonly rabbitmqService: RabbitmqService,
     private readonly projectHttpService: ProjectHttpService,
   ) {}
+
+  getActivity(id: number): any {
+    const PROTO_PATH = path.join(__dirname, '../../proto/activity.proto');
+    const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+      keepCase: true,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true,
+    });
+    const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
+    const activityProto = protoDescriptor.proto as any;
+
+    const client = new activityProto.ActivityService(
+      process.env.PROJECT_SERVICE_GRPC_URL ?? 'localhost:5000',
+      grpc.credentials.createInsecure(),
+    );
+
+    const request = { id };
+
+    return new Promise((resolve, reject) => {
+      client.FindOne(
+        request,
+        (error: grpc.ServiceError, response: ActivityResponse) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    });
+  }
 
   async startTimesheet(
     userId: string,
@@ -40,16 +92,9 @@ export class TimesheetService {
       throw new Error('You have not ended the previous timesheet.');
     }
 
-    const activity: ActivityResponse = await this.projectHttpService.callApi(
-      `api/v1/activities/${dto.activity_id}`,
-      'get',
-      {},
-      {
-        headers: {
-          'X-Internal-Code': ENV.internal_code,
-        },
-      },
-    );
+    const activity: ActivityResponse = (await this.getActivity(
+      dto.activity_id as number,
+    )) as ActivityResponse;
 
     const timesheet = await this.timesheetRepository.create({
       user_id: userId,
