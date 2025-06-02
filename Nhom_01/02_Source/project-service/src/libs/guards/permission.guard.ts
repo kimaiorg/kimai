@@ -10,6 +10,12 @@ export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const ctxType = context.getType();
+
+    if (ctxType === 'rpc') {
+      return true;
+    }
+
     const internalCode = context.switchToHttp().getRequest()?.headers[
       'x-internal-code'
     ];
