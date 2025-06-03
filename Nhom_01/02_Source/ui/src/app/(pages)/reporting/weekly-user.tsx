@@ -9,14 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTranslation } from "@/lib/i18n";
 import { generateWeeklyReportPdf } from "@/lib/pdf-utils";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { formatDuration, generateWeekOption, getWeekNumber } from "@/lib/utils";
+import { formatDuration, generateWeekOption } from "@/lib/utils";
 import { ProjectType } from "@/type_schema/project";
-import {
-  WeekDayType,
-  WeeklyOneUserReportResponseType,
-  WeeklyOneUserReportType,
-  WeeklyReportEntry
-} from "@/type_schema/report";
+import { WeekDayType, WeeklyOneUserReportType, WeeklyReportEntry } from "@/type_schema/report";
 import { Role, RolePermissionType } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
@@ -27,7 +22,7 @@ function WeeklyUserReport() {
   const { t } = useTranslation();
   const { user } = useUser();
   const weekOptions = generateWeekOption();
-  const [currentWeekNumber, setCurrentWeekNumber] = useState(getWeekNumber(new Date(), weekOptions));
+  const [currentWeekNumber, setCurrentWeekNumber] = useState(21);
 
   const [selectedWeek, setSelectedWeek] = useState(weekOptions.find((week) => week.week === currentWeekNumber));
   const [projects, setProjects] = useState<ProjectType[]>([]);
@@ -49,11 +44,19 @@ function WeeklyUserReport() {
       setIsLoading(true);
       try {
         const response = await getWeeklyOneUserReport(selectedUser.user_id!, selectedWeek!.from, selectedWeek!.to);
+        const timeEachDays = [];
+        for (let i = 0; i < 7; i++) {
+          const totalTimeDay = response.entries.reduce(
+            (sum, entry) => addTimeDuration(sum, entry.duration[i] || "0:00"),
+            "0:00"
+          );
+          timeEachDays.push(totalTimeDay);
+        }
         const data: WeeklyOneUserReportType = {
           ...response,
           user: userList.find((u) => u.user_id === selectedUser.user_id)!,
-          totalOfDays: "0",
-          totalOfEachDay: ["0", "0", "0", "0", "0", "0", "0"]
+          totalOfDays: response.entries.reduce((sum, entry) => addTimeDuration(sum, entry.totalDuration), "0:00"),
+          totalOfEachDay: timeEachDays
         };
         setWeeklyReport(data);
       } catch (error) {
@@ -212,20 +215,6 @@ function WeeklyUserReport() {
     window.open(pdfUrl, "_blank");
   };
 
-  // Color dot for project
-  const ProjectColorDot = ({ color }: { color: string }) => {
-    const colorMap: Record<string, string> = {
-      red: "bg-red-500",
-      yellow: "bg-yellow-500",
-      pink: "bg-pink-500",
-      blue: "bg-blue-500",
-      green: "bg-green-500",
-      orange: "bg-orange-500"
-    };
-
-    return <span className={`inline-block w-2 h-2 rounded-full mr-2 ${colorMap[color]}`}></span>;
-  };
-
   // Handle user change
   const handleUserChange = (userId: string) => {
     setSelectedUser(userList.find((u) => u.user_id === userId)!);
@@ -324,7 +313,7 @@ function WeeklyUserReport() {
             <Table>
               <TableHeader className="dark:bg-slate-800">
                 <TableRow>
-                  <TableHead className="w-1/4">Project</TableHead>
+                  <TableHead className="w-1/4">Task</TableHead>
                   <TableHead>Total</TableHead>
                   {currentWeek.map((day, index) => (
                     <TableHead
@@ -337,40 +326,41 @@ function WeeklyUserReport() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* {[].map((project) => (
-                  <TableRow
-                    key={project.id}
-                    className="hover:bg-gray-50 dark:hover:bg-slate-800"
-                  >
-                    <TableCell className="font-medium">
-                      <div className="flex items-center">
-                        <ProjectColorDot color={project.color} />
-                        {project.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-blue-500 font-medium">
-                      {getProjectTotal(project.id.toString())}
-                    </TableCell>
-                    {currentWeek.map((day, dayIndex) => (
+                {weeklyReport &&
+                  weeklyReport.entries.map((entry, idx) => (
+                    <TableRow
+                      key={idx}
+                      className="hover:bg-gray-50 dark:hover:bg-slate-800"
+                    >
+                      <TableCell className="font-medium">
+                        <div className="flex items-center">{entry.task.title}</div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center">{entry.totalDuration}</div>
+                      </TableCell>
+                      {entry.duration.map((dur, index) => (
+                        <TableCell
+                          key={index}
+                          className="text-blue-500 font-medium"
+                        >
+                          {dur || "0:00"}
+                        </TableCell>
+                      ))}
+                      {/* {currentWeek.map((day, dayIndex) => (
                       <TableCell
                         key={dayIndex}
                         className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
                       >
                         {getTimeForProjectAndDay(project.id.toString(), day.date)}
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))} */}
+                    ))} */}
+                    </TableRow>
+                  ))}
                 <TableRow className="font-bold">
                   <TableCell>Total</TableCell>
-                  <TableCell className="text-blue-500">{getGrandTotal()}</TableCell>
-                  {currentWeek.map((day, dayIndex) => (
-                    <TableCell
-                      key={dayIndex}
-                      className={day.dayName === "THU" ? "bg-amber-50 dark:bg-slate-900" : ""}
-                    >
-                      {getDayTotal(day.date)}
-                    </TableCell>
+                  <TableCell className="text-blue-500">{weeklyReport?.totalOfDays}</TableCell>
+                  {weeklyReport?.totalOfEachDay.map((dayTotal, dayIndex) => (
+                    <TableCell key={dayIndex}>{dayTotal}</TableCell>
                   ))}
                 </TableRow>
               </TableBody>
@@ -383,3 +373,23 @@ function WeeklyUserReport() {
 }
 
 export default AuthenticatedRoute(WeeklyUserReport, []);
+
+function addTimeDuration(time1: string, time2: string): string {
+  // Split the time strings into hours and minutes
+  const [hours1, minutes1] = time1.split(":").map(Number);
+  const [hours2, minutes2] = time2.split(":").map(Number);
+
+  // Add minutes and hours
+  let totalMinutes: number = minutes1 + minutes2;
+  let totalHours: number = hours1 + hours2;
+
+  // Convert excess minutes into hours
+  totalHours += Math.floor(totalMinutes / 60);
+  totalMinutes = totalMinutes % 60;
+
+  // Format as "HH:MM" with leading zeros
+  const formattedHours: string = totalHours.toString().padStart(2, "0");
+  const formattedMinutes: string = totalMinutes.toString().padStart(2, "0");
+
+  return `${formattedHours}:${formattedMinutes}`;
+}

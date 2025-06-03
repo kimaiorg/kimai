@@ -8,10 +8,10 @@ const ProjectOverview = dynamic(() => import("@/app/(pages)/reporting/project-ov
   ssr: false,
   loading: () => <TimesheetTableSkeleton />
 });
-const WeeklyAll = dynamic(() => import("@/app/(pages)/reporting/weekly-all"), {
-  ssr: false,
-  loading: () => <TimesheetTableSkeleton />
-});
+// const WeeklyAll = dynamic(() => import("@/app/(pages)/reporting/weekly-all"), {
+//   ssr: false,
+//   loading: () => <TimesheetTableSkeleton />
+// });
 const WeeklyUser = dynamic(() => import("@/app/(pages)/reporting/weekly-user"), {
   ssr: false,
   loading: () => <TimesheetTableSkeleton />
@@ -25,13 +25,13 @@ const reportCards: ReportViewType[] = [
     component: WeeklyUser,
     allowRoles: []
   },
-  {
-    title: "Weekly view for all users",
-    type: ReportView.WEEKLY_ALL_USERS,
-    icon: <UsersIcon className="h-6 w-6 text-pink-500" />,
-    component: WeeklyAll,
-    allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
-  },
+  // {
+  //   title: "Weekly view for all users",
+  //   type: ReportView.WEEKLY_ALL_USERS,
+  //   icon: <UsersIcon className="h-6 w-6 text-pink-500" />,
+  //   component: WeeklyAll,
+  //   allowRoles: [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]
+  // },
   {
     type: ReportView.PROJECT_OVERVIEW,
     title: "Project overview",

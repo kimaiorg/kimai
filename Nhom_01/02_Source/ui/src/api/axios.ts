@@ -70,5 +70,21 @@ notificationAxios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+const reportAxios = axios.create({
+  baseURL: process.env.REPORTING_BACKEND_URL,
+  validateStatus: () => true
+});
+// Add a request interceptor
+reportAxios.interceptors.request.use((config) => config);
+// Add a response interceptor
+reportAxios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.status === 401) {
+      removeTokens();
+    }
+    return Promise.reject(error);
+  }
+);
 
-export { invoiceAxios, notificationAxios, projectAxios, timesheetAxios, removeTokens };
+export { invoiceAxios, notificationAxios, projectAxios, removeTokens, reportAxios, timesheetAxios };
