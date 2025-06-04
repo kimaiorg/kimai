@@ -15,7 +15,7 @@ import { ActivityType } from "@/type_schema/activity";
 import { Pagination } from "@/type_schema/common";
 import { Role } from "@/type_schema/role";
 import debounce from "debounce";
-import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
+import { Eye, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -152,18 +152,6 @@ function Activity() {
               Create <Plus />
             </Button>
           </ActivityCreateDialog>
-          <Button
-            variant="outline"
-            size="icon"
-          >
-            <FileDown className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-          >
-            <Upload className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 

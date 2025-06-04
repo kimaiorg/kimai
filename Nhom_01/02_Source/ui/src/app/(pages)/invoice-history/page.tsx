@@ -3,6 +3,7 @@
 import { getAllInvoiceHistories } from "@/api/invoice.api";
 import FilterInvoiceHistoryModal from "@/app/(pages)/invoice-history/filter-modal";
 import InvoiceStatusUpdateDialog from "@/app/(pages)/invoice-history/invoice-history-status-dialog";
+import InvoiceSendMailDialog from "@/app/(pages)/invoice-history/invoice-send-email-dialog";
 import InvoicePreviewDialog from "@/app/(pages)/invoice/invoice-preview-dialog";
 import { generateInvoiceTemplatePDF } from "@/components/invoice/templates/invoice-pdf-generator";
 import { AuthenticatedRoute } from "@/components/shared/authenticated-route";
@@ -21,17 +22,15 @@ import { formatDate } from "date-fns";
 import debounce from "debounce";
 import {
   BadgeDollarSign,
-  DollarSign,
   Download,
   Eye,
-  FileDown,
   Filter,
+  Mail,
   MoreHorizontal,
   Plus,
   Search,
-  SquarePen,
-  Trash2,
-  Upload
+  SendHorizontal,
+  Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -196,18 +195,6 @@ function InvoiceHistoryContent() {
               Create <Plus />
             </Button>
           </Link>
-          <Button
-            variant="outline"
-            size="icon"
-          >
-            <FileDown className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-          >
-            <Upload className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -287,14 +274,26 @@ function InvoiceHistoryContent() {
                               <Eye size={14} /> Show preview
                             </div>
                           </InvoicePreviewDialog>
-                          <InvoiceStatusUpdateDialog
-                            targetInvoice={invoice}
-                            refetchData={() => fetchInvoiceHistories()}
-                          >
-                            <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md text-lime-600">
-                              <BadgeDollarSign size={14} /> Mark as paid
-                            </div>
-                          </InvoiceStatusUpdateDialog>
+                          {invoice.status === "NEW" && (
+                            <InvoiceSendMailDialog
+                              targetInvoice={invoice}
+                              refetchData={fetchInvoiceHistories}
+                            >
+                              <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md text-violet-600">
+                                <Mail size={14} /> Send invoice
+                              </div>
+                            </InvoiceSendMailDialog>
+                          )}
+                          {invoice.status === "PENDING" && (
+                            <InvoiceStatusUpdateDialog
+                              targetInvoice={invoice}
+                              refetchData={() => fetchInvoiceHistories()}
+                            >
+                              <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md text-lime-600">
+                                <BadgeDollarSign size={14} /> Mark as paid
+                              </div>
+                            </InvoiceStatusUpdateDialog>
+                          )}
                           <div
                             className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md"
                             onClick={() => handleDownloadInvoice(invoice)}

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationType, NotificationTypeType } from "@/type_schema/notification";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { formatDistanceToNow } from "date-fns";
 import { BellRing, Calendar, Clock, CreditCard, ExternalLink, FileText } from "lucide-react";
 import Link from "next/link";
@@ -16,10 +17,12 @@ export default function Notification({ children }: { children: React.ReactNode }
   // Define state, actions here
   const [notifications, setNotifications] = useState<NotificationType[] | null>(null);
   const router = useRouter();
+  const { user: currentUser } = useUser();
 
   const getNotifications = async () => {
-    const result = await getAllNotifications(1, 3);
-    // console.log(result.data);
+    const result = await getAllNotifications();
+    console.log(result.data);
+    result.data = result.data.filter((notification) => notification.user_id === currentUser!.user_id).slice(0, 3);
     setNotifications(result.data);
   };
 

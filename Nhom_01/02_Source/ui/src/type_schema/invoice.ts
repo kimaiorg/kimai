@@ -24,7 +24,7 @@ export type InvoiceHistoryType = {
   project?: ProjectType;
   fromDate?: string;
   toDate?: string;
-  status: string; // NEW, PENDING, PAID, CANCELED
+  status: string; // NEW, PAID, CANCELED
   totalPrice: number | string; // Total price of the invoice
   taxRate?: number; // Tax rate
   taxPrice?: number; // Tax price: totalPrice * taxRate
@@ -34,7 +34,6 @@ export type InvoiceHistoryType = {
   comment?: string; // Additional comment
   createdBy: string;
   createdAt: string;
-  template?: InvoiceTemplateType; // ID of the invoice template
   activities?: InvoiceHistoryItemType[];
   items?: InvoiceItemType[];
   date: string;

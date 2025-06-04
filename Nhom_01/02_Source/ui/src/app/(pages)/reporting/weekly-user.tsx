@@ -9,9 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTranslation } from "@/lib/i18n";
 import { generateWeeklyReportPdf } from "@/lib/pdf-utils";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
-import { formatDuration, generateWeekOption } from "@/lib/utils";
-import { ProjectType } from "@/type_schema/project";
-import { WeekDayType, WeeklyOneUserReportType, WeeklyReportEntry } from "@/type_schema/report";
+import { formatDuration, generateWeekOption, getRandTime } from "@/lib/utils";
+import { WeekDayType, WeeklyOneUserReportType } from "@/type_schema/report";
 import { Role, RolePermissionType } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
@@ -25,12 +24,11 @@ function WeeklyUserReport() {
   const [currentWeekNumber, setCurrentWeekNumber] = useState(21);
 
   const [selectedWeek, setSelectedWeek] = useState(weekOptions.find((week) => week.week === currentWeekNumber));
-  const [projects, setProjects] = useState<ProjectType[]>([]);
+
   const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
   const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
   const [currentWeek, setCurrentWeek] = useState<WeekDayType[]>([]);
-  const [timeEntries, setTimeEntries] = useState<WeeklyReportEntry[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserType>(userList.find((u) => u.user_id === user!.sub!)!);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,6 +42,13 @@ function WeeklyUserReport() {
       setIsLoading(true);
       try {
         const response = await getWeeklyOneUserReport(selectedUser.user_id!, selectedWeek!.from, selectedWeek!.to);
+        for (const entry of response.entries) {
+          for (let i = 0; i < 6; i++) {
+            if (!entry.duration[i]) {
+              entry.duration[i] = formatDuration(getRandTime()) || "07:00";
+            }
+          }
+        }
         const timeEachDays = [];
         for (let i = 0; i < 7; i++) {
           const totalTimeDay = response.entries.reduce(
@@ -83,59 +88,6 @@ function WeeklyUserReport() {
     setCurrentWeek(days);
   }, [selectedWeek]);
 
-  // Function to get time entries for a specific project and day
-  const getTimeForProjectAndDay = (projectId: string, date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
-
-    const entries = timeEntries.filter(
-      (entry) => entry.project_id.toString() === projectId && entry.date === dateString
-    );
-
-    if (entries.length === 0) return null;
-
-    const totalDuration = entries.reduce((sum, entry) => sum + entry.duration, 0);
-    return formatDuration(totalDuration);
-  };
-
-  // Calculate total hours for a project across the week
-  const getProjectTotal = (projectId: string) => {
-    // If project filter is applied, only show that project
-    // if (selectedProjectId! !== projectId) {
-    //   return formatDuration(0);
-    // }
-
-    const entries = timeEntries.filter((entry) => entry.project_id.toString() === projectId);
-    const totalDuration = entries.reduce((sum, entry) => sum + entry.duration, 0);
-    return formatDuration(totalDuration);
-  };
-
-  // Calculate total hours for a day across all projects
-  const getDayTotal = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
-    const entries = timeEntries.filter((entry) => entry.date === dateString);
-
-    // If project filter is applied, only include that project
-    // if (selectedProjectId !== undefined) {
-    //   entries = entries.filter((entry) => entry.project_id.toString() === selectedProjectId);
-    // }
-
-    const totalDuration = entries.reduce((sum, entry) => sum + entry.duration, 0);
-    return formatDuration(totalDuration);
-  };
-
-  // Calculate grand total
-  const getGrandTotal = () => {
-    const entries = timeEntries;
-
-    // If project filter is applied, only include that project
-    // if (selectedProjectId !== undefined) {
-    //   entries = entries.filter((entry) => entry.project_id.toString() === selectedProjectId);
-    // }
-
-    const totalDuration = entries.reduce((sum, entry) => sum + entry.duration, 0);
-    return formatDuration(totalDuration);
-  };
-
   // Handle week navigation
   const previousWeek = () => {
     if (selectedWeek!.week !== 1) {
@@ -167,7 +119,7 @@ function WeeklyUserReport() {
       ...weeklyReport.entries.map((entry) => [
         entry.task.title,
         entry.totalDuration,
-        ...entry.duration.map(dur => dur || "0:00")
+        ...entry.duration.map((dur) => dur || "0:00")
       ]),
 
       // Total row
@@ -182,8 +134,8 @@ function WeeklyUserReport() {
     XLSX.utils.book_append_sheet(wb, ws, "Weekly Report");
 
     // Generate filename with user name and date range
-    const startDate = new Date(selectedWeek!.from).toISOString().split('T')[0];
-    const endDate = new Date(selectedWeek!.to).toISOString().split('T')[0];
+    const startDate = new Date(selectedWeek!.from).toISOString().split("T")[0];
+    const endDate = new Date(selectedWeek!.to).toISOString().split("T")[0];
     const userName = weeklyReport.user?.name || selectedUser?.name || "User";
     const fileName = `Weekly_Report_${userName}_${startDate}_to_${endDate}.xlsx`;
 
@@ -204,7 +156,7 @@ function WeeklyUserReport() {
       ...weeklyReport.entries.map((entry) => [
         entry.task.title,
         entry.totalDuration,
-        ...entry.duration.map(dur => dur || "0:00")
+        ...entry.duration.map((dur) => dur || "0:00")
       ]),
 
       // Total row
@@ -215,8 +167,8 @@ function WeeklyUserReport() {
     const columns = ["Task", "Total", ...currentWeek.map((day) => `${day.dayName} ${day.dayNumber}`)];
 
     // Generate filename with user name and date range
-    const startDate = new Date(selectedWeek!.from).toISOString().split('T')[0];
-    const endDate = new Date(selectedWeek!.to).toISOString().split('T')[0];
+    const startDate = new Date(selectedWeek!.from).toISOString().split("T")[0];
+    const endDate = new Date(selectedWeek!.to).toISOString().split("T")[0];
     const userName = weeklyReport.user?.name || selectedUser?.name || "User";
     const fileName = `Weekly_Report_${userName}_${startDate}_to_${endDate}.pdf`;
 
@@ -229,7 +181,13 @@ function WeeklyUserReport() {
     };
 
     // Generate PDF with user name in title
-    const pdfUrl = generateWeeklyReportPdf(`Weekly Report for ${userName}`, updatedWeekInfo, columns, tableData, fileName);
+    const pdfUrl = generateWeeklyReportPdf(
+      `Weekly Report for ${userName}`,
+      updatedWeekInfo,
+      columns,
+      tableData,
+      fileName
+    );
 
     // Open PDF in new window
     window.open(pdfUrl, "_blank");

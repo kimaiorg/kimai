@@ -22,7 +22,7 @@ import { TeamType } from "@/type_schema/team";
 import { UserType } from "@/type_schema/user.schema";
 import { formatDate } from "date-fns";
 import debounce from "debounce";
-import { Eye, FileDown, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2, Upload } from "lucide-react";
+import { Eye, Filter, MoreHorizontal, Plus, Search, SquarePen, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -157,7 +157,7 @@ function Team() {
               Create <Plus />
             </Button>
           </CreateTeamModal>
-          <Button
+          {/* <Button
             variant="outline"
             size="icon"
           >
@@ -168,7 +168,7 @@ function Team() {
             size="icon"
           >
             <Upload className="h-4 w-4" />
-          </Button>
+          </Button> */}
         </div>
       </div>
 

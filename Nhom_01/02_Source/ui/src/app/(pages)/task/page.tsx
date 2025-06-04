@@ -276,7 +276,7 @@ function Task() {
               </Button>
             </TaskCreateDialog>
           )}
-          <Button
+          {/* <Button
             variant="outline"
             size="icon"
           >
@@ -287,7 +287,7 @@ function Task() {
             size="icon"
           >
             <Upload className="h-4 w-4" />
-          </Button>
+          </Button> */}
         </div>
       </div>
 

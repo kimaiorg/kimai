@@ -11,6 +11,7 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/type_schema/common";
 import { NotificationType, NotificationTypeType } from "@/type_schema/notification";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { formatDistanceToNow } from "date-fns";
 import debounce from "debounce";
 import { Bell, Calendar, Clock, CreditCard, ExternalLink, FileText, Filter, Search } from "lucide-react";
@@ -24,6 +25,7 @@ function NotificationPage() {
   const page = queryParams.get("page") ? Number(queryParams.get("page")) : 1;
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const searchKeyword = queryParams.get("keyword") || "";
+  const { user: currentUser } = useUser();
   const [keyword, setKeyword] = useState<string>(searchKeyword);
   const [sortBy, setSortBy] = useState<string>(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState<string>(queryParams.get("sortOrder") || "asc");
@@ -92,6 +94,7 @@ function NotificationPage() {
         type,
         hasRead
       );
+      result.data = result.data.filter((notification) => notification.user_id === currentUser!.user_id);
       setNotificationList(result);
     } catch (error) {
       console.error("Error fetching notifications:", error);

@@ -93,15 +93,22 @@ export async function updateInvoiceStatus(request: UpdateInvoiceRequestDTO, invo
   }
 }
 
-export async function getInvoiceTemplateById(invoiceTemplateId: number): Promise<InvoiceTemplateType> {
+export async function sendInvoiceViaEmail(invoiceId: string, customerEmail: string): Promise<number> {
   const token = await getManagementAccessToken();
-  const response = await invoiceAxios.get<InvoiceTemplateType>(`/api/v1/invoice-templates/${invoiceTemplateId}`, {
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
-  });
 
-  const data = response.data;
-  return data;
+  const payload = {
+    email: customerEmail
+  };
+
+  try {
+    const response = await invoiceAxios.post<any>(`/api/v1/invoices/${invoiceId}/send-email`, payload, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    return response.status;
+  } catch (error: any) {
+    return error.response.status;
+  }
 }

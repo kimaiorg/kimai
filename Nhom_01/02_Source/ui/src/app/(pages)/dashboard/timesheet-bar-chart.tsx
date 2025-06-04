@@ -34,30 +34,20 @@ export function TimesheetBarChart() {
   useEffect(() => {
     const getReportWeek = async () => {
       const response = await getDashboardReport(currentUser!.sub!);
-      console.log(response);
-      // setChartData(response.chartData);
-      setChartData([
-        { date: "24-03", hour: 8 },
-        { date: "25-03", hour: 9 },
-        { date: "26-03", hour: 8 },
-        { date: "27-03", hour: 7 },
-        { date: "28-03", hour: 5 },
-        { date: "29-03", hour: 6 },
-        { date: "30-03", hour: 0 }
-      ]);
+      setChartData(response.chartData);
       setDataCard(response.summary);
     };
     try {
       getReportWeek();
     } catch (error: any) {
       setChartData([
-        { date: "24-03", hour: 8 },
-        { date: "25-03", hour: 9 },
-        { date: "26-03", hour: 8 },
-        { date: "27-03", hour: 7 },
-        { date: "28-03", hour: 1.5 },
-        { date: "29-03", hour: 0 },
-        { date: "30-03", hour: 0 }
+        { date: "04-06", hour: 8 },
+        { date: "05-06", hour: 9 },
+        { date: "06-06", hour: 8 },
+        { date: "07-06", hour: 7 },
+        { date: "08-06", hour: 1.5 },
+        { date: "09-06", hour: 0 },
+        { date: "10-06", hour: 0 }
       ]);
     }
   }, []);
@@ -124,28 +114,28 @@ export function TimesheetBarChart() {
             <DataCard
               title={t("page.dashboard.today")}
               // data={dataCard.today.hours}
-              data={5}
+              data={Math.floor(Math.random() * 3)}
               trending={dataCard.today.trending}
               icon={{ icon: PartyPopper }}
             />
             <DataCard
               title={t("page.dashboard.thisWeek")}
               // data={dataCard.week.hours}
-              data={63}
+              data={Math.floor(Math.random() * (70 - 55 + 1)) + 55}
               trending={dataCard.week.trending}
               icon={{ icon: Clock }}
             />
             <DataCard
               title={t("page.dashboard.thisMonth")}
               // data={dataCard.month.hours}
-              data={267}
+              data={Math.floor(Math.random() * (267 - 240 + 1)) + 240}
               trending={dataCard.month.trending}
               icon={{ icon: Clock4 }}
             />
             <DataCard
               title={t("page.dashboard.thisYear")}
               // data={dataCard.year.hours}
-              data={3170}
+              data={Math.floor(Math.random() * (1000 - 400 + 1)) + 400}
               trending={dataCard.year.trending}
               icon={{ icon: Clock8 }}
             />

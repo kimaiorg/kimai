@@ -155,3 +155,16 @@ export const getWeekNumber = (date: Date, weekOptions: WeekOptionType[]): number
   console.log(currentWeekOption);
   return currentWeekOption![0].week;
 };
+
+export function getRandTime(): number {
+  const min = 0; // 1 hour in seconds
+  const max = 36000; // 10 hours in seconds
+  const interval = 900; // 15 minutes in seconds
+
+  const minIndex = Math.ceil(min / interval); // First valid index
+  const maxIndex = Math.floor(max / interval); // Last valid index
+
+  const randomIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
+
+  return randomIndex * interval;
+}

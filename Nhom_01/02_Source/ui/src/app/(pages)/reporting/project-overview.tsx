@@ -166,9 +166,9 @@ function ProjectOverviewReport() {
 
     // Generate PDF with summary
     const pdfUrl = generateProjectOverviewPdf(
-      `Project Overview - ${customerName}`, 
-      columns, 
-      tableData, 
+      `Project Overview - ${customerName}`,
+      columns,
+      tableData,
       fileName,
       summary
     );
@@ -275,9 +275,9 @@ function ProjectOverviewReport() {
   return (
     <>
       <div className="bg-white dark:bg-slate-700 rounded-md shadow mb-6">
-        <div className="flex flex-col md:flex-row justify-between items-center p-4 border-b">
+        <div className="flex flex-col md:flex-row justify-between items-center p-2 border-b">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <h2 className="text-xl font-semibold">Project Overview</h2>
+            <h2 className="text-md font-semibold">Overview</h2>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -390,16 +390,16 @@ function ProjectOverviewReport() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="whitespace-nowrap">{item.hourly_quota?.toFixed(2) || "0.00"}</div>
+                              <div className="whitespace-nowrap">{item.hourly_quota?.toFixed(0) || "0.00"}</div>
                             </TableCell>
                             <TableCell>
                               {item.budget ? (
                                 <div>
                                   <div className="flex justify-between">
-                                    <div className="whitespace-nowrap">FKP {item.budget?.toFixed(2) || "0.00"}</div>
+                                    <div className="whitespace-nowrap">$ {item.budget?.toFixed(2) || "0.00"}</div>
                                     {item.spent > 0 && (
                                       <div className="whitespace-nowrap text-right">
-                                        FKP {(item.spent || 0).toFixed(2)}
+                                        $ {(item.spent || 0).toFixed(2)}
                                       </div>
                                     )}
                                   </div>

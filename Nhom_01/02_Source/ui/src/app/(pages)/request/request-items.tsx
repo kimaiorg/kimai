@@ -55,7 +55,7 @@ const requestCards: RequestViewType[] = [
     background: "bg-lime-100",
     description: "Manage task expense requests",
     textColor: "text-lime-600"
-  },
+  }
   // {
   //   id: RequestPageType.EXPENSE,
   //   title: "Expense requests",
@@ -70,20 +70,20 @@ const requestCards: RequestViewType[] = [
   //   description: "Manage expense requests",
   //   textColor: "text-sky-600"
   // },
-  {
-    id: RequestPageType.ABSENCE,
-    title: "Absence requests",
-    icon: (
-      <Home
-        className="h-24 w-24 text-amber-600"
-        strokeWidth={1}
-      />
-    ),
-    component: AbsenceRequest,
-    background: "bg-amber-100",
-    description: "Manage absence requests",
-    textColor: "text-amber-600"
-  }
+  // {
+  //   id: RequestPageType.ABSENCE,
+  //   title: "Absence requests",
+  //   icon: (
+  //     <Home
+  //       className="h-24 w-24 text-amber-600"
+  //       strokeWidth={1}
+  //     />
+  //   ),
+  //   component: AbsenceRequest,
+  //   background: "bg-amber-100",
+  //   description: "Manage absence requests",
+  //   textColor: "text-amber-600"
+  // }
 ];
 
 const getRequestById = (id: string) => requestCards.find((request) => request.id === id);

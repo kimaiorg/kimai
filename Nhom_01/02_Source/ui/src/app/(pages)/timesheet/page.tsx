@@ -339,7 +339,7 @@ function Timesheet() {
               </ManualTimesheetCreateDialog>
             </>
           )}
-          <Button
+          {/* <Button
             variant="outline"
             size="icon"
             className="border border-gray-200 cursor-pointer"
@@ -352,7 +352,7 @@ function Timesheet() {
             className="border border-gray-200 cursor-pointer"
           >
             <Upload className="h-4 w-4" />
-          </Button>
+          </Button> */}
         </div>
       </div>
 
