@@ -1197,57 +1197,57 @@ export class InvoiceService {
         console.log('[INVOICE_SERVICE] Marked timesheets as exported');
       }
       
-      // Send email notification to customer if customer has email
-      if (customerData && customerData.email) {
-        try {
-          console.log('[INVOICE_SERVICE] Sending email notification to customer:', customerData.email);
+      // // Send email notification to customer if customer has email
+      // if (customerData && customerData.email) {
+      //   try {
+      //     console.log('[INVOICE_SERVICE] Sending email notification to customer:', customerData.email);
           
-          // Prepare invoice data for email
-          const invoiceForEmail = {
-            id: newInvoice.id.toString(),
-            invoiceNumber: newInvoice.invoiceNumber,
-            date: newInvoice.createdAt.toISOString(),
-            dueDate: newInvoice.dueDate.toISOString(),
-            status: newInvoice.status,
-            subtotalAmount: newInvoice.subtotal.toString(),
-            taxAmount: newInvoice.tax.toString(),
-            taxRate: newInvoice.vat.toString(),
-            totalAmount: newInvoice.total.toString(),
-            currency: newInvoice.currency,
-            customer: customerData,
-            items: items.map(item => ({
-              description: item.description,
-              quantity: Number(item.amount),
-              unitPrice: Number(item.rate),
-              totalPrice: Number(item.total),
-            })),
-          };
+      //     // Prepare invoice data for email
+      //     const invoiceForEmail = {
+      //       id: newInvoice.id.toString(),
+      //       invoiceNumber: newInvoice.invoiceNumber,
+      //       date: newInvoice.createdAt.toISOString(),
+      //       dueDate: newInvoice.dueDate.toISOString(),
+      //       status: newInvoice.status,
+      //       subtotalAmount: newInvoice.subtotal.toString(),
+      //       taxAmount: newInvoice.tax.toString(),
+      //       taxRate: newInvoice.vat.toString(),
+      //       totalAmount: newInvoice.total.toString(),
+      //       currency: newInvoice.currency,
+      //       customer: customerData,
+      //       items: items.map(item => ({
+      //         description: item.description,
+      //         quantity: Number(item.amount),
+      //         unitPrice: Number(item.rate),
+      //         totalPrice: Number(item.total),
+      //       })),
+      //     };
           
-          // Log detailed invoice items data for debugging
-          console.log(`[INVOICE_SERVICE] Invoice items for email (${invoiceForEmail.items.length}):`);
-          invoiceForEmail.items.forEach((item, index) => {
-            console.log(`[INVOICE_SERVICE] Item ${index + 1}:`, JSON.stringify(item));
-          });
+      //     // Log detailed invoice items data for debugging
+      //     console.log(`[INVOICE_SERVICE] Invoice items for email (${invoiceForEmail.items.length}):`);
+      //     invoiceForEmail.items.forEach((item, index) => {
+      //       console.log(`[INVOICE_SERVICE] Item ${index + 1}:`, JSON.stringify(item));
+      //     });
           
-          // Send the email with user information
-          const emailResult = await this.emailService.sendInvoiceEmail(
-            customerData.email,
-            `New Invoice #${newInvoice.invoiceNumber} Generated`,
-            invoiceForEmail,
-            {
-              userId: dto.userId || 1,
-              userName: `User ${dto.userId || 1}` // In a real app, you would fetch the actual user name
-            }
-          );
+      //     // Send the email with user information
+      //     const emailResult = await this.emailService.sendInvoiceEmail(
+      //       customerData.email,
+      //       `New Invoice #${newInvoice.invoiceNumber} Generated`,
+      //       invoiceForEmail,
+      //       {
+      //         userId: dto.userId || 1,
+      //         userName: `User ${dto.userId || 1}` // In a real app, you would fetch the actual user name
+      //       }
+      //     );
           
-          console.log('[INVOICE_SERVICE] Email notification result:', emailResult);
-        } catch (emailError) {
-          // Just log the error but don't fail the invoice creation
-          console.error('[INVOICE_SERVICE] Failed to send email notification:', emailError);
-        }
-      } else {
-        console.log('[INVOICE_SERVICE] Customer has no email address, skipping notification');
-      }
+      //     console.log('[INVOICE_SERVICE] Email notification result:', emailResult);
+      //   } catch (emailError) {
+      //     // Just log the error but don't fail the invoice creation
+      //     console.error('[INVOICE_SERVICE] Failed to send email notification:', emailError);
+      //   }
+      // } else {
+      //   console.log('[INVOICE_SERVICE] Customer has no email address, skipping notification');
+      // }
       
       return {
         success: true,
@@ -1413,6 +1413,33 @@ export class InvoiceService {
         };
       }
 
+      // Process invoice items with proper calculations
+      const processedItems = (invoice.items || []).map((item: any) => {
+        const quantity = Number(item.amount) || 0;
+        const unitPrice = Number(item.rate) || 0;
+        const total = quantity * unitPrice;
+        
+        return {
+          description: item.description,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          total: total,
+          totalPrice: total, // Add totalPrice property that email service expects
+          taxRate: 10, // Default 10%
+          date: item.begin ? item.begin.toISOString() : new Date().toISOString(),
+        };
+      });
+      
+      // Calculate subtotal from items
+      const subtotal = processedItems.reduce((sum, item) => sum + (item.total || 0), 0);
+      
+      // Get tax rate from invoice or use default 10%
+      const taxRate = Number(invoice.vat || 10);
+      const tax = subtotal * (taxRate / 100);
+      
+      // Calculate total
+      const total = subtotal + tax;
+
       // Prepare invoice data for email
       const invoiceData = {
         id: invoice.id.toString(),
@@ -1421,18 +1448,15 @@ export class InvoiceService {
         date: invoice.createdAt.toISOString(),
         dueDate: invoice.dueDate.toISOString(),
         status: invoice.status,
-        totalAmount: invoice.total,
-        totalPrice: invoice.total.toString(),
-        currency: invoice.currency,
+        totalAmount: total,
+        totalPrice: total.toFixed(2),
+        subtotalAmount: subtotal.toFixed(2), // Match property name expected by email service
+        taxAmount: tax.toFixed(2), // Match property name expected by email service
+        taxRate: taxRate, // Include the tax rate
+        currency: invoice.currency || 'USD',
         notes: invoice.comment || '',
         paymentDate: invoice.paymentDate ? invoice.paymentDate.toISOString() : undefined,
-        items: (invoice.items || []).map((item: any) => ({
-          description: item.description,
-          quantity: Number(item.amount),
-          unitPrice: Number(item.rate),
-          taxRate: 10, // Default 10%
-          date: item.begin.toISOString(),
-        })),
+        items: processedItems,
         emailType: emailType, // Set the email type for template selection
       };
 
