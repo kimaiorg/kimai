@@ -4,3 +4,4 @@ export * from './list-invoice.dto';
 export * from './filter-invoice.dto';
 export * from './update-invoice-status.dto';
 export * from './create-invoice-from-filter.dto';
+export * from './send-invoice-email.dto';

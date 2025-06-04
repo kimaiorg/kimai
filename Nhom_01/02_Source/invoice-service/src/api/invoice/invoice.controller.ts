@@ -29,6 +29,8 @@ import {
   updateInvoiceStatusSchema,
   CreateInvoiceFromFilterDto,
   createInvoiceFromFilterSchema,
+  SendInvoiceEmailDto,
+  sendInvoiceEmailSchema,
 } from '@/api/invoice/dto';
 import { ZodValidationPipe } from '@/libs/pipes/zod-validation.pipe';
 import {
@@ -46,6 +48,8 @@ import {
   FilterInvoiceSwaggerDto,
   UpdateInvoiceStatusSwaggerDto,
   CreateInvoiceFromFilterSwaggerDto,
+  SendInvoiceEmailSwaggerDto,
+  SendInvoiceEmailResponseDto,
 } from '@/api/invoice/swagger';
 import { PaginationResponse } from '@/libs/response/pagination';
 import { z } from 'zod';
@@ -612,6 +616,129 @@ export class InvoiceController {
   @Permissions(['delete:invoices'])
   async cleanupExpiredFilteredInvoices(): Promise<any> {
     return await this.invoiceService.cleanupExpiredFilteredInvoices();
+  }
+
+  @Post(':id/send-email')
+  @ApiOperation({ 
+    summary: 'Send an invoice email on demand',
+    description: 'Sends an invoice email to either the customer\'s email or a specified override email. Updates invoice status to PENDING after successful sending. Can be used with an empty request body {} for default behavior.'
+  })
+  @ApiParam({ name: 'id', description: 'Invoice ID', type: 'number' })
+  @ApiBody({
+    type: SendInvoiceEmailSwaggerDto,
+    description: 'Invoice email sending options',
+    examples: {
+      empty: {
+        summary: 'Default behavior (recommended)',
+        description: 'Send with default settings to customer email',
+        value: {}
+      },
+      emailOnly: {
+        summary: 'Override email only',
+        description: 'Send to a specific email instead of customer email',
+        value: { email: 'recipient@example.com' }
+      },
+      full: {
+        summary: 'Full configuration',
+        description: 'All options specified',
+        value: {
+          emailType: 'standard',
+          email: 'recipient@example.com',
+          senderInfo: {
+            userId: '1',
+            userName: 'Admin User'
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The invoice email has been successfully sent and invoice status updated to PENDING.',
+    type: SendInvoiceEmailResponseDto
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Invoice not found.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request, invalid email format, or no valid email address available.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden.' })
+  @HttpCode(HttpStatus.OK)
+  @Permissions(['update:invoices'])
+  // Custom validation handling to provide better error messages
+  async sendInvoiceEmail(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() rawBody: any,
+    @Req() request: Request,
+  ): Promise<any> {
+    try {
+      console.log('[INVOICE_CONTROLLER] Received raw body:', JSON.stringify(rawBody, null, 2));
+      
+      // Parse and validate the input
+      let parsedData: any;
+      try {
+        parsedData = sendInvoiceEmailSchema.parse(rawBody);
+        console.log('[INVOICE_CONTROLLER] Parsed data:', JSON.stringify(parsedData, null, 2));
+      } catch (error) {
+        console.error('[INVOICE_CONTROLLER] Validation error:', error);
+        return {
+          success: false,
+          message: 'Validation failed',
+          error: error.message || 'Invalid request body',
+          statusCode: 400
+        };
+      }
+      
+      // Extract values with defaults from the validated data
+      const emailType = parsedData?.emailType || 'standard';
+      const senderInfo = parsedData?.senderInfo;
+      const email = parsedData?.email;
+      
+      console.log('[INVOICE_CONTROLLER] Processed values:', { emailType, senderInfo, email });
+      
+      // Extract the authorization header from the request
+      const authHeader = request.headers.authorization;
+      
+      const result = await this.invoiceService.sendInvoiceEmail(
+        id,
+        emailType,
+        senderInfo,
+        email, // Pass the optional email parameter
+        authHeader // Pass the authorization header
+      );
+      
+      if (!result.success) {
+        return {
+          success: false,
+          message: result.message || 'Failed to send invoice email',
+          error: result.error,
+          statusCode: result.message?.includes('not found') ? 404 : 400,
+        };
+      }
+      
+      return {
+        success: true,
+        message: result.statusUpdated 
+          ? 'Invoice email sent successfully and status updated to PENDING' 
+          : 'Invoice email sent successfully',
+        data: result,
+      };
+    } catch (error) {
+      console.error(`Error sending email for invoice ${id}:`, error);
+      return {
+        success: false,
+        message: error.message || 'Failed to send invoice email',
+        error: error.stack,
+        statusCode: 500,
+      };
+    }
   }
 
   @Get('test-email')

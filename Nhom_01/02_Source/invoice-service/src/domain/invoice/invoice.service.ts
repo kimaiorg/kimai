@@ -630,57 +630,7 @@ export class InvoiceService {
         };
       }
       
-      // Send email notification if invoice is marked as PAID
-      if (dto.status === 'PAID') {
-        try {
-          // Get customer info from the API
-          const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
-          
-          if (customerInfo && customerInfo.email) {
-            // Prepare invoice data for email notification
-            const invoiceData = {
-              id: updatedInvoice.id.toString(),
-              invoiceNumber: updatedInvoice.invoiceNumber || `INV-${updatedInvoice.id}`,
-              customer: customerInfo,
-              date: updatedInvoice.createdAt.toISOString(),
-              dueDate: updatedInvoice.dueDate.toISOString(),
-              status: updatedInvoice.status,
-              totalAmount: updatedInvoice.total,
-              totalPrice: updatedInvoice.total.toString(),
-              currency: updatedInvoice.currency,
-              notes: updatedInvoice.comment || '',
-              paymentDate: updatedInvoice.paymentDate ? updatedInvoice.paymentDate.toISOString() : new Date().toISOString(),
-              items: (updatedInvoice.items || []).map((item: any) => ({
-                description: item.description,
-                quantity: Number(item.amount),
-                unitPrice: Number(item.rate),
-                taxRate: 10, // Mặc định 10%
-                date: item.begin.toISOString(),
-              })),
-            };
-            
-            this.logger.log(`Sending payment confirmation email to customer: ${customerInfo.email}`);
-            await this.emailService.sendInvoiceEmail(
-              customerInfo.email,
-              `Invoice #${invoiceData.invoiceNumber} - Payment Confirmation`,
-              {
-                ...invoiceData,
-                emailType: 'update_notification',
-                paymentStatus: 'PAID',
-                paymentDate: new Date().toLocaleString(),
-                paymentComment: dto.comment || 'Payment received',
-              },
-              { userId: updatedInvoice.userId.toString() }
-            );
-            this.logger.log(`Payment confirmation email sent successfully to ${customerInfo.email}`);
-          } else {
-            this.logger.warn(`Cannot send payment confirmation email: Customer ${updatedInvoice.customerId} has no email address`);
-          }
-        } catch (emailError) {
-          // Log the error but don't fail the update operation
-          this.logger.error(`Failed to send payment confirmation email: ${emailError.message}`);
-        }
-      }
+      // No automatic email sending - emails will be sent via dedicated endpoint
       
       return {
         success: true,
@@ -734,52 +684,7 @@ export class InvoiceService {
       // Lấy thông tin customer từ API
       const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
       
-      // Send email notification if customer has an email address
-      if (customerInfo && customerInfo.email) {
-        try {
-          // Prepare invoice data for email notification
-          const invoiceData = {
-            id: updatedInvoice.id.toString(),
-            invoiceNumber: updatedInvoice.invoiceNumber || `INV-${updatedInvoice.id}`,
-            customer: customerInfo,
-            date: updatedInvoice.createdAt.toISOString(),
-            dueDate: updatedInvoice.dueDate.toISOString(),
-            status: updatedInvoice.status,
-            totalAmount: updatedInvoice.total,
-            totalPrice: updatedInvoice.total.toString(),
-            currency: updatedInvoice.currency,
-            notes: updatedInvoice.comment || '',
-            paymentDate: updatedInvoice.paymentDate ? updatedInvoice.paymentDate.toISOString() : new Date().toISOString(),
-            items: (updatedInvoice.items || []).map((item: any) => ({
-              description: item.description,
-              quantity: Number(item.amount),
-              unitPrice: Number(item.rate),
-              taxRate: 10, // Default 10%
-              date: item.begin.toISOString(),
-            })),
-          };
-          
-          this.logger.log(`Sending payment confirmation email to customer: ${customerInfo.email}`);
-          await this.emailService.sendInvoiceEmail(
-            customerInfo.email,
-            `Invoice #${invoiceData.invoiceNumber} - Payment Confirmation`,
-            {
-              ...invoiceData,
-              emailType: 'update_notification',
-              paymentStatus: 'PAID',
-              paymentDate: new Date().toLocaleString(),
-              paymentComment: updatedInvoice.comment || 'Payment received',
-            },
-            { userId: updatedInvoice.userId.toString() }
-          );
-          this.logger.log(`Payment confirmation email sent successfully to ${customerInfo.email}`);
-        } catch (emailError) {
-          // Log the error but don't fail the update operation
-          this.logger.error(`Failed to send payment confirmation email: ${emailError.message}`);
-        }
-      } else {
-        this.logger.warn(`Cannot send payment confirmation email: Customer ${updatedInvoice.customerId} has no email address`);
-      }
+      // No automatic email sending - emails will be sent via dedicated endpoint
       
       // Chuyển đổi dữ liệu để phù hợp với cấu trúc của frontend
       return {
@@ -1439,7 +1344,7 @@ export class InvoiceService {
       };
     }
   }
-  
+
   /**
    * Clean up expired filtered invoices
    */
@@ -1461,7 +1366,132 @@ export class InvoiceService {
       };
     }
   }
+  
+  /**
+   * Send an invoice email for a specific invoice ID
+   * @param id Invoice ID
+   * @param emailType Type of email to send ('standard' or 'update_notification')
+   * @param senderInfo Optional information about the sender
+   * @param overrideEmail Optional email to send to instead of customer email
+   * @param authHeader Optional authorization header for API calls
+   * @returns Promise with the result of sending the email
+   */
+  async sendInvoiceEmail(
+    id: number, 
+    emailType: string = 'standard', 
+    senderInfo?: { userId?: number | string; userName?: string }, 
+    overrideEmail?: string,
+    authHeader?: string
+  ): Promise<any> {
+    try {
+      // Find the invoice
+      const invoice = await this.invoiceRepository.findById(id);
+      if (!invoice) {
+        return {
+          success: false,
+          message: 'Invoice not found',
+        };
+      }
 
+      // Get customer info - pass the auth header if provided
+      const customerInfo = await this.getCustomerInfo(invoice.customerId, authHeader);
+      if (!customerInfo || (!customerInfo.email && !overrideEmail)) {
+        return {
+          success: false,
+          message: `Cannot send email: Customer ${invoice.customerId} has no email address and no override email provided`,
+        };
+      }
+
+      // Determine which email to use - override email takes precedence
+      const targetEmail = overrideEmail || customerInfo.email || '';
+      
+      // Validate that we have a valid email to send to
+      if (!targetEmail) {
+        return {
+          success: false,
+          message: 'Cannot send email: No valid email address provided',
+        };
+      }
+
+      // Prepare invoice data for email
+      const invoiceData = {
+        id: invoice.id.toString(),
+        invoiceNumber: invoice.invoiceNumber || `INV-${invoice.id}`,
+        customer: customerInfo,
+        date: invoice.createdAt.toISOString(),
+        dueDate: invoice.dueDate.toISOString(),
+        status: invoice.status,
+        totalAmount: invoice.total,
+        totalPrice: invoice.total.toString(),
+        currency: invoice.currency,
+        notes: invoice.comment || '',
+        paymentDate: invoice.paymentDate ? invoice.paymentDate.toISOString() : undefined,
+        items: (invoice.items || []).map((item: any) => ({
+          description: item.description,
+          quantity: Number(item.amount),
+          unitPrice: Number(item.rate),
+          taxRate: 10, // Default 10%
+          date: item.begin.toISOString(),
+        })),
+        emailType: emailType, // Set the email type for template selection
+      };
+
+      // Determine subject based on email type and invoice status
+      let subject = `Invoice #${invoiceData.invoiceNumber}`;
+      if (emailType === 'update_notification') {
+        subject += ` - ${invoice.status} Notification`;
+      }
+
+      // Send the email
+      this.logger.log(`Sending ${emailType} email for invoice #${invoiceData.invoiceNumber} to ${targetEmail}`);
+      const emailResult = await this.emailService.sendInvoiceEmail(
+        targetEmail,
+        subject,
+        invoiceData,
+        senderInfo
+      );
+
+      if (emailResult.success) {
+        this.logger.log(`Email sent successfully to ${targetEmail}`);
+        
+        // Update invoice status to PENDING after successful email sending
+        try {
+          await this.invoiceRepository.update(id, { status: 'PENDING' });
+          this.logger.log(`Updated invoice #${invoice.id} status to PENDING`);
+        } catch (updateError) {
+          this.logger.error(`Failed to update invoice status: ${updateError.message}`);
+          // Don't fail the whole operation if just the status update fails
+        }
+        
+        return {
+          success: true,
+          message: `Email sent successfully to ${targetEmail}`,
+          emailDetails: emailResult,
+          statusUpdated: true,
+        };
+      } else {
+        this.logger.error(`Failed to send email: ${emailResult.error}`);
+        return {
+          success: false,
+          message: 'Failed to send email',
+          error: emailResult.error,
+        };
+      }
+    } catch (error) {
+      this.logger.error(`Error sending invoice email: ${error.message}`);
+      return {
+        success: false,
+        message: 'An error occurred while sending the invoice email',
+        error: error.message,
+      };
+    }
+  }
+  
+  /**
+   * Generate a unique invoice number based on customer ID and current date
+   * @param customerId The customer ID to include in the invoice number
+   * @returns A unique invoice number string
+   */
   private async generateInvoiceNumber(customerId: number): Promise<string> {
     const date = new Date();
     const year = date.getFullYear();
@@ -1469,7 +1499,7 @@ export class InvoiceService {
     const day = String(date.getDate()).padStart(2, '0');
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     
-    // Tạo số invoice theo định dạng: INV-CUSTOMERID-YYYYMMDD-RANDOM
+    // Format: INV-CUSTOMERID-YYYYMMDD-RANDOM
     return `INV-${customerId}-${year}${month}${day}-${random}`;
   }
   

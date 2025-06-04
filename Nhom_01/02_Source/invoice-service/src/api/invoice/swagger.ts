@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 
 export class InvoiceItemSwagger {
   @ApiProperty({ example: 'Web development' })
@@ -297,4 +297,84 @@ export class CreateInvoiceFromFilterSwaggerDto {
     required: false,
   })
   status?: string;
+}
+
+@ApiExtraModels()
+export class SendInvoiceEmailSwaggerDto {
+  @ApiProperty({
+    description: 'Type of email to send. Defaults to "standard" if not provided.',
+    enum: ['standard', 'update_notification'],
+    default: 'standard',
+    required: false,
+  })
+  emailType?: string;
+
+  @ApiProperty({
+    description: 'Optional sender information to include in the email',
+    required: false,
+    type: 'object',
+    properties: {
+      userId: {
+        type: 'string',
+        description: 'ID of the user sending the email',
+      },
+      userName: {
+        type: 'string',
+        description: 'Name of the user sending the email',
+      },
+    },
+  })
+  senderInfo?: {
+    userId?: string | number;
+    userName?: string;
+  };
+  
+  @ApiProperty({
+    description: 'Optional email address to send to instead of customer email. If provided, this email will be used as the recipient instead of the customer\'s email from the database.',
+    required: false,
+  })
+  email?: string;
+}
+
+// Example response schema for the send email endpoint
+export class SendInvoiceEmailResponseDto {
+  @ApiProperty({
+    description: 'Whether the operation was successful',
+    example: true,
+  })
+  success: boolean;
+
+  @ApiProperty({
+    description: 'Message describing the result of the operation',
+    example: 'Invoice email sent successfully and status updated to PENDING',
+  })
+  message: string;
+
+  @ApiProperty({
+    description: 'Additional data about the email sending operation',
+    required: false,
+    type: 'object',
+    properties: {
+      success: {
+        type: 'boolean',
+        description: 'Whether the email was sent successfully',
+        example: true,
+      },
+      message: {
+        type: 'string',
+        description: 'Message about the email sending operation',
+        example: 'Email sent successfully to recipient@example.com',
+      },
+      statusUpdated: {
+        type: 'boolean',
+        description: 'Whether the invoice status was updated to PENDING',
+        example: true,
+      },
+      emailDetails: {
+        type: 'object',
+        description: 'Details about the email that was sent',
+      },
+    },
+  })
+  data?: any;
 }
