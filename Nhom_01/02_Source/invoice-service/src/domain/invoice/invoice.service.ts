@@ -428,6 +428,37 @@ export class InvoiceService {
         };
       }
       
+      // Default tax rate
+      const defaultTaxRate = 10; // 10%
+      
+      // Map invoice items and calculate subtotals
+      const items = (invoice.items || []).map((item: any) => {
+        const quantity = Number(item.amount);
+        const unitPrice = Number(item.rate);
+        const taxRate = item.taxRate || defaultTaxRate;
+        
+        return {
+          description: item.description,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          taxRate: taxRate,
+          date: item.begin ? item.begin.toISOString() : new Date().toISOString(),
+        };
+      });
+      
+      // Calculate total price from items
+      const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+      
+      // Use the invoice total if available, otherwise use calculated subtotal
+      const totalPrice = invoice.total ? Number(invoice.total) : subtotal;
+      
+      // Calculate tax amount (assuming all items have the same tax rate)
+      const taxRate = defaultTaxRate;
+      const taxPrice = totalPrice * (taxRate / 100);
+      
+      // Calculate final price with tax
+      const finalPrice = totalPrice + taxPrice;
+      
       return {
         success: true,
         data: {
@@ -436,19 +467,16 @@ export class InvoiceService {
           date: invoice.createdAt.toISOString(),
           dueDate: invoice.dueDate.toISOString(),
           status: invoice.status,
-          totalPrice: invoice.total.toString(),
+          totalPrice: totalPrice.toString(),
+          taxRate: taxRate,
+          taxPrice: taxPrice,
+          finalPrice: finalPrice,
           currency: invoice.currency,
           comment: invoice.comment || '',
           createdBy: invoice.userId.toString(),
           createdAt: invoice.createdAt.toISOString(),
           paymentDate: invoice.paymentDate ? invoice.paymentDate.toISOString() : undefined,
-          items: (invoice.items || []).map((item: any) => ({
-            description: item.description,
-            quantity: Number(item.amount),
-            unitPrice: Number(item.rate),
-            taxRate: 10, // Mặc định 10%
-            date: item.begin ? item.begin.toISOString() : new Date().toISOString(),
-          })),
+          items: items,
         }
       };
     } catch (error) {

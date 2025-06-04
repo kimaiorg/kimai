@@ -11,24 +11,34 @@ export type InvoiceHistoryItemType = Omit<ActivityType, "tasks"> & {
   tasks: (TaskType & { price: number })[]; // Tasks in the activity
 };
 
+export type InvoiceItemType = {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  date: string;
+};
+
 export type InvoiceHistoryType = {
   customer: CustomerType;
-  project: ProjectType;
-  fromDate: string;
-  toDate: string;
+  project?: ProjectType;
+  fromDate?: string;
+  toDate?: string;
   status: string; // NEW, PENDING, PAID, CANCELED
-  totalPrice: number; // Total price of the invoice
-  taxRate: number; // Tax rate
-  taxPrice: number; // Tax price: totalPrice * taxRate
-  finalPrice: number; // Total price after tax: totalPrice + taxPrice
+  totalPrice: number | string; // Total price of the invoice
+  taxRate?: number; // Tax rate
+  taxPrice?: number; // Tax price: totalPrice * taxRate
+  finalPrice?: number; // Total price after tax: totalPrice + taxPrice
   currency: string; // Currency of the invoice: USD, VND, etc.
   notes?: string; // Additional notes
+  comment?: string; // Additional comment
   createdBy: string;
   createdAt: string;
-  template: InvoiceTemplateType; // ID of the invoice template
-  activities: InvoiceHistoryItemType[];
+  template?: InvoiceTemplateType; // ID of the invoice template
+  activities?: InvoiceHistoryItemType[];
+  items?: InvoiceItemType[];
   date: string;
-  totalAmount: string;
+  totalAmount?: string;
   dueDate?: string;
   id: string;
 };
