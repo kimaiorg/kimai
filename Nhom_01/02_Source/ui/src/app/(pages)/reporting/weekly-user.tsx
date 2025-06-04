@@ -153,22 +153,25 @@ function WeeklyUserReport() {
 
   // Export to Excel
   const exportToExcel = () => {
+    if (!weeklyReport) {
+      console.error("No report data available for export");
+      return;
+    }
+
     // Create worksheet data
     const wsData = [
       // Header row with days
-      ["Project", "Total", ...currentWeek.map((day) => `${day.dayName} ${day.dayNumber}`)],
+      ["Task", "Total", ...currentWeek.map((day) => `${day.dayName} ${day.dayNumber}`)],
 
-      // Project rows
-      ...projects
-        .filter((project) => project.id.toString() === "1")
-        .map((project) => [
-          project.name,
-          getProjectTotal(project.id.toString()),
-          ...currentWeek.map((day) => getTimeForProjectAndDay(project.id.toString(), day.date) || "")
-        ]),
+      // Task rows
+      ...weeklyReport.entries.map((entry) => [
+        entry.task.title,
+        entry.totalDuration,
+        ...entry.duration.map(dur => dur || "0:00")
+      ]),
 
       // Total row
-      ["Total", getGrandTotal(), ...currentWeek.map((day) => getDayTotal(day.date))]
+      ["Total", weeklyReport.totalOfDays, ...weeklyReport.totalOfEachDay]
     ];
 
     // Create worksheet
@@ -178,8 +181,11 @@ function WeeklyUserReport() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Weekly Report");
 
-    // Generate filename
-    const fileName = `Weekly_Report_${selectedUser}.xlsx`;
+    // Generate filename with user name and date range
+    const startDate = new Date(selectedWeek!.from).toISOString().split('T')[0];
+    const endDate = new Date(selectedWeek!.to).toISOString().split('T')[0];
+    const userName = weeklyReport.user?.name || selectedUser?.name || "User";
+    const fileName = `Weekly_Report_${userName}_${startDate}_to_${endDate}.xlsx`;
 
     // Export
     XLSX.writeFile(wb, fileName);
@@ -187,29 +193,43 @@ function WeeklyUserReport() {
 
   // Export to PDF
   const exportToPdf = () => {
+    if (!weeklyReport) {
+      console.error("No report data available for export");
+      return;
+    }
+
     // Create table data for PDF
     const tableData = [
-      // Project rows
-      ...projects
-        .filter((project) => project.id.toString() === "1")
-        .map((project) => [
-          project.name,
-          getProjectTotal(project.id.toString()),
-          ...currentWeek.map((day) => getTimeForProjectAndDay(project.id.toString(), day.date) || "")
-        ]),
+      // Task rows
+      ...weeklyReport.entries.map((entry) => [
+        entry.task.title,
+        entry.totalDuration,
+        ...entry.duration.map(dur => dur || "0:00")
+      ]),
 
       // Total row
-      ["Total", getGrandTotal(), ...currentWeek.map((day) => getDayTotal(day.date))]
+      ["Total", weeklyReport.totalOfDays, ...weeklyReport.totalOfEachDay]
     ];
 
     // Column headers
-    const columns = ["Project", "Total", ...currentWeek.map((day) => `${day.dayName} ${day.dayNumber}`)];
+    const columns = ["Task", "Total", ...currentWeek.map((day) => `${day.dayName} ${day.dayNumber}`)];
 
-    // Generate filename
-    const fileName = `Weekly_Report_${selectedUser}.pdf`;
+    // Generate filename with user name and date range
+    const startDate = new Date(selectedWeek!.from).toISOString().split('T')[0];
+    const endDate = new Date(selectedWeek!.to).toISOString().split('T')[0];
+    const userName = weeklyReport.user?.name || selectedUser?.name || "User";
+    const fileName = `Weekly_Report_${userName}_${startDate}_to_${endDate}.pdf`;
 
-    // Generate PDF
-    const pdfUrl = generateWeeklyReportPdf(`Weekly Report for ${selectedUser}`, weekInfo, columns, tableData, fileName);
+    // Week info for PDF header
+    const updatedWeekInfo = {
+      number: selectedWeek?.week || weekInfo.number,
+      year: new Date(selectedWeek!.from).getFullYear(),
+      start: startDate,
+      end: endDate
+    };
+
+    // Generate PDF with user name in title
+    const pdfUrl = generateWeeklyReportPdf(`Weekly Report for ${userName}`, updatedWeekInfo, columns, tableData, fileName);
 
     // Open PDF in new window
     window.open(pdfUrl, "_blank");
