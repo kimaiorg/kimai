@@ -141,8 +141,68 @@ export class EmailService {
         itemsTableHtml = '<p>No items found in this invoice.</p>';
       }
 
-      // Create HTML content for the email
-      const htmlContent = `
+      // Create HTML content for the email based on emailType - define templates first
+      const updateNotificationTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #eee;">
+          <div style="text-align: center; padding: 15px; background-color: #f8f9fa; border-bottom: 3px solid #007bff;">
+            <h2>Invoice Update Notification</h2>
+          </div>
+          
+          <div style="padding: 20px;">
+            <p>Dear ${invoiceData.customer?.name || 'Valued Customer'},</p>
+            
+            <p>We are writing to inform you that your invoice has been updated to <strong>${invoiceData.status}</strong> status.</p>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-left: 4px solid #007bff;">
+              <h3 style="margin-top: 0;">Invoice Details</h3>
+              <table style="width: 100%;">
+                <tr>
+                  <td style="padding: 5px 0;"><strong>Invoice Number:</strong></td>
+                  <td style="padding: 5px 0;">${invoiceData.invoiceNumber || invoiceData.id}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0;"><strong>Date:</strong></td>
+                  <td style="padding: 5px 0;">${invoiceDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0;"><strong>Due Date:</strong></td>
+                  <td style="padding: 5px 0;">${dueDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0;"><strong>Status:</strong></td>
+                  <td style="padding: 5px 0;"><span style="background-color: ${invoiceData.status === 'PAID' ? '#28a745' : '#ffc107'}; color: ${invoiceData.status === 'PAID' ? 'white' : 'black'}; padding: 3px 8px; border-radius: 3px;">${invoiceData.status}</span></td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0;"><strong>Total Amount:</strong></td>
+                  <td style="padding: 5px 0;">${formattedTotal}</td>
+                </tr>
+              </table>
+            </div>
+            
+            ${invoiceData.paymentComment ? `<div style="background-color: #f8f9fa; padding: 15px; margin: 20px 0; border-left: 4px solid #28a745;">
+              <h3 style="margin-top: 0;">Payment Comment</h3>
+              <p>${invoiceData.paymentComment}</p>
+            </div>` : ''}
+            
+            <div style="margin: 30px 0;">
+              <h3>Customer Information</h3>
+              <p><strong>Name:</strong> ${invoiceData.customer?.name || 'N/A'}</p>
+              <p><strong>Email:</strong> ${invoiceData.customer?.email || 'N/A'}</p>
+              ${invoiceData.customer?.address ? `<p><strong>Address:</strong> ${invoiceData.customer.address}</p>` : ''}
+              ${invoiceData.customer?.phone ? `<p><strong>Phone:</strong> ${invoiceData.customer.phone}</p>` : ''}
+            </div>
+            
+            <p>If you have any questions about this invoice, please contact us.</p>
+            
+            <p>Thank you for your business!</p>
+            
+            <p>Best regards,<br>Finance Department</p>
+          </div>
+        </div>
+      `;
+      
+      // Standard template for new invoice notifications
+      const standardTemplate = `
         <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #eee;">
           <div style="text-align: center; padding: 15px; background-color: #f8f9fa; border-bottom: 3px solid #007bff;">
             <h2>Invoice Notification</h2>
@@ -212,6 +272,18 @@ export class EmailService {
           </div>
         </div>
       `;
+      
+      // Choose template based on emailType
+      let htmlContent;
+      if (invoiceData.emailType === 'update_notification') {
+        // Use the update notification template (simplified, no items or payment details)
+        this.logger.log(`[EMAIL] Using update notification template for invoice #${invoiceData.invoiceNumber || invoiceData.id}`);
+        htmlContent = updateNotificationTemplate;
+      } else {
+        // Use the standard template with full invoice details
+        this.logger.log(`[EMAIL] Using standard template for invoice #${invoiceData.invoiceNumber || invoiceData.id}`);
+        htmlContent = standardTemplate;
+      }
 
       // Send email
       const info = await this.transporter.sendMail({

@@ -630,11 +630,61 @@ export class InvoiceService {
         };
       }
       
-      // Get customer info from the API - no fallback to mock data
-      
+      // Send email notification if invoice is marked as PAID
+      if (dto.status === 'PAID') {
+        try {
+          // Get customer info from the API
+          const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
+          
+          if (customerInfo && customerInfo.email) {
+            // Prepare invoice data for email notification
+            const invoiceData = {
+              id: updatedInvoice.id.toString(),
+              invoiceNumber: updatedInvoice.invoiceNumber || `INV-${updatedInvoice.id}`,
+              customer: customerInfo,
+              date: updatedInvoice.createdAt.toISOString(),
+              dueDate: updatedInvoice.dueDate.toISOString(),
+              status: updatedInvoice.status,
+              totalAmount: updatedInvoice.total,
+              totalPrice: updatedInvoice.total.toString(),
+              currency: updatedInvoice.currency,
+              notes: updatedInvoice.comment || '',
+              paymentDate: updatedInvoice.paymentDate ? updatedInvoice.paymentDate.toISOString() : new Date().toISOString(),
+              items: (updatedInvoice.items || []).map((item: any) => ({
+                description: item.description,
+                quantity: Number(item.amount),
+                unitPrice: Number(item.rate),
+                taxRate: 10, // Mặc định 10%
+                date: item.begin.toISOString(),
+              })),
+            };
+            
+            this.logger.log(`Sending payment confirmation email to customer: ${customerInfo.email}`);
+            await this.emailService.sendInvoiceEmail(
+              customerInfo.email,
+              `Invoice #${invoiceData.invoiceNumber} - Payment Confirmation`,
+              {
+                ...invoiceData,
+                emailType: 'update_notification',
+                paymentStatus: 'PAID',
+                paymentDate: new Date().toLocaleString(),
+                paymentComment: dto.comment || 'Payment received',
+              },
+              { userId: updatedInvoice.userId.toString() }
+            );
+            this.logger.log(`Payment confirmation email sent successfully to ${customerInfo.email}`);
+          } else {
+            this.logger.warn(`Cannot send payment confirmation email: Customer ${updatedInvoice.customerId} has no email address`);
+          }
+        } catch (emailError) {
+          // Log the error but don't fail the update operation
+          this.logger.error(`Failed to send payment confirmation email: ${emailError.message}`);
+        }
+      }
       
       return {
         success: true,
+        emailSent: dto.status === 'PAID' ? true : false,
       };
     } catch (error) {
       console.error(`Failed to update invoice ${id}: ${error.message}`);
@@ -683,6 +733,53 @@ export class InvoiceService {
 
       // Lấy thông tin customer từ API
       const customerInfo = await this.getCustomerInfo(updatedInvoice.customerId);
+      
+      // Send email notification if customer has an email address
+      if (customerInfo && customerInfo.email) {
+        try {
+          // Prepare invoice data for email notification
+          const invoiceData = {
+            id: updatedInvoice.id.toString(),
+            invoiceNumber: updatedInvoice.invoiceNumber || `INV-${updatedInvoice.id}`,
+            customer: customerInfo,
+            date: updatedInvoice.createdAt.toISOString(),
+            dueDate: updatedInvoice.dueDate.toISOString(),
+            status: updatedInvoice.status,
+            totalAmount: updatedInvoice.total,
+            totalPrice: updatedInvoice.total.toString(),
+            currency: updatedInvoice.currency,
+            notes: updatedInvoice.comment || '',
+            paymentDate: updatedInvoice.paymentDate ? updatedInvoice.paymentDate.toISOString() : new Date().toISOString(),
+            items: (updatedInvoice.items || []).map((item: any) => ({
+              description: item.description,
+              quantity: Number(item.amount),
+              unitPrice: Number(item.rate),
+              taxRate: 10, // Default 10%
+              date: item.begin.toISOString(),
+            })),
+          };
+          
+          this.logger.log(`Sending payment confirmation email to customer: ${customerInfo.email}`);
+          await this.emailService.sendInvoiceEmail(
+            customerInfo.email,
+            `Invoice #${invoiceData.invoiceNumber} - Payment Confirmation`,
+            {
+              ...invoiceData,
+              emailType: 'update_notification',
+              paymentStatus: 'PAID',
+              paymentDate: new Date().toLocaleString(),
+              paymentComment: updatedInvoice.comment || 'Payment received',
+            },
+            { userId: updatedInvoice.userId.toString() }
+          );
+          this.logger.log(`Payment confirmation email sent successfully to ${customerInfo.email}`);
+        } catch (emailError) {
+          // Log the error but don't fail the update operation
+          this.logger.error(`Failed to send payment confirmation email: ${emailError.message}`);
+        }
+      } else {
+        this.logger.warn(`Cannot send payment confirmation email: Customer ${updatedInvoice.customerId} has no email address`);
+      }
       
       // Chuyển đổi dữ liệu để phù hợp với cấu trúc của frontend
       return {
