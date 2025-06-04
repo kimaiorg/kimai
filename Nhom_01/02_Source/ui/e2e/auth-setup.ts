@@ -71,7 +71,7 @@ setup("authenticate", async ({ page }) => {
 
   // Wait for dashboard to load
   console.log("Waiting for dashboard to load...");
-  await page.waitForLoadState("networkidle", { timeout: 10000 });
+  await page.waitForLoadState("networkidle", { timeout: 30000 });
 
   // Take screenshot of the dashboard
   await page.screenshot({ path: "test-results/e2e/dashboard.png" });

@@ -50,11 +50,15 @@ import {
 import { PaginationResponse } from '@/libs/response/pagination';
 import { z } from 'zod';
 import { Request } from 'express';
+import { EmailService } from '@/infrastructure/services/email.service';
 
 @ApiTags('invoices')
 @Controller('invoices')
 export class InvoiceController {
-  constructor(private readonly invoiceService: InvoiceService) {}
+  constructor(
+    private readonly invoiceService: InvoiceService,
+    private readonly emailService: EmailService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new invoice' })
@@ -608,5 +612,54 @@ export class InvoiceController {
   @Permissions(['delete:invoices'])
   async cleanupExpiredFilteredInvoices(): Promise<any> {
     return await this.invoiceService.cleanupExpiredFilteredInvoices();
+  }
+
+  @Get('test-email')
+  async testEmail(@Query('email') email: string): Promise<any> {
+    try {
+      console.log('[INVOICE_CONTROLLER] Testing email service with recipient:', email);
+      
+      if (!email) {
+        return {
+          success: false,
+          message: 'Email parameter is required',
+        };
+      }
+      
+      const testData = {
+        id: '12345',
+        invoiceNumber: 'TEST-INV-001',
+        date: new Date().toISOString(),
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'TEST',
+        totalAmount: '100.00',
+        currency: 'USD',
+        customer: {
+          id: 999,
+          name: 'Test Customer',
+          email: email
+        }
+      };
+      
+      const result = await this.emailService.sendTestEmail(
+        email,
+        { userId: 999, userName: 'Test User' }
+      );
+      
+      console.log('[INVOICE_CONTROLLER] Test email result:', result);
+      
+      return {
+        success: true,
+        message: 'Test email sent',
+        result
+      };
+    } catch (error) {
+      console.error('[INVOICE_CONTROLLER] Error sending test email:', error);
+      return {
+        success: false,
+        message: 'Failed to send test email',
+        error: error.message
+      };
+    }
   }
 }

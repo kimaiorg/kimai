@@ -17,6 +17,7 @@ import { CustomerType } from '@/type_schema/customer';
 import { ProjectType } from '@/type_schema/project';
 import { TaskType } from '@/type_schema/task';
 import { InvoiceHistoryType, InvoiceHistoryItemType, InvoiceTemplateType } from '@/type_schema/invoice';
+import { EmailService } from '@/infrastructure/services/email.service';
 
 // Define a type for customer information
 interface CustomerInfo {
@@ -52,6 +53,7 @@ export class InvoiceService {
     private readonly filteredInvoiceRepository: FilteredInvoiceRepository,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {
 
     const env = this.configService.get<string>('NODE_ENV') || 'development';
@@ -1165,6 +1167,58 @@ export class InvoiceService {
         console.log('[INVOICE_SERVICE] Marked timesheets as exported');
       }
       
+      // Send email notification to customer if customer has email
+      if (customerData && customerData.email) {
+        try {
+          console.log('[INVOICE_SERVICE] Sending email notification to customer:', customerData.email);
+          
+          // Prepare invoice data for email
+          const invoiceForEmail = {
+            id: newInvoice.id.toString(),
+            invoiceNumber: newInvoice.invoiceNumber,
+            date: newInvoice.createdAt.toISOString(),
+            dueDate: newInvoice.dueDate.toISOString(),
+            status: newInvoice.status,
+            subtotalAmount: newInvoice.subtotal.toString(),
+            taxAmount: newInvoice.tax.toString(),
+            taxRate: newInvoice.vat.toString(),
+            totalAmount: newInvoice.total.toString(),
+            currency: newInvoice.currency,
+            customer: customerData,
+            items: items.map(item => ({
+              description: item.description,
+              quantity: Number(item.amount),
+              unitPrice: Number(item.rate),
+              totalPrice: Number(item.total),
+            })),
+          };
+          
+          // Log detailed invoice items data for debugging
+          console.log(`[INVOICE_SERVICE] Invoice items for email (${invoiceForEmail.items.length}):`);
+          invoiceForEmail.items.forEach((item, index) => {
+            console.log(`[INVOICE_SERVICE] Item ${index + 1}:`, JSON.stringify(item));
+          });
+          
+          // Send the email with user information
+          const emailResult = await this.emailService.sendInvoiceEmail(
+            customerData.email,
+            `New Invoice #${newInvoice.invoiceNumber} Generated`,
+            invoiceForEmail,
+            {
+              userId: dto.userId || 1,
+              userName: `User ${dto.userId || 1}` // In a real app, you would fetch the actual user name
+            }
+          );
+          
+          console.log('[INVOICE_SERVICE] Email notification result:', emailResult);
+        } catch (emailError) {
+          // Just log the error but don't fail the invoice creation
+          console.error('[INVOICE_SERVICE] Failed to send email notification:', emailError);
+        }
+      } else {
+        console.log('[INVOICE_SERVICE] Customer has no email address, skipping notification');
+      }
+      
       return {
         success: true,
         data: {
@@ -1340,6 +1394,8 @@ export class InvoiceService {
         return response.data.data;
       }
       
+      
+      console.log(`No timesheets found for filter: ${JSON.stringify(dto)}`);
       return [];
     } catch (error) {
       console.error('Failed to fetch timesheets:', error);
@@ -1473,7 +1529,7 @@ export class InvoiceService {
         // Create default expenses for all tasks
         tasks.forEach(task => {
           const defaultCost = 45; // Use the same default cost as in the example
-          
+        
           const defaultExpense = {
             id: `default-${task.id}`,
             name: `Expense for ${task.title}`,

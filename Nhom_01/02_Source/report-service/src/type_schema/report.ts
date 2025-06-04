@@ -1,4 +1,4 @@
-import { TaskResponseType } from './task';
+  import { TaskResponseType } from './task';
 import { UserType } from './user';
 
 export type WeekOptionType = {

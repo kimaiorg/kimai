@@ -28,6 +28,16 @@ export class ReportService {
     const env = this.configService.get<string>('NODE_ENV') || 'development';
     console.log(`[REPORT_SERVICE] Current environment: ${env}`);
 
+    // Initialize service URLs from environment variables with fallbacks
+    this.timesheetServiceUrl = this.configService.get<string>('TIMESHEET_SERVICE_URL') || 'http://localhost:3334';
+    this.projectServiceUrl = this.configService.get<string>('PROJECT_SERVICE_URL') || 'http://localhost:3333';
+
+    // Log the service URLs for debugging
+    this.logger.log(`REPORT SERVICE INITIALIZED WITH:`);
+    this.logger.log(`- Timesheet Service URL: ${this.timesheetServiceUrl}`);
+    this.logger.log(`- Project Service URL: ${this.projectServiceUrl}`);
+    this.logger.log(`- Environment variables: TIMESHEET_SERVICE_URL=${this.configService.get<string>('TIMESHEET_SERVICE_URL')}, PROJECT_SERVICE_URL=${this.configService.get<string>('PROJECT_SERVICE_URL')}`);
+
     // Define default URLs for different environments
     const defaultUrls = {
       production: {
@@ -86,8 +96,21 @@ export class ReportService {
     try {
       this.logger.log(`Fetching weekly report for user ${userId} from ${fromDate} to ${toDate}`);
       
-      // 1. Get user information from project service
-      const user = await this.getUserInfo(userId, authHeader);
+      // Skip fetching user info from customer endpoint for Auth0 IDs
+      // Auth0 IDs are in format "auth0|..." and don't need to be looked up in the customer service
+      let user: UserType;
+      if (userId.startsWith('auth0|')) {
+        // Create a basic user object with the Auth0 ID
+        user = {
+          user_id: userId,
+          name: `User ${userId.substring(0, 10)}...`, // Truncate for display
+          email: `user-${userId.split('|')[1].substring(0, 6)}@example.com`, // Generate a placeholder email
+        };
+        this.logger.log(`Using Auth0 ID directly: ${userId}`);
+      } else {
+        // Only fetch user info if it's not an Auth0 ID (e.g., it's a numeric customer ID)
+        user = await this.getUserInfo(userId, authHeader);
+      }
       
       // 2. Get timesheet entries for the user within the date range
       const timesheetEntries = await this.getTimesheetEntries(userId, fromDate, toDate, authHeader);
@@ -447,53 +470,92 @@ export class ReportService {
       // Sử dụng endpoint /api/v1/timesheets với phương thức GET và các tham số query đúng
       const url = `${this.timesheetServiceUrl}/api/v1/timesheets`;
       const params = new URLSearchParams();
-      params.append('from_date', fromDate);
-      params.append('to_date', toDate);
-      params.append('userId', encodeURIComponent(userId)); // Sử dụng userId thay vì user_id theo API thực tế
+      
+      // Format dates to YYYY-MM-DD format without time component
+      const formattedFromDate = new Date(fromDate).toISOString().split('T')[0];
+      const formattedToDate = new Date(toDate).toISOString().split('T')[0];
+      
+      params.append('from_date', formattedFromDate);
+      params.append('to_date', formattedToDate);
+      // Fix the double encoding issue - don't use encodeURIComponent here
+      // The URLSearchParams will handle the encoding correctly
+      params.append('user_id', userId); // Changed from 'userId' to 'user_id' to match timesheet service API
       
       const headers = this.getHeaders(authHeader);
       
+      const fullUrl = `${url}?${params.toString()}`;
+      this.logger.log(`EXACT API CALL: ${fullUrl}`);
       this.logger.log(`Fetching timesheet entries from: ${url}?${params.toString()} for user ${userId}`);
+      this.logger.log(`Original date range: from ${fromDate} to ${toDate}`);
+      this.logger.log(`Formatted date range: from ${formattedFromDate} to ${formattedToDate}`);
       
-      const response = await firstValueFrom(
-        this.httpService.get(`${url}?${params.toString()}`, { 
-          headers,
-          timeout: 10000 // Increased timeout to 10 seconds
-        })
-      );
-      
-      // Kiểm tra phản hồi
-      if (!response.data) {
-        throw new Error(`API returned empty response for timesheet entries`);
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get(fullUrl, { 
+            headers,
+            timeout: 10000 // Increased timeout to 10 seconds
+          })
+        );
+        
+        // Log the raw response for debugging
+        this.logger.log(`Raw API response: ${JSON.stringify(response.data)}`);
+        
+        // Kiểm tra phản hồi
+        if (!response.data) {
+          throw new Error(`API returned empty response for timesheet entries`);
+        }
+        
+        // Xử lý cấu trúc phản hồi từ timesheet-service API
+        // Theo bộ nhớ, API trả về dữ liệu trong cấu trúc { data: [...], metadata: {...} }
+        let timesheetEntries: WeeklyReportEntry[] = [];
+        
+        if (response.data.data && Array.isArray(response.data.data)) {
+          // Cấu trúc chuẩn: { data: [...], metadata: {...} }
+          timesheetEntries = response.data.data;
+          this.logger.log(`Received ${timesheetEntries.length} timesheet entries for user ${userId} (paginated structure)`);
+        } else if (Array.isArray(response.data)) {
+          // Trường hợp API trả về mảng trực tiếp
+          timesheetEntries = response.data;
+          this.logger.log(`Received ${timesheetEntries.length} timesheet entries for user ${userId} (direct array)`);
+        } else if (typeof response.data === 'object' && !Array.isArray(response.data) && !response.data.data) {
+          // Trường hợp API trả về đối tượng đơn lẻ
+          timesheetEntries = [response.data];
+          this.logger.log(`Received single timesheet entry for user ${userId} (object)`);
+        } else {
+          throw new Error(`API returned unexpected structure for timesheet entries: ${JSON.stringify(response.data)}`);
+        }
+        
+        // Thêm thông tin debug về dữ liệu nhận được
+        if (timesheetEntries.length > 0) {
+          this.logger.log(`Sample timesheet entry: ${JSON.stringify(timesheetEntries[0])}`);
+        } else {
+          this.logger.warn(`No timesheet entries found for user ${userId} in date range ${fromDate} to ${toDate}`);
+        }
+        
+        return timesheetEntries;
+      } catch (error) {
+        let errorMessage = `Error fetching timesheet entries for user ${userId}: `;
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code outside of 2xx range
+          errorMessage += `Server responded with status ${error.response.status}. `;
+          if (error.response.data) {
+            errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage += `No response received from server. Check if timesheet service is running at ${this.timesheetServiceUrl}.`;
+        } else {
+          // Something happened in setting up the request
+          errorMessage += error.message || 'Unknown error';
+        }
+        
+        this.logger.error(errorMessage);
+        
+        // Return empty array in case of error
+        return [];
       }
-      
-      // Xử lý cấu trúc phản hồi từ timesheet-service API
-      // Theo bộ nhớ, API trả về dữ liệu trong cấu trúc { data: [...], metadata: {...} }
-      let timesheetEntries: WeeklyReportEntry[] = [];
-      
-      if (response.data.data && Array.isArray(response.data.data)) {
-        // Cấu trúc chuẩn: { data: [...], metadata: {...} }
-        timesheetEntries = response.data.data;
-        this.logger.log(`Received ${timesheetEntries.length} timesheet entries for user ${userId} (paginated structure)`);
-      } else if (Array.isArray(response.data)) {
-        // Trường hợp API trả về mảng trực tiếp
-        timesheetEntries = response.data;
-        this.logger.log(`Received ${timesheetEntries.length} timesheet entries for user ${userId} (direct array)`);
-      } else if (typeof response.data === 'object' && !Array.isArray(response.data) && !response.data.data) {
-        // Trường hợp API trả về đối tượng đơn lẻ
-        timesheetEntries = [response.data];
-        this.logger.log(`Received single timesheet entry for user ${userId} (object)`);
-      } else {
-        throw new Error(`API returned unexpected structure for timesheet entries: ${JSON.stringify(response.data)}`);
-      }
-      
-      // Thêm thông tin debug về dữ liệu nhận được
-      if (timesheetEntries.length > 0) {
-        this.logger.log(`Sample timesheet entry: ${JSON.stringify(timesheetEntries[0])}`);
-      }
-      
-      return timesheetEntries;
-    } catch (error: any) {
+    } catch (error) {
       let errorMessage = `Error fetching timesheet entries for user ${userId}: `;
       
       if (error.response) {
@@ -538,50 +600,78 @@ export class ReportService {
       
       const headers = this.getHeaders(authHeader);
       
+      const fullUrl = `${url}?${params.toString()}`;
+      this.logger.log(`EXACT API CALL: ${fullUrl}`);
       this.logger.log(`Fetching all timesheet entries from: ${url}?${params.toString()}`);
       
-      const response = await firstValueFrom(
-        this.httpService.get(`${url}?${params.toString()}`, { 
-          headers,
-          timeout: 10000 // Increased timeout to 10 seconds
-        })
-      );
-      
-      // Kiểm tra phản hồi
-      if (!response.data) {
-        throw new Error(`API returned empty response for all timesheet entries`);
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get(fullUrl, { 
+            headers,
+            timeout: 10000 // Increased timeout to 10 seconds
+          })
+        );
+        
+        // Log the raw response for debugging
+        this.logger.log(`Raw API response: ${JSON.stringify(response.data)}`);
+        
+        // Kiểm tra phản hồi
+        if (!response.data) {
+          throw new Error(`API returned empty response for all timesheet entries`);
+        }
+        
+        // Xử lý cấu trúc phản hồi từ timesheet-service API
+        // Theo bộ nhớ, API trả về dữ liệu trong cấu trúc { data: [...], metadata: {...} }
+        let timesheetEntries: WeeklyReportEntry[] = [];
+        
+        if (response.data.data && Array.isArray(response.data.data)) {
+          // Cấu trúc chuẩn: { data: [...], metadata: {...} }
+          timesheetEntries = response.data.data;
+          this.logger.log(`Received ${timesheetEntries.length} timesheet entries (paginated structure)`);
+        } else if (Array.isArray(response.data)) {
+          // Trường hợp API trả về mảng trực tiếp
+          timesheetEntries = response.data;
+          this.logger.log(`Received ${timesheetEntries.length} timesheet entries (direct array)`);
+        } else if (typeof response.data === 'object' && !Array.isArray(response.data) && !response.data.data) {
+          // Trường hợp API trả về đối tượng đơn lẻ
+          timesheetEntries = [response.data];
+          this.logger.log(`Received single timesheet entry (object)`);
+        } else {
+          throw new Error(`API returned unexpected structure for all timesheet entries: ${JSON.stringify(response.data)}`);
+        }
+        
+        // Thêm thông tin debug về dữ liệu nhận được
+        if (timesheetEntries.length > 0) {
+          this.logger.log(`Sample timesheet entry: ${JSON.stringify(timesheetEntries[0])}`);
+          this.logger.log(`Total timesheet entries received: ${timesheetEntries.length}`);
+        } else {
+          this.logger.warn(`No timesheet entries found for the date range ${fromDate} to ${toDate}`);
+        }
+        
+        return timesheetEntries;
+      } catch (error) {
+        let errorMessage = `Error fetching all timesheet entries: `;
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code outside of 2xx range
+          errorMessage += `Server responded with status ${error.response.status}. `;
+          if (error.response.data) {
+            errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage += `No response received from server. Check if timesheet service is running at ${this.timesheetServiceUrl}.`;
+        } else {
+          // Something happened in setting up the request
+          errorMessage += error.message || 'Unknown error';
+        }
+        
+        this.logger.error(errorMessage);
+        
+        // Return empty array in case of error
+        return [];
       }
-      
-      // Xử lý cấu trúc phản hồi từ timesheet-service API
-      // Theo bộ nhớ, API trả về dữ liệu trong cấu trúc { data: [...], metadata: {...} }
-      let timesheetEntries: WeeklyReportEntry[] = [];
-      
-      if (response.data.data && Array.isArray(response.data.data)) {
-        // Cấu trúc chuẩn: { data: [...], metadata: {...} }
-        timesheetEntries = response.data.data;
-        this.logger.log(`Received ${timesheetEntries.length} timesheet entries (paginated structure)`);
-      } else if (Array.isArray(response.data)) {
-        // Trường hợp API trả về mảng trực tiếp
-        timesheetEntries = response.data;
-        this.logger.log(`Received ${timesheetEntries.length} timesheet entries (direct array)`);
-      } else if (typeof response.data === 'object' && !Array.isArray(response.data) && !response.data.data) {
-        // Trường hợp API trả về đối tượng đơn lẻ
-        timesheetEntries = [response.data];
-        this.logger.log(`Received single timesheet entry (object)`);
-      } else {
-        throw new Error(`API returned unexpected structure for all timesheet entries: ${JSON.stringify(response.data)}`);
-      }
-      
-      // Thêm thông tin debug về dữ liệu nhận được
-      if (timesheetEntries.length > 0) {
-        this.logger.log(`Sample timesheet entry: ${JSON.stringify(timesheetEntries[0])}`);
-        this.logger.log(`Total timesheet entries received: ${timesheetEntries.length}`);
-      } else {
-        this.logger.warn(`No timesheet entries found for the date range ${fromDate} to ${toDate}`);
-      }
-      
-      return timesheetEntries;
-    } catch (error: any) {
+    } catch (error) {
       let errorMessage = `Error fetching all timesheet entries: `;
       
       if (error.response) {
@@ -623,14 +713,19 @@ export class ReportService {
           const url = `${this.projectServiceUrl}/api/v1/tasks/${taskId}`;
           const headers = this.getHeaders(authHeader);
           
+          const fullUrl = `${url}`;
+          this.logger.log(`EXACT API CALL: ${fullUrl}`);
           this.logger.log(`Fetching task info from: ${url}`);
           
           const response = await firstValueFrom(
-            this.httpService.get(url, { 
+            this.httpService.get(fullUrl, { 
               headers,
               timeout: 5000 // 5 seconds timeout
             })
           );
+          
+          // Log the raw response for debugging
+          this.logger.log(`Raw API response: ${JSON.stringify(response.data)}`);
           
           if (response.data) {
             tasks.push(response.data);
@@ -680,13 +775,60 @@ export class ReportService {
       
       const headers = this.getHeaders(authHeader);
       
-      const response = await firstValueFrom(
-        this.httpService.get(`${url}?${params.toString()}`, { headers })
-      );
+      const fullUrl = `${url}?${params.toString()}`;
+      this.logger.log(`EXACT API CALL: ${fullUrl}`);
+      this.logger.log(`Fetching projects from: ${url}?${params.toString()}`);
       
-      return response.data;
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get(fullUrl, { headers })
+        );
+        
+        // Log the raw response for debugging
+        this.logger.log(`Raw API response: ${JSON.stringify(response.data)}`);
+        
+        return response.data;
+      } catch (error) {
+        let errorMessage = `Error fetching projects: `;
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code outside of 2xx range
+          errorMessage += `Server responded with status ${error.response.status}. `;
+          if (error.response.data) {
+            errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage += `No response received from server. Check if project service is running at ${this.projectServiceUrl}.`;
+        } else {
+          // Something happened in setting up the request
+          errorMessage += error.message || 'Unknown error';
+        }
+        
+        this.logger.error(errorMessage);
+        
+        // Return empty array in case of error
+        return [];
+      }
     } catch (error) {
-      this.logger.error(`Error fetching projects:`, error);
+      let errorMessage = `Error fetching projects: `;
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code outside of 2xx range
+        errorMessage += `Server responded with status ${error.response.status}. `;
+        if (error.response.data) {
+          errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += `No response received from server. Check if project service is running at ${this.projectServiceUrl}.`;
+      } else {
+        // Something happened in setting up the request
+        errorMessage += error.message || 'Unknown error';
+      }
+      
+      this.logger.error(errorMessage);
+      
       // Return empty array in case of error
       return [];
     }
@@ -700,13 +842,60 @@ export class ReportService {
       const url = `${this.projectServiceUrl}/api/v1/customers`;
       const headers = this.getHeaders(authHeader);
       
-      const response = await firstValueFrom(
-        this.httpService.get(url, { headers })
-      );
+      const fullUrl = `${url}`;
+      this.logger.log(`EXACT API CALL: ${fullUrl}`);
+      this.logger.log(`Fetching customers from: ${url}`);
       
-      return response.data;
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get(fullUrl, { headers })
+        );
+        
+        // Log the raw response for debugging
+        this.logger.log(`Raw API response: ${JSON.stringify(response.data)}`);
+        
+        return response.data;
+      } catch (error) {
+        let errorMessage = `Error fetching customers: `;
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code outside of 2xx range
+          errorMessage += `Server responded with status ${error.response.status}. `;
+          if (error.response.data) {
+            errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage += `No response received from server. Check if project service is running at ${this.projectServiceUrl}.`;
+        } else {
+          // Something happened in setting up the request
+          errorMessage += error.message || 'Unknown error';
+        }
+        
+        this.logger.error(errorMessage);
+        
+        // Return empty array in case of error
+        return [];
+      }
     } catch (error) {
-      this.logger.error(`Error fetching customers:`, error);
+      let errorMessage = `Error fetching customers: `;
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code outside of 2xx range
+        errorMessage += `Server responded with status ${error.response.status}. `;
+        if (error.response.data) {
+          errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += `No response received from server. Check if project service is running at ${this.projectServiceUrl}.`;
+      } else {
+        // Something happened in setting up the request
+        errorMessage += error.message || 'Unknown error';
+      }
+      
+      this.logger.error(errorMessage);
+      
       // Return empty array in case of error
       return [];
     }
@@ -730,13 +919,60 @@ export class ReportService {
       
       const headers = this.getHeaders(authHeader);
       
-      const response = await firstValueFrom(
-        this.httpService.get(`${url}?${params.toString()}`, { headers })
-      );
+      const fullUrl = `${url}?${params.toString()}`;
+      this.logger.log(`EXACT API CALL: ${fullUrl}`);
+      this.logger.log(`Fetching timesheet entries for projects from: ${url}?${params.toString()}`);
       
-      return response.data;
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get(fullUrl, { headers })
+        );
+        
+        // Log the raw response for debugging
+        this.logger.log(`Raw API response: ${JSON.stringify(response.data)}`);
+        
+        return response.data;
+      } catch (error) {
+        let errorMessage = `Error fetching timesheet entries for projects: `;
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code outside of 2xx range
+          errorMessage += `Server responded with status ${error.response.status}. `;
+          if (error.response.data) {
+            errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage += `No response received from server. Check if timesheet service is running at ${this.timesheetServiceUrl}.`;
+        } else {
+          // Something happened in setting up the request
+          errorMessage += error.message || 'Unknown error';
+        }
+        
+        this.logger.error(errorMessage);
+        
+        // Return empty array in case of error
+        return [];
+      }
     } catch (error) {
-      this.logger.error(`Error fetching timesheet entries for projects:`, error);
+      let errorMessage = `Error fetching timesheet entries for projects: `;
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code outside of 2xx range
+        errorMessage += `Server responded with status ${error.response.status}. `;
+        if (error.response.data) {
+          errorMessage += `Response: ${JSON.stringify(error.response.data)}`;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += `No response received from server. Check if timesheet service is running at ${this.timesheetServiceUrl}.`;
+      } else {
+        // Something happened in setting up the request
+        errorMessage += error.message || 'Unknown error';
+      }
+      
+      this.logger.error(errorMessage);
+      
       // Return empty array in case of error
       return [];
     }
@@ -1108,8 +1344,12 @@ export class ReportService {
   }
 
   /**
-   * Group timesheet entries by user
+   * Group timesheet entries by user_id and task_id
+   * @param entries Timesheet entries to group
+   * @returns Grouped entries by user_id and task_id
    */
+  
+
   private groupTimesheetEntriesByUser(entries: WeeklyReportEntry[]): Record<string, WeeklyReportEntry[]> {
     const entriesByUser = {};
     
