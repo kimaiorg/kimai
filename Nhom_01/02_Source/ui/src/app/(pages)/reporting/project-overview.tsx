@@ -34,9 +34,9 @@ function ProjectOverviewReport() {
         const data = await getProjectOverviewReport(customerId);
 
         // Đảm bảo tất cả các dự án đều có customer_name
-        const projectsWithCustomers = (data.projects || []).map((project) => {
+        const projectsWithCustomers = (data.projects || []).map((project: ProjectReportData) => {
           if (!project.customer_name && project.customer_id) {
-            const customer = (data.customers || []).find((c) => c.id === project.customer_id);
+            const customer = (data.customers || []).find((c: CustomerReportData) => c.id === project.customer_id);
             return {
               ...project,
               customer_name: customer?.name || "Unknown Customer"
@@ -116,6 +116,9 @@ function ProjectOverviewReport() {
 
   // Export to PDF
   const exportToPdf = () => {
+    // Calculate totals
+    const totals = calculateTotals();
+
     // Create table data for PDF
     const tableData = [
       // Project rows
@@ -150,8 +153,25 @@ function ProjectOverviewReport() {
         : "All Customers";
     const fileName = `Project_Overview_${customerName}_${new Date().toISOString().split("T")[0]}.pdf`;
 
-    // Generate PDF
-    const pdfUrl = generateProjectOverviewPdf(`Project Overview - ${customerName}`, columns, tableData, fileName);
+    // Create summary data
+    const summary = [
+      { label: "Total Budget", value: formatCurrency(totals.budget) },
+      { label: "Total Spent", value: formatCurrency(totals.spent) },
+      { label: "Total Remaining", value: formatCurrency(totals.remaining) },
+      { label: "Time Spent This Month", value: formatDuration(totals.thisMonth) },
+      { label: "Total Time Spent", value: formatDuration(totals.timeSpent) },
+      { label: "Not Exported Time", value: formatDuration(totals.notExported) },
+      { label: "Budget Used", value: `${Math.min(100, Math.round((totals.spent / (totals.budget || 1)) * 100))}%` }
+    ];
+
+    // Generate PDF with summary
+    const pdfUrl = generateProjectOverviewPdf(
+      `Project Overview - ${customerName}`, 
+      columns, 
+      tableData, 
+      fileName,
+      summary
+    );
 
     // Open PDF in new window
     window.open(pdfUrl, "_blank");

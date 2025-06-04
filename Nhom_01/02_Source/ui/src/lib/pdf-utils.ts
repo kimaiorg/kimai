@@ -223,9 +223,16 @@ export function generateWeeklyReportPdf(
  * @param columns Column headers
  * @param data Table data
  * @param filename Output filename
+ * @param summary Optional summary data to display at the end
  * @returns Blob URL of the generated PDF
  */
-export function generateProjectOverviewPdf(title: string, columns: string[], data: any[][], filename: string): string {
+export function generateProjectOverviewPdf(
+  title: string, 
+  columns: string[], 
+  data: any[][], 
+  filename: string,
+  summary?: Array<{label: string, value: string}>
+): string {
   return generateReportPdf({
     title,
     columns,
@@ -235,7 +242,8 @@ export function generateProjectOverviewPdf(title: string, columns: string[], dat
     companyInfo: {
       name: "Kimai Time Tracking",
       address: "123 Time Street\nTracking City, TC 12345"
-    }
+    },
+    summary
   });
 }
 
