@@ -64,6 +64,7 @@ export default function LocaleLayout({
         try {
           const userList = await getAllUsers();
           // console.log(userList);
+
           dispatch(updateUserList(userList.users));
         } catch (error) {
           console.error(error);

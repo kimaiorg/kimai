@@ -10,7 +10,7 @@ import CalendarTimesheetViewDialog from "@/app/(pages)/timesheet/calendar-timesh
 import { CalendarSkeleton } from "@/components/skeleton/calendar-skeleton";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { CalendarEventType } from "@/type_schema/calendar";
-import { TimesheetType } from "@/type_schema/timesheet";
+import { TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
@@ -19,49 +19,6 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { useEffect, useRef, useState } from "react";
-
-const sampleEvents = [
-  {
-    id: "1",
-    title: "Meeting with Team A",
-    start: "2025-04-15T09:00:00",
-    end: "2025-04-15T10:30:00",
-    backgroundColor: "#4285F4",
-    location: "Conference Room 1",
-    description: "Discuss project roadmap and upcoming milestones",
-    attendees: ["John Doe", "Jane Smith"]
-  },
-  {
-    id: "2",
-    title: "Project Review",
-    start: "2025-04-16T11:00:00",
-    end: "2025-04-16T12:00:00",
-    backgroundColor: "#EA4335",
-    location: "Meeting Room B",
-    description: "Review progress on current sprint",
-    attendees: ["Alex Johnson", "Sarah Williams"]
-  },
-  {
-    id: "3",
-    title: "Lunch Break",
-    start: "2025-04-17T12:00:00",
-    end: "2025-04-17T13:00:00",
-    backgroundColor: "#FBBC05",
-    location: "Cafeteria",
-    description: "Team lunch",
-    attendees: ["Team Members"]
-  },
-  {
-    id: "4",
-    title: "Client Call",
-    start: "2025-04-18T14:00:00",
-    end: "2025-04-18T15:00:00",
-    backgroundColor: "#34A853",
-    location: "Call Room 2",
-    description: "Discuss project requirements with client",
-    attendees: ["Client Rep", "Project Manager"]
-  }
-];
 
 type CreateTimeSheetProps = {
   startTime?: string;
@@ -85,14 +42,18 @@ export default function MyCalendar() {
 
   const handleFetchTimesheets = () => {
     const fetchTimesheets = async () => {
-      const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
+      const [projects, activities, tasks] = await Promise.all([
+        getAllProjects(1, 250),
+        getAllActivities(1, 250),
+        getAllTasks(1, 250)
+      ]);
       const result = await getAllMyTimesheets();
       const timesheets: TimesheetType[] = result.data
         .map((timesheet) => {
           const { user_id, project_id, activity_id, task_id, ...rest } = timesheet;
           return {
             ...rest,
-            status: timesheet.status as "running" | "stopped",
+            status: timesheet.status as TimesheetStatus,
             user: userList.find((user) => user.user_id === user_id)!,
             project: projects.data.find((project) => project.id === project_id)!,
             activity: activities.data.find((activity) => activity.id === activity_id)!,
@@ -122,7 +83,7 @@ export default function MyCalendar() {
 
     const calendar = new Calendar(calendarRef.current, {
       plugins: [dayGridPlugin, timeGridPlugin, bootstrap5Plugin, interactionPlugin],
-      initialView: "timeGridWeek",
+      initialView: "dayGridMonth",
       weekNumbers: true,
       nowIndicator: true,
       slotMinTime: "06:00:00",

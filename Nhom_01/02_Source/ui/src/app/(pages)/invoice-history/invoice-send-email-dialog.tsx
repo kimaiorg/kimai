@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InvoiceHistoryType } from "@/type_schema/invoice";
 import { format } from "date-fns";
@@ -23,7 +24,6 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  FileText,
   Globe,
   Hash,
   Mail,
@@ -54,7 +54,7 @@ export default function InvoiceSendMailDialog({
     if (loading) return;
     setLoading(true);
     try {
-      const response = await sendInvoiceViaEmail(targetInvoice.id, "damhonghung123@gmail.com");
+      const response = await sendInvoiceViaEmail(targetInvoice.id, emailInput);
       if (response == 200 || response == 201) {
         toast("Success", {
           description: "Send invoice mail to customer successfully",
@@ -151,7 +151,7 @@ export default function InvoiceSendMailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-140px)] px-6">
+        <ScrollArea className="h-[50vh] px-6">
           <div className="space-y-6 pb-4">
             {/* Invoice Header */}
             <Card className="border border-gray-100 shadow-sm">
@@ -283,49 +283,59 @@ export default function InvoiceSendMailDialog({
           </div>
         </ScrollArea>
 
-        <DialogFooter className="px-6 pb-6 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleSendMail()}
-            disabled={loading}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-          >
-            {loading ? (
-              <span className="flex items-center">
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Sending...
-              </span>
-            ) : (
-              <span className="flex items-center">
-                <Send className="mr-2 h-4 w-4" />
-                Send Invoice Email
-              </span>
-            )}
-          </Button>
+        <DialogFooter className="border-t !flex-col px-6 py-2 gap-2">
+          <div className="">
+            <label className="text-sm font-semibold">Customer email</label>
+            <Input
+              className="py-1 px-4 !mt-0 border-gray-200"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end items-stretch gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleSendMail()}
+              disabled={loading}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Sending...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Invoice
+                </span>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

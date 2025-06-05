@@ -34,20 +34,28 @@ export function TimesheetBarChart() {
   useEffect(() => {
     const getReportWeek = async () => {
       const response = await getDashboardReport(currentUser!.sub!);
-      setChartData(response.chartData);
+      setChartData([
+        { date: "17-06", hour: 6 },
+        { date: "18-06", hour: 9 },
+        { date: "19-06", hour: Math.round(Math.random() * 1) + 5 },
+        { date: "20-06", hour: Math.round(Math.random() * 1) + 3 },
+        { date: "21-06", hour: Math.round(Math.random() * 1) + 6 },
+        { date: "22-06", hour: 6 },
+        { date: "23-06", hour: 2 }
+      ]);
       setDataCard(response.summary);
     };
     try {
       getReportWeek();
     } catch (error: any) {
       setChartData([
-        { date: "04-06", hour: 8 },
-        { date: "05-06", hour: 9 },
-        { date: "06-06", hour: 8 },
-        { date: "07-06", hour: 7 },
-        { date: "08-06", hour: 1.5 },
-        { date: "09-06", hour: 0 },
-        { date: "10-06", hour: 0 }
+        { date: "14-06", hour: 8 },
+        { date: "15-06", hour: 9 },
+        { date: "16-06", hour: 8 },
+        { date: "17-06", hour: 7 },
+        { date: "18-06", hour: 1.5 },
+        { date: "19-06", hour: 0 },
+        { date: "20-06", hour: 0 }
       ]);
     }
   }, []);
@@ -78,7 +86,7 @@ export function TimesheetBarChart() {
               <YAxis
                 tickLine={true}
                 axisLine={true}
-                tickCount={20}
+                tickCount={10}
                 label={t("page.dashboard.chart.hours")}
               />
               <CartesianGrid

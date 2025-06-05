@@ -50,8 +50,8 @@ export function CalendarManualTimesheetCreateDialog({
     defaultValues: {
       task_id: "",
       description: "Description about your task here",
-      from: startTime,
-      end: endTime
+      start_time: startTime,
+      end_time: endTime
     }
   });
   async function onSubmit(values: CreateManualTimesheetValidation) {
@@ -62,8 +62,8 @@ export function CalendarManualTimesheetCreateDialog({
       const payload: CreateManualTimesheetRequestDTO = {
         ...rest,
         task_id: Number(task_id),
-        user_name: "Will be deleted",
         project_id: project!.id,
+        username: "Will be deleted",
         activity_id: activity!.id
       };
       const response = await addNewManualTimesheetRecord(payload);
@@ -97,7 +97,7 @@ export function CalendarManualTimesheetCreateDialog({
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const tasks = await getAllTasksByUserId(currentUser!.user_id as string);
+        const tasks = await getAllTasksByUserId(1, 100, currentUser!.sub!);
         setTaskList(tasks);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -153,7 +153,7 @@ export function CalendarManualTimesheetCreateDialog({
               {/* Name and Color */}
               <FormField
                 control={createTimesheetForm.control}
-                name="from"
+                name="start_time"
                 render={({ field }) => (
                   <FormItem className="col-span-6">
                     <FormLabel>Start time</FormLabel>
@@ -169,7 +169,7 @@ export function CalendarManualTimesheetCreateDialog({
               />
               <FormField
                 control={createTimesheetForm.control}
-                name="end"
+                name="end_time"
                 render={({ field }) => (
                   <FormItem className="col-span-6">
                     <FormLabel>End time</FormLabel>

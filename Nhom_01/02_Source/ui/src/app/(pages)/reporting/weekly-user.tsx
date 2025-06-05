@@ -21,7 +21,7 @@ function WeeklyUserReport() {
   const { t } = useTranslation();
   const { user } = useUser();
   const weekOptions = generateWeekOption();
-  const [currentWeekNumber, setCurrentWeekNumber] = useState(21);
+  const [currentWeekNumber, setCurrentWeekNumber] = useState(22);
 
   const [selectedWeek, setSelectedWeek] = useState(weekOptions.find((week) => week.week === currentWeekNumber));
 

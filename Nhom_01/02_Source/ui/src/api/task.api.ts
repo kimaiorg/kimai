@@ -45,10 +45,15 @@ export async function getAllTasks(
   return data;
 }
 
-export async function getAllTasksByUserId(userId: string): Promise<TaskResponseType[]> {
+export async function getAllTasksByUserId(page?: number, limit?: number, userId?: string): Promise<TaskResponseType[]> {
   const token = await getManagementAccessToken();
-  console.log(userId);
-  const response = await projectAxios.get<Pagination<TaskResponseType>>(`/api/v1/tasks`, {
+
+  const params = new URLSearchParams();
+  if (page) params.append("page", page.toString());
+  if (limit) params.append("limit", limit.toString());
+  if (userId) params.append("user_id", userId);
+
+  const response = await projectAxios.get<Pagination<TaskResponseType>>(`/api/v1/tasks?${params.toString()}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"

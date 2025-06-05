@@ -94,3 +94,8 @@ INSERT INTO public."InvoiceItem" VALUES (1, 'Develop sentiment analysis engine',
 (55, 'Develop subscription billing system', 7.00, 400.00, 2800.00, NULL, 116, 69, '2025-04-01 00:00:00', '2025-07-01 00:00:00', 11, '2025-06-01 17:49:24.119', '2025-06-01 17:49:24.119'),
 (56, 'Develop error logging system', 7.00, 59.00, 413.00, NULL, 115, 88, '2025-04-01 00:00:00', '2025-07-01 00:00:00', 12, '2025-06-01 17:51:02.627', '2025-06-01 17:51:02.627'),
 (57, 'Create voice recognition system', 9.00, 27.00, 243.00, NULL, 107, 49, '2025-04-01 00:00:00', '2025-07-01 00:00:00', 13, '2025-06-01 17:51:38.634', '2025-06-01 17:51:38.634');
+
+SELECT pg_catalog.setval('public."FilteredInvoice_id_seq"', 99, true); 
+SELECT pg_catalog.setval('public."InvoiceItem_id_seq"', 58, true); 
+SELECT pg_catalog.setval('public."InvoiceTemplate_id_seq"', 10, false); 
+SELECT pg_catalog.setval('public."Invoice_id_seq"', 22, true); 

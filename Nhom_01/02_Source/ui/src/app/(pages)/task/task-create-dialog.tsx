@@ -178,7 +178,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Enter your company name"
+                        placeholder="Enter task description"
                         rows={2}
                         className="!mt-0 border-gray-200"
                         {...field}
@@ -302,7 +302,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
                         >
                           <FormControl>
                             <SelectTrigger className="w-full !mt-0 border-gray-200">
-                              <SelectValue placeholder="Select an assignee" />
+                              <SelectValue placeholder="Select an expense" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

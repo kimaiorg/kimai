@@ -22,7 +22,7 @@ export default function Notification({ children }: { children: React.ReactNode }
   const getNotifications = async () => {
     const result = await getAllNotifications();
     console.log(result.data);
-    result.data = result.data.filter((notification) => notification.user_id === currentUser!.user_id).slice(0, 3);
+    result.data = result.data.filter((notification) => notification.user_id === currentUser!.sub).slice(0, 3);
     setNotifications(result.data);
   };
 
@@ -59,7 +59,7 @@ export default function Notification({ children }: { children: React.ReactNode }
     }
     const determinedUrl = determineUrl(notification.type, notification.target_id);
 
-    router.replace(determinedUrl);
+    router.push(determinedUrl);
   };
 
   const getNotificationIcon = (type: NotificationTypeType) => {
@@ -161,7 +161,11 @@ export default function Notification({ children }: { children: React.ReactNode }
                           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: false })}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{notification.content} </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {notification.type === NotificationTypeType.TIMESHEET_REQUEST
+                          ? "A member has just started a timesheet"
+                          : notification.content}
+                      </p>
                     </div>
                   </div>
                 ))}

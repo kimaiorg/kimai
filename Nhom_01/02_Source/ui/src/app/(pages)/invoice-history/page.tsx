@@ -134,7 +134,6 @@ function InvoiceHistoryContent() {
     updateUrl(params);
   };
 
-  const userList = useAppSelector((state) => state.userListState.users) as UserType[];
   const [invoiceHistories, setInvoiceHistories] = useState<PaginationV2<InvoiceHistoryType> | null>(null);
 
   // Load invoices when component mounts
@@ -341,11 +340,7 @@ function InvoiceHistoryContent() {
 }
 
 // Sử dụng AuthenticatedRoute như một Higher-Order Component
-const AuthenticatedInvoiceHistory = AuthenticatedRoute(InvoiceHistoryContent, [
-  Role.ADMIN,
-  Role.SUPER_ADMIN,
-  Role.TEAM_LEAD
-]);
+const AuthenticatedInvoiceHistory = AuthenticatedRoute(InvoiceHistoryContent, [Role.ADMIN, Role.SUPER_ADMIN]);
 
 export default AuthenticatedInvoiceHistory;
 

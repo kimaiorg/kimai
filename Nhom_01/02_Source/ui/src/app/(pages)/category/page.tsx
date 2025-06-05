@@ -28,8 +28,8 @@ function CategoryPage() {
   const limit = queryParams.get("limit") ? Number(queryParams.get("limit")) : 10;
   const searchKeyword = queryParams.get("keyword") || "";
   const [keyword, setKeyword] = useState<string>(searchKeyword);
-  const sortBy = queryParams.get("sortBy") || "";
-  const sortOrder = queryParams.get("sortOrder") || "";
+  const sortBy = queryParams.get("sortBy") || "created_at";
+  const sortOrder = queryParams.get("sortOrder") || "desc";
   const [categoryList, setCategoryList] = useState<Pagination<CategoryType> | null>(null);
 
   const handleFetchCategories = async (
@@ -160,7 +160,7 @@ function CategoryPage() {
                   key={index}
                   className={`border-t dark:border-slate-700 `}
                 >
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{category.id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{index + 1}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                     <div className="flex items-center">
                       <div

@@ -6,7 +6,6 @@ import {
   ClipboardPaste,
   FileChartColumnIncreasing,
   FilePlus,
-  FileSpreadsheet,
   FileText,
   GitPullRequestCreateArrow,
   Home,
@@ -29,7 +28,7 @@ export const timesheetNavMain = [
     icon: Home,
     isActive: false,
     allowRoles: [],
-    items: null
+    items: undefined
   },
   {
     title: "Time tracking",
@@ -55,14 +54,6 @@ export const timesheetNavMain = [
         isActive: false,
         allowRoles: []
       }
-      // {
-      //   title: "Export",
-      //   translationKey: "sidebar.export",
-      //   url: "/export",
-      //   icon: ClipboardPlus,
-      //   isActive: false,
-      //   allowRoles: []
-      // },
     ]
   },
   {
@@ -72,34 +63,8 @@ export const timesheetNavMain = [
     icon: GitPullRequestCreateArrow,
     isActive: false,
     allowRoles: [],
-    items: null
+    items: undefined
   },
-  // {
-  //   title: "Employment contract",
-  //   translationKey: "sidebar.workingTime",
-  //   url: "/working-time",
-  //   icon: Scale,
-  //   isActive: false,
-  //   allowRoles: [],
-  //   items: [
-  //     {
-  //       title: "Working time",
-  //       translationKey: "sidebar.workingTime",
-  //       url: "/working-time",
-  //       icon: Calculator,
-  //       isActive: false,
-  //       allowRoles: []
-  //     },
-  //     {
-  //       title: "Absence",
-  //       translationKey: "sidebar.absence",
-  //       url: "/absence",
-  //       icon: PersonStanding,
-  //       isActive: false,
-  //       allowRoles: []
-  //     }
-  //   ]
-  // },
   {
     title: "Reporting",
     translationKey: "sidebar.reporting",
@@ -107,7 +72,7 @@ export const timesheetNavMain = [
     icon: FileChartColumnIncreasing,
     isActive: false,
     allowRoles: [],
-    items: null
+    items: undefined
   },
   {
     title: "Invoices",
@@ -133,14 +98,6 @@ export const timesheetNavMain = [
         isActive: false,
         allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
       }
-      // {
-      //   title: "Invoice template",
-      //   translationKey: "sidebar.invoiceTemplate",
-      //   url: "/invoice-template",
-      //   icon: FileSpreadsheet,
-      //   isActive: false,
-      //   allowRoles: [Role.SUPER_ADMIN, Role.ADMIN]
-      // }
     ]
   },
   {
@@ -150,7 +107,7 @@ export const timesheetNavMain = [
     icon: ListTodo,
     isActive: false,
     allowRoles: [],
-    item: null
+    item: undefined
   },
   {
     title: "Exspenses",

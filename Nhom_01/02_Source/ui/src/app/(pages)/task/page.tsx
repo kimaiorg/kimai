@@ -325,7 +325,7 @@ function Task() {
                   key={index}
                   className={`border-t dark:border-slate-700 `}
                 >
-                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{task.id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{index + 1}</td>
                   <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                     <div className="flex items-center">
                       <div

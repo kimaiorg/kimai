@@ -82,29 +82,33 @@ function TimesheetUpdateRequestPage() {
     sortOrder?: string
   ) => {
     // Start all fetch requests concurrently
-    const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
-    const result = await getAllMyTimesheetUpdateRequests(page, limit, keyword, sortBy, sortOrder, teamId, userId);
+    const [projects, activities, tasks] = await Promise.all([
+      getAllProjects(1, 200),
+      getAllActivities(1, 200),
+      getAllTasks(1, 200)
+    ]);
+    const result = hasRole(userRolePermissions.role, allowRoles)
+      ? await getAllMyTimesheetUpdateRequests(page, limit, keyword, sortBy, sortOrder, teamId, userId)
+      : await getAllMyTimesheetUpdateRequests(page, limit, keyword, sortBy, sortOrder, teamId, currentUser!.sub!);
     const { data, metadata } = result;
-    const filteredData = hasRole(userRolePermissions.role, allowRoles)
-      ? data
-      : data.filter((timesheetData) => timesheetData.user_id === currentUser?.sub);
-    const timesheets: RequestUpdateType<TimesheetType, TimesheetUpdateRequestType>[] = filteredData.map(
-      (timesheetUpdate) => {
-        const { previous_data, ...rest } = timesheetUpdate;
-        const { user_id, project_id, activity_id, task_id, ...restTimesheet } = previous_data;
-        return {
-          ...rest,
-          previous_data: {
-            ...restTimesheet,
-            status: previous_data.status,
-            user: userList.find((user) => user.user_id === user_id)!,
-            project: projects.data.find((project) => project.id === project_id)!,
-            activity: activities.data.find((activity) => activity.id === activity_id)!,
-            task: tasks.data.find((task) => task.id === task_id)!
-          }
-        };
-      }
-    );
+    // const filteredData = hasRole(userRolePermissions.role, allowRoles)
+    //   ? data
+    //   : data.filter((timesheetData) => timesheetData.user_id === currentUser?.sub);
+    const timesheets: RequestUpdateType<TimesheetType, TimesheetUpdateRequestType>[] = data.map((timesheetUpdate) => {
+      const { previous_data, ...rest } = timesheetUpdate;
+      const { user_id, project_id, activity_id, task_id, ...restTimesheet } = previous_data;
+      return {
+        ...rest,
+        previous_data: {
+          ...restTimesheet,
+          status: previous_data.status,
+          user: userList.find((user) => user.user_id === user_id)!,
+          project: projects.data.find((project) => project.id === project_id)!,
+          activity: activities.data.find((activity) => activity.id === activity_id)!,
+          task: tasks.data.find((task) => task.id === task_id)!
+        }
+      };
+    });
     // .filter((timesheet) => timesheet.user.user_id === currentUser?.sub);
     setTimesheetUpdateList({
       data: timesheets,
@@ -114,7 +118,11 @@ function TimesheetUpdateRequestPage() {
 
   const goToPage = (page: number) => {
     handleFetchTimesheets(page, limit, keyword, sortBy, sortOrder);
-    updateQueryParams("page", page.toString());
+    const params = new URLSearchParams(queryParams);
+    params.set("page", page.toString());
+    params.set("rq", requestType.id);
+    const newUrl = `${pathname}?${params.toString()}`;
+    replace(newUrl);
   };
 
   useEffect(() => {

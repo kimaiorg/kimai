@@ -54,13 +54,15 @@ function TaskExpenseUpdateRequestPage() {
     sortOrder?: string
   ) => {
     try {
-      const result = await getAllExpenseUpdateTasks(page, limit, keyword, sortBy, sortOrder, teamId, userId);
+      const result = hasRole(userRolePermissions.role, allowRoles)
+        ? await getAllExpenseUpdateTasks(page, limit, keyword, sortBy, sortOrder, teamId, userId)
+        : await getAllExpenseUpdateTasks(page, limit, keyword, sortBy, sortOrder, teamId, currentUser!.sub!);
 
       const { data, metadata } = result;
-      const filteredData = hasRole(userRolePermissions.role, allowRoles)
-        ? data
-        : data.filter((task) => task.user_id === currentUser?.sub);
-      const taskData = filteredData.map((taskExpense) => {
+      // const filteredData = hasRole(userRolePermissions.role, allowRoles)
+      //   ? data
+      //   : data.filter((task) => task.user_id === currentUser?.sub);
+      const taskData = data.map((taskExpense) => {
         const { previous_data: task, ...rest } = taskExpense;
         const { user_id, ...restTask } = task;
         return {
@@ -247,9 +249,7 @@ function TaskExpenseUpdateRequestPage() {
                   fetchTaskExpenses={() => handleFetchTasks()}
                 >
                   <tr className="border-t dark:border-slate-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800">
-                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                      {taskExpense.previous_data.id}
-                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{index + 1}</td>
                     <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
                       <div className="flex items-center">
                         <div

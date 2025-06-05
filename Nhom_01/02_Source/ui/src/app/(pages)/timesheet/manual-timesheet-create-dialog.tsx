@@ -90,7 +90,7 @@ export function ManualTimesheetCreateDialog({
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const tasks = await getAllTasksByUserId(currentUser!.user_id as string);
+        const tasks = await getAllTasksByUserId(1, 100, currentUser!.sub!);
         setTaskList(tasks);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -211,7 +211,7 @@ export function ManualTimesheetCreateDialog({
                         >
                           <FormControl>
                             <SelectTrigger className="w-full !mt-0 border-gray-200">
-                              <SelectValue placeholder="Select activity" />
+                              <SelectValue placeholder="Select a task" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

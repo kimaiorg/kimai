@@ -3,7 +3,7 @@
 import { getAllActivities } from "@/api/activity.api";
 import { getAllProjects } from "@/api/project.api";
 import { getAllTasks } from "@/api/task.api";
-import { endTimesheetRecord, getAllMyTimesheets, requestStartTrackingTimesheet } from "@/api/timesheet.api";
+import { endTimesheetRecord, getAllMyTimesheets } from "@/api/timesheet.api";
 import FilterTimesheetModal from "@/app/(pages)/timesheet/filter-modal";
 import { ManualTimesheetCreateDialog } from "@/app/(pages)/timesheet/manual-timesheet-create-dialog";
 import { TimesheetCreateDialog } from "@/app/(pages)/timesheet/timesheet-create-dialog";
@@ -19,13 +19,13 @@ import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { secondsToTime } from "@/lib/utils";
 import { Pagination } from "@/type_schema/common";
-import { ApprovalStatus, CommonRequestType, RequestTypeType } from "@/type_schema/request";
-import { TimesheetStartTrackingRequestType, TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
+import { ApprovalStatus } from "@/type_schema/request";
+import { TimesheetStatus, TimesheetType } from "@/type_schema/timesheet";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { format } from "date-fns";
 import debounce from "debounce";
-import { Eye, FileDown, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2, Upload } from "lucide-react";
+import { Eye, Filter, MoreHorizontal, Play, Plus, Search, Square, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -82,7 +82,11 @@ function Timesheet() {
     sortOrder?: string
   ) => {
     // Start all fetch requests concurrently
-    const [projects, activities, tasks] = await Promise.all([getAllProjects(), getAllActivities(), getAllTasks()]);
+    const [projects, activities, tasks] = await Promise.all([
+      getAllProjects(1, 250),
+      getAllActivities(1, 150),
+      getAllTasks(1, 250)
+    ]);
     const result = await getAllMyTimesheets(
       page,
       limit,

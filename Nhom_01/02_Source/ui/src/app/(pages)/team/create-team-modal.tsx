@@ -57,7 +57,7 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
       const response = await addNewTeam(payload);
       if (response == 201) {
         toast("Success", {
-          description: "Add new user successfully",
+          description: "Add new team successfully",
           duration: 2000,
           className: "!bg-lime-500 !text-white"
         });
@@ -66,7 +66,7 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
         createTeamForm.reset();
       } else {
         toast("Error", {
-          description: "Add new user failed",
+          description: "Add new team failed",
           duration: 2000,
           className: "!bg-red-500 !text-white"
         });

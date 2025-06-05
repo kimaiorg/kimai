@@ -94,7 +94,8 @@ function NotificationPage() {
         type,
         hasRead
       );
-      result.data = result.data.filter((notification) => notification.user_id === currentUser!.user_id);
+      result.data = result.data.filter((notification) => notification.user_id === currentUser!.sub);
+      console.log(result);
       setNotificationList(result);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -236,7 +237,11 @@ function NotificationPage() {
                       {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{notification.content}</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {notification.type === NotificationTypeType.TIMESHEET_REQUEST
+                      ? "A member has just started a timesheet"
+                      : notification.content}
+                  </p>
                   <div className="flex items-center justify-between">
                     <span className={`text-xs px-2 py-1 rounded-full ${getNotificationTypeColor(notification.type)}`}>
                       {getNotificationTypeLabel(notification.type)}
