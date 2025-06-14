@@ -21,7 +21,7 @@ export default function Notification({ children }: { children: React.ReactNode }
 
   const getNotifications = async () => {
     const result = await getAllNotifications();
-    console.log(result.data);
+    // console.log(result.data);
     result.data = result.data.filter((notification) => notification.user_id === currentUser!.sub).slice(0, 3);
     setNotifications(result.data);
   };

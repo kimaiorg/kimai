@@ -27,16 +27,9 @@ http:
     my-service:
       loadBalancer:
         servers:
-          - url: "http://localhost:3330"
+          - url: "http://host.docker.internal:3334"
         passHostHeader: false # Changed to false since you're modifying Host header
         serversTransport: my-transport
-
-    # Add a middleware to inject the x-service-name header
-    middlewares:
-      x-service-name-header:
-        headers:
-          customRequestHeaders:
-            x-service-name: "timesheet"
 
   serversTransports:
     my-transport:

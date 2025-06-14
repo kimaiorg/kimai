@@ -16,5 +16,6 @@ start "Invoice Service" cmd /c "cd invoice-service && npm install -f && npm run 
 start "Notification Service" cmd /c "cd notification-service && npm install && npm run prisma:generate && npm run prisma:migrate && npm run start"  
 start "Report Service" cmd /c "cd report-service && npm install -f && npm run start"  
 start "API Gateway" cmd /c "cd api-gateway && npm install && npm run start"  
+start "Report service loadbalancer" cmd /c "cd /timesheet-service-loadbalancer/local && docker build -t traefik-kimai . && docker run -d --name traefik-report-service -p 80:80 traefik-kimai"  
 echo All services started! 
 

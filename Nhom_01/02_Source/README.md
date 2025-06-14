@@ -39,7 +39,7 @@
 
   RABBITMQ_URL=amqp://root:root@localhost:5672
 
-  TIMESHEET_SERVICE_URL=http://localhost:3334
+  TIMESHEET_SERVICE_URL=http://localhost
 
   INTERNAL_CODE=X9T4B7LQZV3MHG2JYAFWECNPDUK6SR80I5LO1XQBVUNZK3MTDY
   ```
@@ -128,7 +128,7 @@
   APP_PORT=3330
 
   # database configs
-  TIMESHEET_SERVICE_URL=http://localhost:3334
+  TIMESHEET_SERVICE_URL=http://localhost
   PROJECT_SERVICE_URL=http://localhost:3333
   NOTIFICATION_SERVICE_URL=http://localhost:3336
   ```
