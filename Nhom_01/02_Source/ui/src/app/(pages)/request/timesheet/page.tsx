@@ -85,7 +85,7 @@ function TimesheetUpdateRequestPage() {
     const [projects, activities, tasks] = await Promise.all([
       getAllProjects(1, 200),
       getAllActivities(1, 200),
-      getAllTasks(1, 200)
+      getAllTasks(1, 400)
     ]);
     const result = hasRole(userRolePermissions.role, allowRoles)
       ? await getAllMyTimesheetUpdateRequests(page, limit, keyword, sortBy, sortOrder, teamId, userId)

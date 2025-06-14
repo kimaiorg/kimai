@@ -15,5 +15,6 @@ start "Timesheet Service" cmd /c "cd timesheet-service && npm install && npm run
 start "Invoice Service" cmd /c "cd invoice-service && npm install -f && npm run prisma:generate && npm run prisma:migrate && npm run start"
 start "Notification Service" cmd /c "cd notification-service && npm install && npm run prisma:generate && npm run prisma:migrate && npm run start"  
 start "Report Service" cmd /c "cd report-service && npm install -f && npm run start"  
+start "API Gateway" cmd /c "cd api-gateway && npm install && npm run start"  
 echo All services started! 
 

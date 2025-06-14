@@ -1,16 +1,22 @@
 import axios from "axios";
 
+const proxyPath = "/proxy";
+
 const removeTokens = () => {
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("backend-at-token");
 };
 
 const projectAxios = axios.create({
-  baseURL: process.env.PROJECT_BACKEND_URL,
+  baseURL: process.env.API_GATEWAY_URL + proxyPath,
   validateStatus: () => true
 });
 // Add a request interceptor
-projectAxios.interceptors.request.use((config) => config);
+projectAxios.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["x-service-name"] = "project";
+  return config;
+});
 // Add a response interceptor
 projectAxios.interceptors.response.use(
   (response) => response,
@@ -22,11 +28,15 @@ projectAxios.interceptors.response.use(
   }
 );
 const timesheetAxios = axios.create({
-  baseURL: process.env.TIMESHEET_BACKEND_URL,
+  baseURL: process.env.API_GATEWAY_URL + proxyPath,
   validateStatus: () => true
 });
 // Add a request interceptor
-timesheetAxios.interceptors.request.use((config) => config);
+timesheetAxios.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["x-service-name"] = "timesheet";
+  return config;
+});
 // Add a response interceptor
 timesheetAxios.interceptors.response.use(
   (response) => response,
@@ -55,11 +65,15 @@ invoiceAxios.interceptors.response.use(
   }
 );
 const notificationAxios = axios.create({
-  baseURL: process.env.NOTIFICATION_BACKEND_URL,
+  baseURL: process.env.API_GATEWAY_URL + proxyPath,
   validateStatus: () => true
 });
 // Add a request interceptor
-notificationAxios.interceptors.request.use((config) => config);
+notificationAxios.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["x-service-name"] = "notification";
+  return config;
+});
 // Add a response interceptor
 notificationAxios.interceptors.response.use(
   (response) => response,

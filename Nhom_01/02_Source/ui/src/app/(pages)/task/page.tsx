@@ -27,14 +27,12 @@ import {
   CircleCheckBig,
   CircleDollarSign,
   Eye,
-  FileDown,
   Filter,
   MoreHorizontal,
   Plus,
   Search,
   SquarePen,
-  Trash2,
-  Upload
+  Trash2
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -56,7 +54,7 @@ function Task() {
   const sortBy = queryParams.get("sortBy") || "";
   const sortOrder = queryParams.get("sortOrder") || "";
   const activityId = queryParams.get("activityId") || "";
-  const userId = queryParams.get("userId") || "";
+  const userId = queryParams.get("userId") || currentUser!.sub!;
   const [taskList, setTaskList] = useState<Pagination<TaskType> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,12 +66,7 @@ function Task() {
     sortOrder?: string
   ) => {
     try {
-      let finalResult = null;
-      if (hasRole(userRolePermissions.role, allowRoles)) {
-        finalResult = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
-      } else {
-        finalResult = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, currentUser!.sub!);
-      }
+      const finalResult = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
       const { data, metadata } = finalResult;
       console.log(data);
       const taskData = data.map((task) => {

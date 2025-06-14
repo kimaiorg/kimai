@@ -8,8 +8,6 @@ import autoTable from "jspdf-autotable";
 
 // Main function to generate PDF
 export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
-  // Log the entire invoice object to debug
-  console.log('FULL INVOICE OBJECT:', JSON.stringify(invoice, null, 2));
   // Create a new PDF document with larger page size
   const doc = new jsPDF({
     orientation: "portrait",
@@ -131,11 +129,13 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
   // Define table rows
   const tableRows = [];
   let startIdx = 1;
+  let itemsTotal = 0;
 
   // Check if items exist and is an array before iterating
   if (invoice.items && Array.isArray(invoice.items)) {
     for (const item of invoice.items) {
       const itemTotal = (item.quantity || 0) * (item.unitPrice || 0);
+      itemsTotal += itemTotal;
       tableRows.push([
         (startIdx++).toString(),
         formatDate(item.date || new Date(), "dd.MM.yyyy"),
@@ -143,7 +143,7 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
         formatCurrency(itemTotal, invoice.currency || "USD")
       ]);
     }
-  } 
+  }
   // Fallback to activities if items doesn't exist
   else if (invoice.activities && Array.isArray(invoice.activities)) {
     for (const invoiceActivity of invoice.activities) {
@@ -154,7 +154,7 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
         formatCurrency(invoiceActivity.totalPrice || 0, invoice.currency || "USD")
       ]);
     }
-  } 
+  }
   // Add a placeholder row if no items or activities
   else {
     tableRows.push([
@@ -165,63 +165,46 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
     ]);
   }
 
-  // Use the total price from the API response
-  console.log('Raw invoice data:', {
-    totalPrice: invoice.totalPrice,
-    taxRate: invoice.taxRate,
-    taxPrice: invoice.taxPrice,
-    finalPrice: invoice.finalPrice,
-    type: {
-      totalPrice: typeof invoice.totalPrice,
-      taxRate: typeof invoice.taxRate,
-      taxPrice: typeof invoice.taxPrice,
-      finalPrice: typeof invoice.finalPrice
-    }
-  });
-  
   // Force convert all values to numbers with explicit fallbacks
   let subtotal = 0;
   if (invoice.totalPrice !== undefined && invoice.totalPrice !== null) {
-    subtotal = typeof invoice.totalPrice === 'string' ? parseFloat(invoice.totalPrice) : Number(invoice.totalPrice);
+    subtotal = typeof invoice.totalPrice === "string" ? parseFloat(invoice.totalPrice) : Number(invoice.totalPrice);
     if (isNaN(subtotal)) subtotal = 0;
   }
-  
-  let taxRate = 0;
+
+  let taxRate = 10;
   if (invoice.taxRate !== undefined && invoice.taxRate !== null) {
-    taxRate = typeof invoice.taxRate === 'number' ? invoice.taxRate : Number(invoice.taxRate);
+    taxRate = typeof invoice.taxRate === "number" ? invoice.taxRate : Number(invoice.taxRate);
     if (isNaN(taxRate)) taxRate = 0;
   }
-  
+
   let taxAmount = 0;
   if (invoice.taxPrice !== undefined && invoice.taxPrice !== null) {
-    taxAmount = typeof invoice.taxPrice === 'number' ? invoice.taxPrice : Number(invoice.taxPrice);
+    taxAmount = typeof invoice.taxPrice === "number" ? invoice.taxPrice : Number(invoice.taxPrice);
     if (isNaN(taxAmount)) taxAmount = 0;
   }
-  
+
   let totalAmount = 0;
   if (invoice.finalPrice !== undefined && invoice.finalPrice !== null) {
-    totalAmount = typeof invoice.finalPrice === 'number' ? invoice.finalPrice : Number(invoice.finalPrice);
+    totalAmount = typeof invoice.finalPrice === "number" ? invoice.finalPrice : Number(invoice.finalPrice);
     if (isNaN(totalAmount)) totalAmount = 0;
   }
-  
+
   // Calculate values if they're missing
   if (subtotal > 0 && taxRate > 0 && taxAmount === 0) {
     taxAmount = subtotal * (taxRate / 100);
   }
-  
+
   if (subtotal > 0 && taxAmount > 0 && totalAmount === 0) {
     totalAmount = subtotal + taxAmount;
   }
-  
-  console.log('Final calculated values:', { subtotal, taxRate, taxAmount, totalAmount });
-  
+
   // Hard-code values for testing if everything is still zero
   if (subtotal === 0 && taxAmount === 0 && totalAmount === 0) {
-    console.log('WARNING: Using hardcoded values for testing');
-    subtotal = 11234;
+    subtotal = itemsTotal;
     taxRate = 10;
-    taxAmount = 1123.4;
-    totalAmount = 12357.4;
+    taxAmount = Math.round(itemsTotal * (taxRate / 100));
+    totalAmount = itemsTotal + taxAmount;
   }
 
   // Add table to document with improved styling
@@ -288,13 +271,6 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
   // Get the y position after the table
   const finalY = (doc as any).lastAutoTable.finalY + 6;
 
-  // Test formatCurrency function
-  console.log('Testing formatCurrency:', {
-    subtotalFormatted: formatCurrency(subtotal, invoice.currency || "USD"),
-    taxAmountFormatted: formatCurrency(taxAmount, invoice.currency || "USD"),
-    totalAmountFormatted: formatCurrency(totalAmount, invoice.currency || "USD")
-  });
-  
   // Create totals table with improved styling
   autoTable(doc, {
     body: [
@@ -340,7 +316,7 @@ export const generateInvoiceTemplatePDF = (invoice: InvoiceHistoryType) => {
   doc.setFontSize(9);
 
   // Split long notes into multiple lines
-  const splitNotes = doc.splitTextToSize(invoice?.notes || "This is the default notes.", contentWidth - 10);
+  const splitNotes = doc.splitTextToSize(invoice?.notes || "", contentWidth - 10);
   doc.text(splitNotes, margin + 5, notesY + 14);
 
   return doc;

@@ -12,7 +12,7 @@
 
 0. **Run docker desktop.**
 
-- NOTE: **Please delete all volumes related to postgres and rabbitmq before running before continue**.
+- NOTE: **Please delete all volumes related to postgres and rabbitmq before continue**.
 
 1. Start the repository:
 
@@ -100,6 +100,39 @@
   RABBITMQ_URL=amqp://root:root@localhost:5672
   ```
 
+- Report service: `cd /report-service`
+
+  - Create a `.env` file: `touch .env`
+  - Paste the following values into the `.env` file:
+
+  ```.env
+  # app configs
+  APP_HOST=localhost
+  APP_PORT=3337
+  APP_VERSION=1
+
+  # DATABASE_URL=postgres://postgres:postgres@localhost:5432/report
+  TIMESHEET_SERVICE_URL=http://localhost:3334
+  PROJECT_SERVICE_URL=http://localhost:3333
+  NODE_ENV=development
+  ```
+
+- Api gateway service: `cd /api-gateway`
+
+  - Create a `.env` file: `touch .env`
+  - Paste the following values into the `.env` file:
+
+  ```.env
+  # app configs
+  APP_HOST=localhost
+  APP_PORT=3330
+
+  # database configs
+  TIMESHEET_SERVICE_URL=http://localhost:3334
+  PROJECT_SERVICE_URL=http://localhost:3333
+  NOTIFICATION_SERVICE_URL=http://localhost:3336
+  ```
+
 3. Start services:
 
 - At your command line, run the following command to start all services:
@@ -131,5 +164,28 @@ docker-compose exec postgres_database_for_invoice_service psql -U postgres -d in
 
 ```cmd
 cd ui
-npm run dev
 ```
+
+- Create a `.env` file: `touch .env`. Paste the following values into the `.env` file:
+
+```env
+AUTH0_SECRET='94d81cec4c193448cca74346c4b17ec4a23e13b5c67b035484ffb062738707a3'
+AUTH0_BASE_URL='http://localhost:3000'
+AUTH0_ISSUER_BASE_URL='https://dev-r0btd5eozgc7ofkj.us.auth0.com'
+AUTH0_CLIENT_ID='xBZ7jnlcHqlksyXxTDdg4EDStyyc2Q96'
+AUTH0_CLIENT_SECRET='1oyLX_A3BKda3JpWyo3f94O_rJ3ApOjcL-_vDe0c_T4bufkmhwaFSsEENYwj8wts'
+AUTH0_IAM_API_AUDIENCE='https://dev-r0btd5eozgc7ofkj.us.auth0.com/api/v2/'
+AUTH0_KIMAI_API_AUDIENCE='kimai_api'
+AUTH0_KIMAI_API_ID='67d98ea6626775c7c50f6298'
+
+API_GATEWAY_URL=http://localhost:3330
+INVOICE_BACKEND_URL=http://localhost:3335
+REPORTING_BACKEND_URL=http://localhost:3337
+
+AUTH0_USERNAME=superadmin@gmail.com
+AUTH0_PASSWORD=Admin123@
+```
+
+- Install dependencies: `npm install -f`
+
+- Start the development server: `npm run dev`

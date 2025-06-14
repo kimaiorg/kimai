@@ -1,0 +1,43 @@
+http:
+  middlewares:
+    cloudflare-headers:
+      headers:
+        customRequestHeaders:
+          Host: "localhost"
+          User-Agent: "Traefik/3.0"
+    cors-headers:
+      headers:
+        customResponseHeaders:
+          Access-Control-Allow-Origin: "*"
+          Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS"
+          Access-Control-Allow-Headers: "Content-Type,Authorization"
+
+  routers:
+    # Main application router
+    app-router:
+      rule: "Host(`localhost`)" # Use your actual Render domain
+      entryPoints:
+        - web
+      service: my-service
+      middlewares:
+        - cloudflare-headers
+        - cors-headers
+
+  services:
+    my-service:
+      loadBalancer:
+        servers:
+          - url: "http://localhost:3330"
+        passHostHeader: false # Changed to false since you're modifying Host header
+        serversTransport: my-transport
+
+    # Add a middleware to inject the x-service-name header
+    middlewares:
+      x-service-name-header:
+        headers:
+          customRequestHeaders:
+            x-service-name: "timesheet"
+
+  serversTransports:
+    my-transport:
+      insecureSkipVerify: true

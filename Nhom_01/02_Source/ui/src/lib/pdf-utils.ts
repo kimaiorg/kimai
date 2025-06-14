@@ -227,11 +227,11 @@ export function generateWeeklyReportPdf(
  * @returns Blob URL of the generated PDF
  */
 export function generateProjectOverviewPdf(
-  title: string, 
-  columns: string[], 
-  data: any[][], 
+  title: string,
+  columns: string[],
+  data: any[][],
   filename: string,
-  summary?: Array<{label: string, value: string}>
+  summary?: Array<{ label: string; value: string }>
 ): string {
   return generateReportPdf({
     title,
