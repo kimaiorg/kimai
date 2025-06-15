@@ -35,7 +35,7 @@ export default function AddUserModal({ children, fetchUsers }: { children: React
     setLoading(true);
     try {
       const response = await addNewUser(values);
-      if (response == 201) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Add new user successfully",
           duration: 2000,

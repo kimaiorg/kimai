@@ -54,7 +54,7 @@ export function TaskUpdateExpenseRequestDialog({
       };
       const response = await requestUpdateTaskExpense(payload);
 
-      if (response == 201 || response == 200) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Request task update successfully",
           duration: 2000,

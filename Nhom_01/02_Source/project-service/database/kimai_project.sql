@@ -822,4 +822,4 @@ SELECT pg_catalog.setval('public.expenses_id_seq', 101, false);
 SELECT pg_catalog.setval('public.projects_id_seq', 130, true); 
 SELECT pg_catalog.setval('public.requests_id_seq', 48, true); 
 SELECT pg_catalog.setval('public.tasks_id_seq', 160, true); 
-SELECT pg_catalog.setval('public.teams_id_seq', 15, false); 
+SELECT pg_catalog.setval('public.teams_id_seq', 19, false); 

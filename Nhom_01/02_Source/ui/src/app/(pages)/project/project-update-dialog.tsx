@@ -86,7 +86,7 @@ export function ProjectUpdateDialog({
       };
       const response = await updateProject(payload, targetProject.id);
 
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Update project successfully",
           duration: 2000,

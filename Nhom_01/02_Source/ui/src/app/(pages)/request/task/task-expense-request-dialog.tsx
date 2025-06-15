@@ -164,7 +164,7 @@ export default function TaskExpenseUpdateRequestDialog({
       };
       const response = await rejectUpdateTask(payload, taskExpense.id.toString());
 
-      if (response == 201 || response == 200) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Reject task update successfully",
           duration: 2000,

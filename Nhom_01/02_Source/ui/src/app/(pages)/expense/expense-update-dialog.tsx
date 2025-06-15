@@ -68,7 +68,7 @@ export function ExpenseUpdateDialog({
       console.log(payload);
       const response = await updateExpense(payload, targetExpense.id);
 
-      if (response == 201 || response == 200) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Update expense successfully",
           duration: 2000,

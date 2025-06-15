@@ -46,7 +46,7 @@ export function CategoryUpdateDialog({
       // console.log(payload);
       const response = await updateCategory(values, targetCategory.id);
 
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Update category successfully",
           duration: 2000,

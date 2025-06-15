@@ -193,7 +193,7 @@ function User() {
                         </UserViewDialog>
                         <UserUpdateDialog
                           targetUser={userItem}
-                          fetchUsers={() => fetchUser(1, limit)}
+                          fetchUsers={() => fetchUser()}
                         >
                           <div className="flex gap-2 items-center cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
                             <SquarePen size={14} /> Edit

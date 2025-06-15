@@ -51,7 +51,7 @@ export function CustomerUpdateDialog({
     try {
       const response = await updateCustomer(values, targetCustomer.id);
 
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Update customer successfully",
           duration: 2000,

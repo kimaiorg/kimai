@@ -68,7 +68,7 @@ export function TaskUpdateDialog({
       console.log(payload);
       const response = await updateTask(payload, targetTask.id);
 
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Update task successfully",
           duration: 2000,

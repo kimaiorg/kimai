@@ -67,7 +67,7 @@ export function ActivityUpdateDialog({
         quota: parseInt(quota)
       };
       const response = await updateActivity(payload, targetActivity.id);
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Add new activity successfully",
           duration: 2000,

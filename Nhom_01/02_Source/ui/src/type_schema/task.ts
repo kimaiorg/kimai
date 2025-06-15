@@ -95,7 +95,9 @@ export const CreateTaskRequestSchema = z
       }),
     color: string(),
     deadline: z.string(),
-    description: z.string().optional(),
+    description: z.string({
+      required_error: "Please describe the task"
+    }),
     activity_id: z
       .string({
         required_error: "Activity is required"

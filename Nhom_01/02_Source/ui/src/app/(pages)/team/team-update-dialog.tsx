@@ -63,7 +63,7 @@ export default function TeamUpdateDialog({
       };
       console.log(payload);
       const response = await updateTeam(payload, targetTeam.id);
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Update team successfully",
           duration: 2000,

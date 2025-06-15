@@ -87,7 +87,7 @@ export function TaskConfirmDialog({
       };
       const response = await confirmTaskStatus(payload, targetTask.id);
 
-      if (response == 201 || response == 200) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Update task status successfully",
           duration: 2000,

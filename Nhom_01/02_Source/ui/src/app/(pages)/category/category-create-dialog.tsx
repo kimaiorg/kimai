@@ -38,7 +38,7 @@ export function CategoryCreateDialog({
     try {
       const response = await addNewCategory(values);
 
-      if (response == 201) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Add new category successfully",
           duration: 2000,

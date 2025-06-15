@@ -43,7 +43,7 @@ export default function UpdateUserModal({
     setLoading(true);
     try {
       const response = await updateUser(values, targetUser.user_id, rolePermission!.role.id);
-      if (response == 200) {
+      if (response == 200 || response == 201 || response == 204) {
         toast("Success", {
           description: "Update user successfully",
           duration: 2000,

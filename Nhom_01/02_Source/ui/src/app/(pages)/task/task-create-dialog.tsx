@@ -38,7 +38,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
       title: "Write unit test",
       color: "#FF5733",
       deadline: "2025-04-11",
-      description: "",
+      description: "Task description",
       activity_id: "",
       expense_id: "",
       user_id: "",
@@ -61,7 +61,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
       console.log(payload);
       const response = await addNewTask(payload);
 
-      if (response == 201) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Add new task successfully",
           duration: 2000,

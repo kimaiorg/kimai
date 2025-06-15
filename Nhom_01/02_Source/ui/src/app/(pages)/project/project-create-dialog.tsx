@@ -78,7 +78,7 @@ export function ProjectCreateDialog({
       };
       const response = await addNewProject(payload);
 
-      if (response == 201) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Add new project successfully",
           duration: 2000,

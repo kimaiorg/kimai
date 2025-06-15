@@ -61,7 +61,7 @@ export function ManualTimesheetCreateDialog({
       };
       const response = await addNewManualTimesheetRecord(payload);
 
-      if (response == 201) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Add new task successfully",
           duration: 2000,

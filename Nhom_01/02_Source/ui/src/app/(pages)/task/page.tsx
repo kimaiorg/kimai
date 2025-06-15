@@ -66,7 +66,9 @@ function Task() {
     sortOrder?: string
   ) => {
     try {
-      const finalResult = await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId);
+      const finalResult = hasRole(userRolePermissions.role, [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD]) ?
+        await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId) :
+        (await getAllTasks(page, limit, keyword, sortBy, sortOrder, activityId, userId));
       const { data, metadata } = finalResult;
       console.log(data);
       const taskData = data.map((task) => {

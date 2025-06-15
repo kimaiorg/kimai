@@ -12,12 +12,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { Input } from "@/components/ui/input";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { useTranslation } from "@/lib/i18n";
-import { useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { formatCurrency } from "@/lib/utils";
 import { PaginationV2 } from "@/type_schema/common";
 import { InvoiceHistoryType } from "@/type_schema/invoice";
 import { Role } from "@/type_schema/role";
-import { UserType } from "@/type_schema/user.schema";
 import { formatDate } from "date-fns";
 import debounce from "debounce";
 import {
@@ -29,7 +27,6 @@ import {
   MoreHorizontal,
   Plus,
   Search,
-  SendHorizontal,
   Trash2
 } from "lucide-react";
 import Link from "next/link";

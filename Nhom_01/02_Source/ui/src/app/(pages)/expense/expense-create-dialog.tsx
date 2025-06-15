@@ -61,7 +61,7 @@ export function ExpenseCreateDialog({
       console.log(payload);
       const response = await addNewExpense(payload);
 
-      if (response == 201) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Add new expense successfully",
           duration: 2000,

@@ -101,7 +101,7 @@ export default function TimesheetRequestDialog({
       };
       const response = await rejectUpdateTimesheet(payload, targetTimesheetUpdate.id.toString());
 
-      if (response == 201 || response == 200) {
+      if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
           description: "Reject timesheet update successfully",
           duration: 2000,
