@@ -49,11 +49,15 @@ timesheetAxios.interceptors.response.use(
 );
 
 const invoiceAxios = axios.create({
-  baseURL: process.env.INVOICE_BACKEND_URL,
+  baseURL: process.env.API_GATEWAY_URL + proxyPath,
   validateStatus: () => true
 });
 // Add a request interceptor
-invoiceAxios.interceptors.request.use((config) => config);
+invoiceAxios.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["x-service-name"] = "invoice";
+  return config;
+});
 // Add a response interceptor
 invoiceAxios.interceptors.response.use(
   (response) => response,
@@ -85,11 +89,15 @@ notificationAxios.interceptors.response.use(
   }
 );
 const reportAxios = axios.create({
-  baseURL: process.env.REPORTING_BACKEND_URL,
+  baseURL: process.env.API_GATEWAY_URL + proxyPath,
   validateStatus: () => true
 });
 // Add a request interceptor
-reportAxios.interceptors.request.use((config) => config);
+reportAxios.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["x-service-name"] = "report";
+  return config;
+});
 // Add a response interceptor
 reportAxios.interceptors.response.use(
   (response) => response,

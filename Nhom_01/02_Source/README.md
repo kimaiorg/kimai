@@ -200,4 +200,4 @@ AUTH0_PASSWORD=Admin123@
 
 - Start the development server: `npm run dev`
 
-start "Report service loadbalancer" cmd /c "cd /timesheet-service-loadbalancer/local && docker build -t traefik-kimai . && docker run -d --name traefik-report-service -p 80:80 traefik-kimai"
+start "Report service loadbalancer" cmd /c "cd /timesheet-service-loadbalancer/local && docker build -t traefik-kimai . && docker run -d --name traefik-timesheet-service -p 80:80 traefik-kimai"
