@@ -158,6 +158,16 @@ docker-compose exec postgres_database_for_timesheet_service psql -U postgres -d 
 docker-compose exec postgres_database_for_invoice_service psql -U postgres -d invoice -f /docker-entrypoint-initdb.d/init.sql
 ```
 
+- Seed data for notificatioin service:
+
+```
+docker-compose exec postgres_database_for_notification_service psql -U postgres -d notification -f /docker-entrypoint-initdb.d/init.sql
+```
+
+```
+docker-compose exec postgres_database_for_notification_service2 psql -U postgres -d notification2 -f /docker-entrypoint-initdb.d/init.sql
+```
+
 ### Running UI
 
 - Navigate to the `ui` directory and run the following command:
@@ -189,3 +199,5 @@ AUTH0_PASSWORD=Admin123@
 - Install dependencies: `npm install -f`
 
 - Start the development server: `npm run dev`
+
+start "Report service loadbalancer" cmd /c "cd /timesheet-service-loadbalancer/local && docker build -t traefik-kimai . && docker run -d --name traefik-report-service -p 80:80 traefik-kimai"
