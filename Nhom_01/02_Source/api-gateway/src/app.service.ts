@@ -11,6 +11,8 @@ export class AppService {
   private timesheetService: HttpService;
   private projectService: HttpService;
   private NotificationService: HttpService;
+  private reportService: HttpService;
+  private invoiceService: HttpService;
   private readonly configService: ConfigService = new ConfigService(ENV);
 
   constructor() {
@@ -24,6 +26,14 @@ export class AppService {
     );
     this.NotificationService = new HttpService(
       this.configService.get<string>('NOTIFICATION_SERVICE_URL') || '',
+      this.logger,
+    );
+    this.reportService = new HttpService(
+      this.configService.get<string>('REPORT_SERVICE_URL') || 'http://localhost:3337',
+      this.logger,
+    );
+    this.invoiceService = new HttpService(
+      this.configService.get<string>('INVOICE_SERVICE_URL') || 'http://localhost:3335',
       this.logger,
     );
   }
@@ -77,6 +87,10 @@ export class AppService {
         return this.projectService;
       case 'notification':
         return this.NotificationService;
+      case 'report':
+        return this.reportService;
+      case 'invoice':
+        return this.invoiceService;
       default:
         throw new BadRequestException(`Unknown service: ${serviceName}`);
     }
