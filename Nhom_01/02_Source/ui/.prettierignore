@@ -8,3 +8,4 @@
 **/.hg
 **/.husky
 **/coverage
+test-results/load-test-result/load-test-summary.html

@@ -1,1 +1,190 @@
-{"root_group":{"checks":[{"name":"Đăng nhập thành công","path":"::Đăng nhập thành công","id":"be64241e3e4254dba1ecb45c7a974e74","passes":29,"fails":270},{"path":"::Nhận được access token","id":"8688af5e23e67ea841d52f1cb240c12a","passes":29,"fails":270,"name":"Nhận được access token"},{"passes":119,"fails":0,"name":"Trang Dashboard tải thành công","path":"::Trang Dashboard tải thành công","id":"b9e9698df710cc4a4bf5041fbe1a1be2"},{"name":"Không bị chuyển hướng đến trang đăng nhập","path":"::Không bị chuyển hướng đến trang đăng nhập","id":"fdc89a8c611a5ddabd361cd4f8d9f274","passes":234,"fails":0},{"passes":119,"fails":0,"name":"Chứa dữ liệu dashboard","path":"::Chứa dữ liệu dashboard","id":"f663932a464ade5dee76c4d9d9d5b0c9"},{"name":"Dữ liệu báo cáo tải thành công","path":"::Dữ liệu báo cáo tải thành công","id":"f0b02258833985a13bad58b42d8bbb52","passes":119,"fails":0},{"name":"Trang Invoice History tải thành công","path":"::Trang Invoice History tải thành công","id":"93ba490fbbbad05fa867bbff7f140ee1","passes":115,"fails":0},{"name":"Chứa dữ liệu hóa đơn","path":"::Chứa dữ liệu hóa đơn","id":"ff7b361fd4f6f36e21acf702bd9802d5","passes":115,"fails":0},{"name":"Chi tiết hóa đơn tải thành công","path":"::Chi tiết hóa đơn tải thành công","id":"e9f199b77b067500734d4a8adbb810c5","passes":115,"fails":0},{"name":"Chứa thông tin chi tiết hóa đơn","path":"::Chứa thông tin chi tiết hóa đơn","id":"9f4b97e5ff4e7474372823512b89ce91","passes":0,"fails":115}],"name":"","path":"","id":"d41d8cd98f00b204e9800998ecf8427e","groups":[]},"options":{"summaryTrendStats":["avg","min","med","max","p(90)","p(95)"],"summaryTimeUnit":"","noColor":false},"state":{"isStdOutTTY":true,"isStdErrTTY":true,"testRunDurationMs":222655.5306},"metrics":{"http_reqs":{"type":"counter","contains":"default","values":{"count":1314,"rate":5.901492751871487}},"checks":{"type":"rate","contains":"default","values":{"rate":0.6027895694360218,"passes":994,"fails":655}},"vus":{"values":{"value":1,"min":1,"max":20},"type":"gauge","contains":"default"},"data_received":{"contains":"data","values":{"count":18414619,"rate":82704.52097182265},"type":"counter"},"vus_max":{"type":"gauge","contains":"default","values":{"min":20,"max":20,"value":20}},"iteration_duration":{"type":"trend","contains":"time","values":{"p(95)":12218.082409999994,"avg":9386.261317056862,"min":2786.6904,"med":9389.3848,"max":14154.1973,"p(90)":11841.32872}},"http_req_duration":{"contains":"time","values":{"avg":432.3219910197868,"min":119.8847,"med":302.70804999999996,"max":3330.6295,"p(90)":833.9047700000001,"p(95)":1109.9817099999993},"thresholds":{"p(95)<500":{"ok":false}},"type":"trend"},"http_req_waiting":{"type":"trend","contains":"time","values":{"avg":382.0894944444438,"min":115.6479,"med":275.8981,"max":3330.0981,"p(90)":636.1253300000001,"p(95)":814.4887999999991}},"http_req_receiving":{"type":"trend","contains":"time","values":{"med":4.8469999999999995,"max":1612.5764,"p(90)":164.9387600000001,"p(95)":325.9961049999999,"avg":50.105501065448955,"min":0}},"http_req_duration{expected_response:true}":{"type":"trend","contains":"time","values":{"avg":215.89652897384278,"min":119.8847,"med":176.4271,"max":928.7765,"p(90)":317.49294000000003,"p(95)":418.22083999999995}},"http_req_failed":{"type":"rate","contains":"default","values":{"rate":0.621765601217656,"passes":817,"fails":497},"thresholds":{"rate<0.01":{"ok":false}}},"http_req_blocked":{"type":"trend","contains":"time","values":{"max":291.3116,"p(90)":0.52864,"p(95)":0.54094,"avg":2.580398401826484,"min":0,"med":0}},"http_req_connecting":{"type":"trend","contains":"time","values":{"avg":1.3390515981735163,"min":0,"med":0,"max":170.9207,"p(90)":0.5275,"p(95)":0.5371}},"data_sent":{"type":"counter","contains":"data","values":{"count":530845,"rate":2384.153668087686}},"http_req_tls_handshaking":{"type":"trend","contains":"time","values":{"max":127.475,"p(90)":0,"p(95)":0,"avg":1.1479351598173515,"min":0,"med":0}},"http_req_sending":{"type":"trend","contains":"time","values":{"p(95)":0.5393,"avg":0.12699550989345507,"min":0,"med":0,"max":19.0605,"p(90)":0.5323}},"iterations":{"values":{"count":299,"rate":1.3428815318185499},"type":"counter","contains":"default"}}}
+{
+  "root_group": {
+    "checks": [
+      {
+        "name": "Đăng nhập thành công",
+        "path": "::Đăng nhập thành công",
+        "id": "be64241e3e4254dba1ecb45c7a974e74",
+        "passes": 29,
+        "fails": 270
+      },
+      {
+        "path": "::Nhận được access token",
+        "id": "8688af5e23e67ea841d52f1cb240c12a",
+        "passes": 29,
+        "fails": 270,
+        "name": "Nhận được access token"
+      },
+      {
+        "passes": 119,
+        "fails": 0,
+        "name": "Trang Dashboard tải thành công",
+        "path": "::Trang Dashboard tải thành công",
+        "id": "b9e9698df710cc4a4bf5041fbe1a1be2"
+      },
+      {
+        "name": "Không bị chuyển hướng đến trang đăng nhập",
+        "path": "::Không bị chuyển hướng đến trang đăng nhập",
+        "id": "fdc89a8c611a5ddabd361cd4f8d9f274",
+        "passes": 234,
+        "fails": 0
+      },
+      {
+        "passes": 119,
+        "fails": 0,
+        "name": "Chứa dữ liệu dashboard",
+        "path": "::Chứa dữ liệu dashboard",
+        "id": "f663932a464ade5dee76c4d9d9d5b0c9"
+      },
+      {
+        "name": "Dữ liệu báo cáo tải thành công",
+        "path": "::Dữ liệu báo cáo tải thành công",
+        "id": "f0b02258833985a13bad58b42d8bbb52",
+        "passes": 119,
+        "fails": 0
+      },
+      {
+        "name": "Trang Invoice History tải thành công",
+        "path": "::Trang Invoice History tải thành công",
+        "id": "93ba490fbbbad05fa867bbff7f140ee1",
+        "passes": 115,
+        "fails": 0
+      },
+      {
+        "name": "Chứa dữ liệu hóa đơn",
+        "path": "::Chứa dữ liệu hóa đơn",
+        "id": "ff7b361fd4f6f36e21acf702bd9802d5",
+        "passes": 115,
+        "fails": 0
+      },
+      {
+        "name": "Chi tiết hóa đơn tải thành công",
+        "path": "::Chi tiết hóa đơn tải thành công",
+        "id": "e9f199b77b067500734d4a8adbb810c5",
+        "passes": 115,
+        "fails": 0
+      },
+      {
+        "name": "Chứa thông tin chi tiết hóa đơn",
+        "path": "::Chứa thông tin chi tiết hóa đơn",
+        "id": "9f4b97e5ff4e7474372823512b89ce91",
+        "passes": 0,
+        "fails": 115
+      }
+    ],
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": []
+  },
+  "options": {
+    "summaryTrendStats": ["avg", "min", "med", "max", "p(90)", "p(95)"],
+    "summaryTimeUnit": "",
+    "noColor": false
+  },
+  "state": { "isStdOutTTY": true, "isStdErrTTY": true, "testRunDurationMs": 222655.5306 },
+  "metrics": {
+    "http_reqs": { "type": "counter", "contains": "default", "values": { "count": 1314, "rate": 5.901492751871487 } },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": { "rate": 0.6027895694360218, "passes": 994, "fails": 655 }
+    },
+    "vus": { "values": { "value": 1, "min": 1, "max": 20 }, "type": "gauge", "contains": "default" },
+    "data_received": {
+      "contains": "data",
+      "values": { "count": 18414619, "rate": 82704.52097182265 },
+      "type": "counter"
+    },
+    "vus_max": { "type": "gauge", "contains": "default", "values": { "min": 20, "max": 20, "value": 20 } },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 12218.082409999994,
+        "avg": 9386.261317056862,
+        "min": 2786.6904,
+        "med": 9389.3848,
+        "max": 14154.1973,
+        "p(90)": 11841.32872
+      }
+    },
+    "http_req_duration": {
+      "contains": "time",
+      "values": {
+        "avg": 432.3219910197868,
+        "min": 119.8847,
+        "med": 302.70804999999996,
+        "max": 3330.6295,
+        "p(90)": 833.9047700000001,
+        "p(95)": 1109.9817099999993
+      },
+      "thresholds": { "p(95)<500": { "ok": false } },
+      "type": "trend"
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 382.0894944444438,
+        "min": 115.6479,
+        "med": 275.8981,
+        "max": 3330.0981,
+        "p(90)": 636.1253300000001,
+        "p(95)": 814.4887999999991
+      }
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 4.8469999999999995,
+        "max": 1612.5764,
+        "p(90)": 164.9387600000001,
+        "p(95)": 325.9961049999999,
+        "avg": 50.105501065448955,
+        "min": 0
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 215.89652897384278,
+        "min": 119.8847,
+        "med": 176.4271,
+        "max": 928.7765,
+        "p(90)": 317.49294000000003,
+        "p(95)": 418.22083999999995
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": { "rate": 0.621765601217656, "passes": 817, "fails": 497 },
+      "thresholds": { "rate<0.01": { "ok": false } }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": { "max": 291.3116, "p(90)": 0.52864, "p(95)": 0.54094, "avg": 2.580398401826484, "min": 0, "med": 0 }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": { "avg": 1.3390515981735163, "min": 0, "med": 0, "max": 170.9207, "p(90)": 0.5275, "p(95)": 0.5371 }
+    },
+    "data_sent": { "type": "counter", "contains": "data", "values": { "count": 530845, "rate": 2384.153668087686 } },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": { "max": 127.475, "p(90)": 0, "p(95)": 0, "avg": 1.1479351598173515, "min": 0, "med": 0 }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": { "p(95)": 0.5393, "avg": 0.12699550989345507, "min": 0, "med": 0, "max": 19.0605, "p(90)": 0.5323 }
+    },
+    "iterations": { "values": { "count": 299, "rate": 1.3428815318185499 }, "type": "counter", "contains": "default" }
+  }
+}
