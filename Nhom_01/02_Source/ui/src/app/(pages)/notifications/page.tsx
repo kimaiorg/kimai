@@ -95,7 +95,7 @@ function NotificationPage() {
         hasRead
       );
       result.data = result.data.filter((notification) => notification.user_id === currentUser!.sub);
-      console.log(result);
+       
       setNotificationList(result);
     } catch (error) {
       console.error("Error fetching notifications:", error);

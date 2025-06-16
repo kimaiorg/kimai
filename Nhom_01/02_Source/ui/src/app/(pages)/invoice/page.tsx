@@ -377,7 +377,7 @@ function InvoiceContent() {
               </thead>
               <tbody>
                 {invoiceHistory &&
-                  invoiceHistory.data.activities.map((invoiceActivity, index) => (
+                  invoiceHistory.data.activities!.map((invoiceActivity, index) => (
                     <Fragment key={index}>
                       <tr className={`border-t dark:border-slate-700 font-semibold text-md`}>
                         <td className="px-4 py-2 text-sm">{index + 1}</td>
@@ -470,33 +470,6 @@ function InvoiceContent() {
 
           {invoiceHistory && invoiceHistory.data.activities && invoiceHistory.data.activities.length > 0 && (
             <div className="pb-6 pt-1 space-y-4">
-              {/* <div className="flex flex-col gap-2">
-                <Label className="text-md font-semibold">Template:</Label>
-                {invoiceTemplateList && (
-                  <Select
-                    onValueChange={(e) => setInvoiceTemplateId(Number(e))}
-                    value={invoiceTemplateId.toString()}
-                  >
-                    <SelectTrigger className="w-full !mt-0 border-gray-200">
-                      <SelectValue placeholder="Select a template" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {invoiceTemplateList.map((invoiceTemplate, index) => (
-                        <SelectItem
-                          key={index}
-                          value={invoiceTemplate.id.toString()}
-                          className="flex items-center gap-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            {getInvoiceTemplateFormatIcon(invoiceTemplate.format)}
-                            <span>{invoiceTemplate.format}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div> */}
               <div className="flex flex-col gap-2">
                 <Label
                   id="notes"

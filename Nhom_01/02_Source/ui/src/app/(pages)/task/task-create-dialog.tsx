@@ -57,8 +57,7 @@ export function TaskCreateDialog({ children, fetchTasks }: { children: React.Rea
         quantity: Number(quantity),
         billable: billable === "true",
         ...rest
-      };
-      console.log(payload);
+      }; 
       const response = await addNewTask(payload);
 
       if (response == 201 || response == 200 || response == 204) {

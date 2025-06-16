@@ -9,7 +9,7 @@ import { ReportView, ReportViewType } from "@/type_schema/report";
 import { RolePermissionType } from "@/type_schema/role";
 import { useState } from "react";
 
-function Reporting() {
+function ReportingPage() {
   const { t } = useTranslation();
   const [selectedReport, setSelectedReport] = useState<ReportViewType>(getReportViewByType(ReportView.WEEKLY_USER));
   const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
@@ -47,5 +47,5 @@ function Reporting() {
     </>
   );
 }
-
-export default AuthenticatedRoute(Reporting, []);
+export { ReportingPage };
+export default AuthenticatedRoute(ReportingPage, []);

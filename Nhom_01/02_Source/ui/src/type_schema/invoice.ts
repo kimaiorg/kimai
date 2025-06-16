@@ -25,7 +25,7 @@ export type InvoiceHistoryType = {
   fromDate?: string;
   toDate?: string;
   status: string; // NEW, PAID, CANCELED
-  totalPrice: number | string; // Total price of the invoice
+  totalPrice: number; // Total price of the invoice
   taxRate?: number; // Tax rate
   taxPrice?: number; // Tax price: totalPrice * taxRate
   finalPrice?: number; // Total price after tax: totalPrice + taxPrice

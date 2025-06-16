@@ -173,7 +173,7 @@ export async function getUserRolePermissions(userId: string): Promise<RolePermis
     }
   });
   const roleData: RoleType[] = await roleResponse.json();
-  console.log(roleData);
+  // console.log(roleData);
   const role = roleData[0];
 
   await new Promise((resolve) => setTimeout(resolve, 500));

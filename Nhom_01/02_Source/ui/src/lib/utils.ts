@@ -151,8 +151,7 @@ export const getWeekNumber = (date: Date, weekOptions: WeekOptionType[]): number
   const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
   const currentWeekOption = weekOptions.filter((weekOption) => {
     return currentDate >= weekOption.from && currentDate <= weekOption.to;
-  });
-  console.log(currentWeekOption);
+  }); 
   return currentWeekOption![0].week;
 };
 

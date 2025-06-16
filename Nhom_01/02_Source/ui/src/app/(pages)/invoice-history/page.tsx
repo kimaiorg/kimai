@@ -18,17 +18,7 @@ import { InvoiceHistoryType } from "@/type_schema/invoice";
 import { Role } from "@/type_schema/role";
 import { formatDate } from "date-fns";
 import debounce from "debounce";
-import {
-  BadgeDollarSign,
-  Download,
-  Eye,
-  Filter,
-  Mail,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Trash2
-} from "lucide-react";
+import { BadgeDollarSign, Download, Eye, Filter, Mail, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

@@ -28,12 +28,10 @@ function ProjectOverviewReport() {
   useEffect(() => {
     const fetchReportData = async () => {
       setIsLoading(true);
-      try {
-        // Chuyển đổi selectedCustomer sang number nếu không phải 'all'
+      try { 
         const customerId = selectedCustomer === "all" ? undefined : parseInt(selectedCustomer);
         const data = await getProjectOverviewReport(customerId);
-
-        // Đảm bảo tất cả các dự án đều có customer_name
+         
         const projectsWithCustomers = (data.projects || []).map((project: ProjectReportData) => {
           if (!project.customer_name && project.customer_id) {
             const customer = (data.customers || []).find((c: CustomerReportData) => c.id === project.customer_id);
@@ -452,4 +450,5 @@ function ProjectOverviewReport() {
   );
 }
 
+export { ProjectOverviewReport };
 export default AuthenticatedRoute(ProjectOverviewReport, []);

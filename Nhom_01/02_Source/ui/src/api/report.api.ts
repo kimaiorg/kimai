@@ -27,41 +27,14 @@ export async function getWeeklyOneUserReport(
     }
   );
 
-  const data = response.data;
-  console.log(data);
-  return data;
-}
-
-export async function getWeeklyAllUsersReport(
-  fromDate: string,
-  toDate: string
-): Promise<Pagination<WeeklyAllUsersReportResponseType>> {
-  const token = await getManagementAccessToken();
-
-  const params = new URLSearchParams();
-  params.append("fromDate", fromDate);
-  params.append("toDate", toDate);
-
-  const response = await reportAxios.get<Pagination<WeeklyAllUsersReportResponseType>>(
-    `/api/v1/reports/all-users?${params.toString()}`,
-    {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
-
-  const data = response.data;
-  console.log(data);
+  const data = response.data; 
   return data;
 }
 
 export async function getProjectOverviewReport(customerId?: number): Promise<any> {
   try {
     const projectData = await getProjectOverviewReportData();
-
-    // Filter projects by customer if customerId is provided
+ 
     if (customerId) {
       return {
         ...projectData,
@@ -70,8 +43,7 @@ export async function getProjectOverviewReport(customerId?: number): Promise<any
     }
 
     return projectData;
-  } catch (error) {
-    console.error("Error fetching project overview report:", error);
+  } catch (error) { 
     throw error;
   }
 }
@@ -85,6 +57,7 @@ export async function getDashboardReport(userId: string): Promise<any> {
       "Content-Type": "application/json"
     }
   });
+   
   return response.data;
 }
 

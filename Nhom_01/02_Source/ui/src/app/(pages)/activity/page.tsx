@@ -59,7 +59,7 @@ function Activity() {
         budgetFrom,
         budgetTo
       );
-      console.log(data);
+       
       setActivityList(data);
     } catch (error) {
       console.error("Error fetching activities:", error);

@@ -49,7 +49,6 @@ export function ActivityCreateDialog({
     }
   });
   async function onSubmit(values: CreateActivityValidation) {
-    console.log(values);
     if (loading) return;
     setLoading(true);
     try {

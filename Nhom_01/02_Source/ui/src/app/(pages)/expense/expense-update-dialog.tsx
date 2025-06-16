@@ -65,7 +65,7 @@ export function ExpenseUpdateDialog({
         cost: Number(cost),
         ...rest
       };
-      console.log(payload);
+       
       const response = await updateExpense(payload, targetExpense.id);
 
       if (response == 201 || response == 200 || response == 204) {

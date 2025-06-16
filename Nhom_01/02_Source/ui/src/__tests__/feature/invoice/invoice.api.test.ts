@@ -41,7 +41,7 @@ describe("Invoice API", () => {
     });
     expectAny(result).not.toBeNull();
     expectAny(result.success).toEqual(mockResponse.success);
-    expectAny(result.data.activities.length).toEqual(mockResponse.data.activities.length);
+    expectAny(result.data.activities?.length).toEqual(mockResponse.data.activities.length);
   });
 
   it("should save an invoice", async () => {

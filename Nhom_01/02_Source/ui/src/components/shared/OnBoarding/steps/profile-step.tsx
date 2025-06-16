@@ -50,7 +50,7 @@ export function ProfileStep({ onNext, onBack }: ProfileStepProps) {
 
   // Handle form submission
   function onSubmit(data: ProfileFormValues) {
-    console.log("Profile data:", data);
+    // console.log("Profile data:", data);
     onNext();
   }
 

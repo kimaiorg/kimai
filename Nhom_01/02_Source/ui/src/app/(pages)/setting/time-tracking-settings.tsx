@@ -50,8 +50,7 @@ export default function TimeTrackingSettings() {
   function onSubmit(data: TimeTrackingFormValues) {
     setIsPending(true);
     // Simulate API call
-    setTimeout(() => {
-      console.log(data);
+    setTimeout(() => { 
       setIsPending(false);
     }, 1000);
   }

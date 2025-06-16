@@ -73,7 +73,6 @@ export async function getAllInvoiceHistories(
     }
   });
 
-  console.log(response.data);
   const data = response.data.data;
   return data;
 }

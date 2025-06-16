@@ -58,7 +58,7 @@ export function ExpenseCreateDialog({
         cost: Number(cost),
         ...rest
       };
-      console.log(payload);
+       
       const response = await addNewExpense(payload);
 
       if (response == 201 || response == 200 || response == 204) {
