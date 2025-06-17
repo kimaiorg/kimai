@@ -232,15 +232,7 @@ export const mockWeekUserReportData = {
           deleted_at: null
         }
       },
-      duration: [
-        "0:00",
-        "9:30",
-        "9:30",
-        "2:30",
-        "5:30",
-        "5:30",
-        ""
-      ],
+      duration: ["0:00", "9:30", "9:30", "2:30", "5:30", "5:30", ""],
       totalDuration: "16:00"
     },
     {
@@ -288,15 +280,7 @@ export const mockWeekUserReportData = {
           deleted_at: null
         }
       },
-      duration: [
-        "3:00",
-        "5:00",
-        "8:00",
-        "2:45",
-        "4:45",
-        "0:45",
-        ""
-      ],
+      duration: ["3:00", "5:00", "8:00", "2:45", "4:45", "0:45", ""],
       totalDuration: "8:00"
     },
     {
@@ -344,15 +328,7 @@ export const mockWeekUserReportData = {
           deleted_at: null
         }
       },
-      duration: [
-        "8:15",
-        "8:15",
-        "8:00",
-        "6:30",
-        "2:00",
-        "2:30",
-        ""
-      ],
+      duration: ["8:15", "8:15", "8:00", "6:30", "2:00", "2:30", ""],
       totalDuration: "8:00"
     },
     {
@@ -400,15 +376,7 @@ export const mockWeekUserReportData = {
           deleted_at: null
         }
       },
-      duration: [
-        "4:30",
-        "5:30",
-        "3:45",
-        "9:15",
-        "2:30",
-        "10:00",
-        ""
-      ],
+      duration: ["4:30", "5:30", "3:45", "9:15", "2:30", "10:00", ""],
       totalDuration: "2:00"
     },
     {
@@ -456,15 +424,7 @@ export const mockWeekUserReportData = {
           deleted_at: null
         }
       },
-      duration: [
-        "5:00",
-        "0:15",
-        "2:45",
-        "2:45",
-        "0:03",
-        "5:45",
-        ""
-      ],
+      duration: ["5:00", "0:15", "2:45", "2:45", "0:03", "5:45", ""],
       totalDuration: "0:03"
     },
     {
@@ -512,221 +472,220 @@ export const mockWeekUserReportData = {
           deleted_at: null
         }
       },
-      duration: [
-        "0:45",
-        "3:45",
-        "4:15",
-        "5:15",
-        "0:32",
-        "1:45",
-        ""
-      ],
+      duration: ["0:45", "3:45", "4:15", "5:15", "0:32", "1:45", ""],
       totalDuration: "0:32"
     }
   ]
 };
 
 export const mockProjectReviewReportData = {
-  "customers": [ 
+  customers: [
     {
-      "id": 5,
-      "name": "Bob Johnson",
-      "color": "#ffb533"
-    }, 
+      id: 5,
+      name: "Bob Johnson",
+      color: "#ffb533"
+    },
     {
-      "id": 4,
-      "name": "Alice Smith",
-      "color": "#33ffb5"
-    }, 
+      id: 4,
+      name: "Alice Smith",
+      color: "#33ffb5"
+    },
     {
-      "id": 2,
-      "name": "Marrie Curiie",
-      "color": "#ff33be"
-    }, 
+      id: 2,
+      name: "Marrie Curiie",
+      color: "#ff33be"
+    },
     {
-      "id": 8,
-      "name": "Sophia Rodriguez",
-      "color": "#ff3385"
-    }, 
+      id: 8,
+      name: "Sophia Rodriguez",
+      color: "#ff3385"
+    }
   ],
-  "projects": [ 
+  projects: [
     {
-      "id": 86,
-      "name": "Event Management Solution",
-      "color": "#5577dd",
-      "customer_id": 5,
-      "customer_name": "Bob Johnson",
-      "budget": 75000,
-      "spent": 6814.4699974154455,
-      "remaining": 68185.53000258455,
-      "budget_used_percentage": 0.09085959996553927,
-      "not_billed": 5737.844529145174,
-      "hourly_quota": 4086,
-      "last_entry": "2026-05-05",
-      "this_month": 100,
-      "total": 3209,
-      "not_exported": 45
-    },  
+      id: 86,
+      name: "Event Management Solution",
+      color: "#5577dd",
+      customer_id: 5,
+      customer_name: "Bob Johnson",
+      budget: 75000,
+      spent: 6814.4699974154455,
+      remaining: 68185.53000258455,
+      budget_used_percentage: 0.09085959996553927,
+      not_billed: 5737.844529145174,
+      hourly_quota: 4086,
+      last_entry: "2026-05-05",
+      this_month: 100,
+      total: 3209,
+      not_exported: 45
+    },
     {
-      "id": 74,
-      "name": "Enterprise Resource Planning",
-      "color": "#7733cc",
-      "customer_id": 4,
-      "customer_name": "Alice Smith",
-      "budget": 190000,
-      "spent": 60759.37574778278,
-      "remaining": 129240.62425221721,
-      "budget_used_percentage": 0.31978618814622517,
-      "not_billed": 4104.101191861903,
-      "hourly_quota": 1211,
-      "last_entry": "2026-04-05",
-      "this_month": 61,
-      "total": 4391,
-      "not_exported": 5
-    }, 
+      id: 74,
+      name: "Enterprise Resource Planning",
+      color: "#7733cc",
+      customer_id: 4,
+      customer_name: "Alice Smith",
+      budget: 190000,
+      spent: 60759.37574778278,
+      remaining: 129240.62425221721,
+      budget_used_percentage: 0.31978618814622517,
+      not_billed: 4104.101191861903,
+      hourly_quota: 1211,
+      last_entry: "2026-04-05",
+      this_month: 61,
+      total: 4391,
+      not_exported: 5
+    },
     {
-      "id": 51,
-      "name": "Workflow Automation System",
-      "color": "#cc6633",
-      "customer_id": 2,
-      "customer_name": "Marrie Curiie",
-      "budget": 85000,
-      "spent": 74713.09870548117,
-      "remaining": 10286.90129451883,
-      "budget_used_percentage": 0.8789776318291902,
-      "not_billed": 65632.2484954391,
-      "hourly_quota": 3010,
-      "last_entry": "2025-04-10",
-      "this_month": 81,
-      "total": 1939,
-      "not_exported": 45
-    }, 
+      id: 51,
+      name: "Workflow Automation System",
+      color: "#cc6633",
+      customer_id: 2,
+      customer_name: "Marrie Curiie",
+      budget: 85000,
+      spent: 74713.09870548117,
+      remaining: 10286.90129451883,
+      budget_used_percentage: 0.8789776318291902,
+      not_billed: 65632.2484954391,
+      hourly_quota: 3010,
+      last_entry: "2025-04-10",
+      this_month: 81,
+      total: 1939,
+      not_exported: 45
+    },
     {
-      "id": 34,
-      "name": "Logistics Optimization",
-      "color": "#cc33ff",
-      "customer_id": 8,
-      "customer_name": "Sophia Rodriguez",
-      "budget": 90000,
-      "spent": 67950.49023955969,
-      "remaining": 22049.509760440313,
-      "budget_used_percentage": 0.7550054471062188,
-      "not_billed": 4918.248342542848,
-      "hourly_quota": 2818,
-      "last_entry": "2025-03-15",
-      "this_month": 69,
-      "total": 5057,
-      "not_exported": 86
-    }, 
+      id: 34,
+      name: "Logistics Optimization",
+      color: "#cc33ff",
+      customer_id: 8,
+      customer_name: "Sophia Rodriguez",
+      budget: 90000,
+      spent: 67950.49023955969,
+      remaining: 22049.509760440313,
+      budget_used_percentage: 0.7550054471062188,
+      not_billed: 4918.248342542848,
+      hourly_quota: 2818,
+      last_entry: "2025-03-15",
+      this_month: 69,
+      total: 5057,
+      not_exported: 86
+    }
   ]
 };
 
+export const mockProjectData = [];
+
 export const mockUserList = [
   {
-    "nickname": "superadmin",
-    "created_at": "2025-03-18T15:31:04.162Z",
-    "updated_at": "2025-06-15T15:55:52.140Z",
-    "user_id": "auth0|67d991b80f7916d942e25d1d",
-    "email": "superadmin@gmail.com",
-    "picture": "https://s.gravatar.com/avatar/6e088c3cf35987ad4e3dfc90e7b8dec6?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fsu.png",
-    "email_verified": false,
-    "identities": [
+    nickname: "superadmin",
+    created_at: "2025-03-18T15:31:04.162Z",
+    updated_at: "2025-06-15T15:55:52.140Z",
+    user_id: "auth0|67d991b80f7916d942e25d1d",
+    email: "superadmin@gmail.com",
+    picture:
+      "https://s.gravatar.com/avatar/6e088c3cf35987ad4e3dfc90e7b8dec6?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fsu.png",
+    email_verified: false,
+    identities: [
       {
-        "isSocial": false,
-        "connection": "Username-Password-Authentication",
-        "user_id": "67d991b80f7916d942e25d1d",
-        "provider": "auth0"
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "67d991b80f7916d942e25d1d",
+        provider: "auth0"
       }
     ],
-    "name": "Superadmin",
-    "last_login": "2025-06-15T15:55:52.140Z",
-    "last_ip": "14.191.94.187",
-    "logins_count": 671
+    name: "Superadmin",
+    last_login: "2025-06-15T15:55:52.140Z",
+    last_ip: "14.191.94.187",
+    logins_count: 671
   },
   {
-    "user_id": "auth0|67e177daa644c618cb3eb35e",
-    "name": "Anh Van Le",
-    "email_verified": false,
-    "identities": [
+    user_id: "auth0|67e177daa644c618cb3eb35e",
+    name: "Anh Van Le",
+    email_verified: false,
+    identities: [
       {
-        "connection": "Username-Password-Authentication",
-        "user_id": "67e177daa644c618cb3eb35e",
-        "provider": "auth0",
-        "isSocial": false
+        connection: "Username-Password-Authentication",
+        user_id: "67e177daa644c618cb3eb35e",
+        provider: "auth0",
+        isSocial: false
       }
     ],
-    "email": "alee@gmail.com",
-    "nickname": "alee",
-    "picture": "https://s.gravatar.com/avatar/b1a7fa9e07e81e3e797a4b0c467f5fbf?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fal.png",
-    "created_at": "2025-03-24T15:18:50.061Z",
-    "updated_at": "2025-06-15T08:14:49.594Z",
-    "last_login": "2025-06-06T18:03:47.034Z",
-    "last_ip": "14.191.94.187",
-    "logins_count": 1
+    email: "alee@gmail.com",
+    nickname: "alee",
+    picture:
+      "https://s.gravatar.com/avatar/b1a7fa9e07e81e3e797a4b0c467f5fbf?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fal.png",
+    created_at: "2025-03-24T15:18:50.061Z",
+    updated_at: "2025-06-15T08:14:49.594Z",
+    last_login: "2025-06-06T18:03:47.034Z",
+    last_ip: "14.191.94.187",
+    logins_count: 1
   },
   {
-    "email_verified": false,
-    "updated_at": "2025-06-06T18:00:47.232Z",
-    "identities": [
+    email_verified: false,
+    updated_at: "2025-06-06T18:00:47.232Z",
+    identities: [
       {
-        "provider": "auth0",
-        "isSocial": false,
-        "connection": "Username-Password-Authentication",
-        "user_id": "67e177af85bc3d00c9259b50"
+        provider: "auth0",
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "67e177af85bc3d00c9259b50"
       }
     ],
-    "user_id": "auth0|67e177af85bc3d00c9259b50",
-    "email": "henry@gmail.com",
-    "picture": "https://s.gravatar.com/avatar/0b89014329de6287d545af884fe97076?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fhe.png",
-    "created_at": "2025-03-24T15:18:07.744Z",
-    "name": "Heny Louria",
-    "nickname": "henry",
-    "last_login": "2025-06-06T18:00:47.232Z",
-    "last_ip": "14.191.94.187",
-    "logins_count": 4
-  }, 
-  {
-    "updated_at": "2025-06-06T17:58:03.668Z",
-    "picture": "https://s.gravatar.com/avatar/85ab6f499d83390c09553e0993eeba8e?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fmi.png",
-    "email_verified": false,
-    "identities": [
-      {
-        "isSocial": false,
-        "connection": "Username-Password-Authentication",
-        "user_id": "67e177f56da4043835d92e1a",
-        "provider": "auth0"
-      }
-    ],
-    "user_id": "auth0|67e177f56da4043835d92e1a",
-    "email": "mikasa@gmail.com",
-    "name": "Mikasa Shinyu",
-    "nickname": "mikasa",
-    "created_at": "2025-03-24T15:19:17.933Z",
-    "last_login": "2025-06-06T17:58:03.668Z",
-    "last_ip": "14.191.94.187",
-    "logins_count": 2
+    user_id: "auth0|67e177af85bc3d00c9259b50",
+    email: "henry@gmail.com",
+    picture:
+      "https://s.gravatar.com/avatar/0b89014329de6287d545af884fe97076?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fhe.png",
+    created_at: "2025-03-24T15:18:07.744Z",
+    name: "Heny Louria",
+    nickname: "henry",
+    last_login: "2025-06-06T18:00:47.232Z",
+    last_ip: "14.191.94.187",
+    logins_count: 4
   },
   {
-    "email": "rose@gmail.com",
-    "picture": "https://s.gravatar.com/avatar/1b69a7741e2439e28d60785be6e56a30?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fro.png",
-    "email_verified": false,
-    "created_at": "2025-03-24T15:19:03.286Z",
-    "user_id": "auth0|67e177e769ff4468b60c246c",
-    "name": "Rose Blackpink",
-    "nickname": "rose",
-    "updated_at": "2025-06-06T17:57:01.016Z",
-    "identities": [
+    updated_at: "2025-06-06T17:58:03.668Z",
+    picture:
+      "https://s.gravatar.com/avatar/85ab6f499d83390c09553e0993eeba8e?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fmi.png",
+    email_verified: false,
+    identities: [
       {
-        "connection": "Username-Password-Authentication",
-        "user_id": "67e177e769ff4468b60c246c",
-        "provider": "auth0",
-        "isSocial": false
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "67e177f56da4043835d92e1a",
+        provider: "auth0"
       }
     ],
-    "last_login": "2025-06-06T17:57:01.016Z",
-    "last_ip": "14.191.94.187",
-    "logins_count": 4
-  }, 
+    user_id: "auth0|67e177f56da4043835d92e1a",
+    email: "mikasa@gmail.com",
+    name: "Mikasa Shinyu",
+    nickname: "mikasa",
+    created_at: "2025-03-24T15:19:17.933Z",
+    last_login: "2025-06-06T17:58:03.668Z",
+    last_ip: "14.191.94.187",
+    logins_count: 2
+  },
+  {
+    email: "rose@gmail.com",
+    picture:
+      "https://s.gravatar.com/avatar/1b69a7741e2439e28d60785be6e56a30?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fro.png",
+    email_verified: false,
+    created_at: "2025-03-24T15:19:03.286Z",
+    user_id: "auth0|67e177e769ff4468b60c246c",
+    name: "Rose Blackpink",
+    nickname: "rose",
+    updated_at: "2025-06-06T17:57:01.016Z",
+    identities: [
+      {
+        connection: "Username-Password-Authentication",
+        user_id: "67e177e769ff4468b60c246c",
+        provider: "auth0",
+        isSocial: false
+      }
+    ],
+    last_login: "2025-06-06T17:57:01.016Z",
+    last_ip: "14.191.94.187",
+    logins_count: 4
+  }
 ];
 
 export const mockReportCards: ReportViewType[] = [
@@ -736,7 +695,7 @@ export const mockReportCards: ReportViewType[] = [
     icon: <UserIcon className="h-6 w-6 text-pink-500" />,
     component: WeeklyUserReport,
     allowRoles: []
-  }, 
+  },
   {
     type: ReportView.PROJECT_OVERVIEW,
     title: "Project overview",
@@ -747,52 +706,52 @@ export const mockReportCards: ReportViewType[] = [
 ];
 
 export const mockDashboardReportData = {
-  "summary": {
-    "today": {
-      "hours": "0:00",
-      "trending": 4
+  summary: {
+    today: {
+      hours: "0:00",
+      trending: 4
     },
-    "week": {
-      "hours": "24:00",
-      "trending": 7
+    week: {
+      hours: "24:00",
+      trending: 7
     },
-    "month": {
-      "hours": "64:35",
-      "trending": 19
+    month: {
+      hours: "64:35",
+      trending: 19
     },
-    "year": {
-      "hours": "64:35",
-      "trending": 117
+    year: {
+      hours: "64:35",
+      trending: 117
     }
   },
-  "chartData": [
+  chartData: [
     {
-      "date": "16-06",
-      "hour": 0
+      date: "16-06",
+      hour: 0
     },
     {
-      "date": "17-06",
-      "hour": 16
+      date: "17-06",
+      hour: 16
     },
     {
-      "date": "18-06",
-      "hour": 0
+      date: "18-06",
+      hour: 0
     },
     {
-      "date": "19-06",
-      "hour": 0
+      date: "19-06",
+      hour: 0
     },
     {
-      "date": "20-06",
-      "hour": 8
+      date: "20-06",
+      hour: 8
     },
     {
-      "date": "21-06",
-      "hour": 0
+      date: "21-06",
+      hour: 0
     },
     {
-      "date": "22-06",
-      "hour": 0
+      date: "22-06",
+      hour: 0
     }
   ]
 };

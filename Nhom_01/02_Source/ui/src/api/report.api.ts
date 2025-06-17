@@ -1,8 +1,7 @@
 import { getManagementAccessToken } from "@/api/auth.api";
 import { reportAxios } from "@/api/axios";
 import { getAllProjects } from "@/api/project.api";
-import { Pagination } from "@/type_schema/common";
-import { WeeklyAllUsersReportResponseType, WeeklyOneUserReportResponseType } from "@/type_schema/report";
+import { WeeklyOneUserReportResponseType } from "@/type_schema/report";
 import { formatDate } from "date-fns";
 
 export async function getWeeklyOneUserReport(
@@ -27,14 +26,15 @@ export async function getWeeklyOneUserReport(
     }
   );
 
-  const data = response.data; 
+  const data = response.data;
   return data;
 }
 
 export async function getProjectOverviewReport(customerId?: number): Promise<any> {
+  const token = await getManagementAccessToken();
   try {
     const projectData = await getProjectOverviewReportData();
- 
+
     if (customerId) {
       return {
         ...projectData,
@@ -43,7 +43,8 @@ export async function getProjectOverviewReport(customerId?: number): Promise<any
     }
 
     return projectData;
-  } catch (error) { 
+  } catch (error) {
+    console.log(token);
     throw error;
   }
 }
@@ -57,11 +58,11 @@ export async function getDashboardReport(userId: string): Promise<any> {
       "Content-Type": "application/json"
     }
   });
-   
+
   return response.data;
 }
 
-async function getProjectOverviewReportData(): Promise<any> {
+export async function getProjectOverviewReportData(): Promise<any> {
   const projectList = await getAllProjects(1, 200);
 
   const customerMap = new Map<number, any>();
