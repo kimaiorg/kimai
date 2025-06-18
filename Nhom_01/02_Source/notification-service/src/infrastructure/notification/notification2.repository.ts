@@ -1,7 +1,7 @@
 import { Prisma2Client } from '@/libs/database/prisma2.service';
 import { Injectable } from '@nestjs/common';
 import { INotificationRepository } from '@/domain/notification/notification.repository.interface';
-import { Notification } from '@prisma2/client';
+import { Notification } from '@prisma/client';
 import { Base2Repository } from '@/libs/database/repositories/base2.repository';
 
 @Injectable()
