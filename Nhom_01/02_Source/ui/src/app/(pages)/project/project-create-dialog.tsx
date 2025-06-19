@@ -61,9 +61,6 @@ export function ProjectCreateDialog({
   });
 
   async function handleSubmit(values: CreateProjectValidation) {
-    if (!selectedTeams.length) {
-      return;
-    }
     if (loading) return;
     setLoading(true);
     try {

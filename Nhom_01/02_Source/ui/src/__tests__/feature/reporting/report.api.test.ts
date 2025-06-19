@@ -1,4 +1,4 @@
-import { mockApiToken } from "@/__tests__/feature/invoice/mockdata";
+import { mockApiToken } from "@/__tests__/feature/reporting/mockdata";
 import {
   mockDashboardReportData,
   mockProjectData,
@@ -25,11 +25,10 @@ jest.mock("@/api/project.api", () => ({
   getAllProjects: jest.fn()
 }));
 
-const mockToken = mockApiToken;
 describe("Reporting API", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockToken);
+    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockApiToken);
   });
 
   it("should return weekly one user report", async () => {
@@ -41,7 +40,7 @@ describe("Reporting API", () => {
     const mockResponse = mockWeekUserReportData;
     (reportAxios.get as jest.Mock).mockResolvedValue({ data: mockResponse });
     const result = await getWeeklyOneUserReport(mockRequest.userId, mockRequest.fromDate, mockRequest.toDate);
-    console.log(result);
+
     expectAny(getManagementAccessToken).toHaveBeenCalled();
 
     expectAny(result).not.toBeNull();

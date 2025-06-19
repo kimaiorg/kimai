@@ -70,7 +70,7 @@ export type CreateProjectRequestDTO = {
   start_date: string;
   end_date: string;
   budget: number;
-  teams: number[];
+  teams?: number[];
   customer: number;
 };
 
@@ -83,6 +83,6 @@ export type UpdateProjectRequestDTO = {
   start_date: string;
   end_date: string;
   budget: number;
-  teams: number[];
+  teams?: number[];
   customer_id: number;
 };

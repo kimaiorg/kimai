@@ -28,10 +28,10 @@ function ProjectOverviewReport() {
   useEffect(() => {
     const fetchReportData = async () => {
       setIsLoading(true);
-      try { 
+      try {
         const customerId = selectedCustomer === "all" ? undefined : parseInt(selectedCustomer);
         const data = await getProjectOverviewReport(customerId);
-         
+
         const projectsWithCustomers = (data.projects || []).map((project: ProjectReportData) => {
           if (!project.customer_name && project.customer_id) {
             const customer = (data.customers || []).find((c: CustomerReportData) => c.id === project.customer_id);

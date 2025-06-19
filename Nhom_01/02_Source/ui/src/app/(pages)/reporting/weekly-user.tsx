@@ -29,7 +29,7 @@ function WeeklyUserReport() {
   const userRolePermissions = useAppSelector((state) => state.userState.privilege) as RolePermissionType;
   const allowRoles = [Role.SUPER_ADMIN, Role.ADMIN, Role.TEAM_LEAD];
   const [currentWeek, setCurrentWeek] = useState<WeekDayType[]>([]);
-   
+
   const [selectedUser, setSelectedUser] = useState<UserType>(userList.find((u) => u.user_id === user!.sub!)!);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,7 +43,7 @@ function WeeklyUserReport() {
       setIsLoading(true);
       try {
         const response = await getWeeklyOneUserReport(selectedUser.user_id!, selectedWeek!.from, selectedWeek!.to);
-         
+
         for (const entry of response.entries) {
           for (let i = 0; i < 6; i++) {
             if (!entry.duration[i]) {
@@ -72,7 +72,7 @@ function WeeklyUserReport() {
         setIsLoading(false);
       }
     };
-    fetchReportData(); 
+    fetchReportData();
   }, [selectedWeek, selectedUser]);
 
   // Generate week days

@@ -51,7 +51,7 @@ export function ActivityUpdateDialog({
       quota: localStorage.getItem("activity_quota") || "50"
     }
   });
-  async function onSubmit(values: UpdateActivityValidation) { 
+  async function onSubmit(values: UpdateActivityValidation) {
     if (loading) return;
     setLoading(true);
     try {

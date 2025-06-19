@@ -84,7 +84,7 @@ export async function addNewUser(request: CreateUserRequestDTO): Promise<number>
   return 201;
 }
 
-export async function updateUser(request: UpdateUserRequestDTO, uId: string, oldRoleId: string): Promise<number> { 
+export async function updateUser(request: UpdateUserRequestDTO, uId: string, oldRoleId: string): Promise<number> {
   const token = await createAccessToken(process.env.AUTH0_IAM_API_AUDIENCE!);
 
   const BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;

@@ -69,9 +69,6 @@ export function ProjectUpdateDialog({
   });
 
   async function handleSubmit(values: UpdateProjectValidation) {
-    if (!selectedTeams.length) {
-      return;
-    }
     if (loading) return;
     setLoading(true);
     try {

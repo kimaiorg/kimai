@@ -207,10 +207,10 @@ function CustomerPage() {
                             Edit
                           </div>
                         </CustomerUpdateDialog>
-                        <div className="text-red-500 items-center flex gap-2 cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
+                        {/* <div className="text-red-500 items-center flex gap-2 cursor-pointer py-1 pl-2 pr-4 hover:bg-gray-100 dark:hover:bg-slate-700 text-md">
                           <Trash2 size={14} />
                           Delete
-                        </div>
+                        </div> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

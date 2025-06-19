@@ -60,7 +60,7 @@ export default function TeamUpdateDialog({
         ...values,
         lead: teamLead!,
         users: selectedUsers.map((user) => user.user_id)
-      }; 
+      };
       const response = await updateTeam(payload, targetTeam.id);
       if (response == 200 || response == 201 || response == 204) {
         toast("Success", {

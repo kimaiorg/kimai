@@ -43,7 +43,7 @@ export const AuthenticatedRoute = (Component: any, roles: Role[]) => {
       );
     }
 
-    if (user) { 
+    if (user) {
       if (hasRole(userRolePermissions.role, roles)) {
         return <Component {...props} />;
       }

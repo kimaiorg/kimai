@@ -19,7 +19,7 @@ export async function getAllTimesheets(
   sortOrder?: string
 ): Promise<Pagination<TimesheetResponseType>> {
   const token = await getManagementAccessToken();
-   
+
   const params = new URLSearchParams();
   if (page) params.append("page", page.toString());
   if (limit) params.append("limit", limit.toString());
@@ -100,7 +100,7 @@ export async function addNewTimesheetRecord(request: CreateTimesheetRequestDTO):
         Authorization: `Bearer ${token}`
       }
     });
-     
+
     return response.data;
   } catch (error: any) {
     return null;

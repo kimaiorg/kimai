@@ -64,7 +64,7 @@ export function TaskUpdateDialog({
         quantity: Number(quantity),
         billable: billable == "true",
         ...rest
-      }; 
+      };
       const response = await updateTask(payload, targetTask.id);
 
       if (response == 200 || response == 201 || response == 204) {

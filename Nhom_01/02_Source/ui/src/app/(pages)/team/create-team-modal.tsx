@@ -53,7 +53,7 @@ export function CreateTeamModal({ children, refetchTeams }: { children: React.Re
         lead: teamLead!,
         users: selectedUsers.map((user) => user.user_id)
       };
-       
+
       const response = await addNewTeam(payload);
       if (response == 201 || response == 200 || response == 204) {
         toast("Success", {
