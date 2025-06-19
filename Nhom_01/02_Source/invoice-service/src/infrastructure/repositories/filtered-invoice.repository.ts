@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
-import { FilterInvoiceDto } from '@/api/invoice/dto';
+import { FilterInvoiceDto } from '@/api/invoice/dto/filter-invoice.dto';
 import * as crypto from 'crypto';
 
 type PrismaServiceWithFilteredInvoice = PrismaService & {
@@ -10,7 +10,7 @@ type PrismaServiceWithFilteredInvoice = PrismaService & {
 
 @Injectable()
 export class FilteredInvoiceRepository {
-  constructor(private readonly prisma: PrismaServiceWithFilteredInvoice) {
+  constructor(private readonly prisma: PrismaService) {
   }
 
   /**
@@ -47,13 +47,13 @@ export class FilteredInvoiceRepository {
     expiresAt.setHours(expiresAt.getHours() + 24);
     
     // Check if a filtered invoice with this hash already exists
-    const existingFilter = await this.prisma.filteredInvoice.findUnique({
+    const existingFilter = await (this.prisma as any).filteredInvoice.findUnique({
       where: { filterHash },
     });
     
     if (existingFilter) {
       // Update the existing filter
-      return this.prisma.filteredInvoice.update({
+      return (this.prisma as any).filteredInvoice.update({
         where: { id: existingFilter.id },
         data: {
           customerId: filterDto.customer_id,
@@ -74,7 +74,7 @@ export class FilteredInvoiceRepository {
       });
     } else {
       // Create a new filtered invoice
-      return this.prisma.filteredInvoice.create({
+      return (this.prisma as any).filteredInvoice.create({
         data: {
           filterHash,
           customerId: filterDto.customer_id,
@@ -100,7 +100,7 @@ export class FilteredInvoiceRepository {
    * Find a filtered invoice by ID
    */
   async findById(id: number): Promise<any> {
-    return this.prisma.filteredInvoice.findUnique({
+    return (this.prisma as any).filteredInvoice.findUnique({
       where: { id },
     });
   }
@@ -109,7 +109,7 @@ export class FilteredInvoiceRepository {
    * Find filtered invoices by customer ID
    */
   async findByCustomerId(customerId: number): Promise<any[]> {
-    return this.prisma.filteredInvoice.findMany({
+    return (this.prisma as any).filteredInvoice.findMany({
       where: { 
         customerId,
         isSaved: false,
@@ -123,7 +123,7 @@ export class FilteredInvoiceRepository {
    * Mark a filtered invoice as saved
    */
   async markAsSaved(id: number): Promise<any> {
-    return this.prisma.filteredInvoice.update({
+    return (this.prisma as any).filteredInvoice.update({
       where: { id },
       data: { isSaved: true },
     });
@@ -133,7 +133,7 @@ export class FilteredInvoiceRepository {
    * Delete expired filtered invoices
    */
   async deleteExpired(): Promise<number> {
-    const result = await this.prisma.filteredInvoice.deleteMany({
+    const result = await (this.prisma as any).filteredInvoice.deleteMany({
       where: {
         expiresAt: { lt: new Date() },
         isSaved: false,
