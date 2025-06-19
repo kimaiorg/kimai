@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getUserRolePermissions } from "@/lib/api/auth";
-import { expectAny } from "../utils/testUtils";
+import { expectAny } from "../../utils/testUtils";
 
 // Mock axios
 jest.mock("axios");

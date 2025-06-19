@@ -3,10 +3,10 @@ import { expectAny } from "@/__tests__/utils/testUtils";
 import { getManagementAccessToken } from "@/api/auth.api";
 import { invoiceAxios } from "@/api/axios";
 import { filterInvoices, getAllInvoiceHistories, saveInvoice, updateInvoiceStatus } from "@/api/invoice.api";
+
 jest.mock("@/api/axios");
 jest.mock("@/api/auth.api");
 
-const mockToken = mockApiToken;
 describe("Invoice API", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,14 +30,14 @@ describe("Invoice API", () => {
         ]
       }
     };
-    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockToken);
+    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockApiToken);
     (invoiceAxios.post as jest.Mock).mockResolvedValue({ data: mockResponse });
 
     const result = await filterInvoices(mockRequest);
 
     expectAny(getManagementAccessToken).toHaveBeenCalled();
     expectAny(invoiceAxios.post).toHaveBeenCalledWith("/api/v1/invoices/filter", mockRequest, {
-      headers: { Authorization: `Bearer ${mockToken}` }
+      headers: { Authorization: `Bearer ${mockApiToken}` }
     });
     expectAny(result).not.toBeNull();
     expectAny(result.success).toEqual(mockResponse.success);
@@ -52,21 +52,21 @@ describe("Invoice API", () => {
       userId: "auth0|67d991b80f7916d942e25d1d"
     };
     const mockStatus = 201;
-    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockToken);
+    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockApiToken);
     (invoiceAxios.post as jest.Mock).mockResolvedValue({ status: mockStatus });
 
     const result = await saveInvoice(mockInvoice);
 
     expectAny(getManagementAccessToken).toHaveBeenCalled();
     expectAny(invoiceAxios.post).toHaveBeenCalledWith("/api/v1/invoices/generate", mockInvoice, {
-      headers: { Authorization: `Bearer ${mockToken}` }
+      headers: { Authorization: `Bearer ${mockApiToken}` }
     });
     expectAny(result).toBe(mockStatus);
   });
 
   it("should get all invoice histories", async () => {
     const mockResponse = { data: { data: { items: [] } } };
-    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockToken);
+    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockApiToken);
     (invoiceAxios.get as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await getAllInvoiceHistories();
@@ -74,7 +74,7 @@ describe("Invoice API", () => {
     expectAny(getManagementAccessToken).toHaveBeenCalled();
     expectAny(invoiceAxios.get).toHaveBeenCalledWith("/api/v1/invoices?", {
       headers: {
-        Authorization: `Bearer ${mockToken}`
+        Authorization: `Bearer ${mockApiToken}`
       }
     });
     expectAny(result).toEqual(mockResponse.data.data);
@@ -84,14 +84,14 @@ describe("Invoice API", () => {
     const mockRequest = { status: "PAID", comment: "" };
     const mockInvoiceId = "123";
     const mockStatus = 200;
-    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockToken);
+    (getManagementAccessToken as jest.Mock).mockResolvedValue(mockApiToken);
     (invoiceAxios.put as jest.Mock).mockResolvedValue({ status: mockStatus });
 
     const result = await updateInvoiceStatus(mockRequest, mockInvoiceId);
 
     expectAny(getManagementAccessToken).toHaveBeenCalled();
     expectAny(invoiceAxios.put).toHaveBeenCalledWith(`/api/v1/invoices/${mockInvoiceId}`, mockRequest, {
-      headers: { Authorization: `Bearer ${mockToken}` }
+      headers: { Authorization: `Bearer ${mockApiToken}` }
     });
     expectAny(result).toBe(mockStatus);
   });

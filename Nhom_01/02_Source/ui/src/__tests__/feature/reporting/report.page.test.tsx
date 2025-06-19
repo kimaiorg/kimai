@@ -66,6 +66,7 @@ jest.mock("xlsx", () => ({
     book_append_sheet: jest.fn()
   }
 }));
+
 function createMockPointerEvent(type: string, props: PointerEventInit = {}): PointerEvent {
   const event = new Event(type, props) as PointerEvent;
   Object.assign(event, {

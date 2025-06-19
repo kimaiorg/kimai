@@ -12,6 +12,7 @@ import { Locale, locales } from "@/lib/i18n";
 import { useAppDispatch, useAppSelector } from "@/lib/redux-toolkit/hooks";
 import { updateUserList } from "@/lib/redux-toolkit/slices/list-user-slice";
 import { updatePrivilege } from "@/lib/redux-toolkit/slices/user-slice";
+import { Role } from "@/type_schema/role";
 import { UserType } from "@/type_schema/user.schema";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { usePathname, useRouter } from "next/navigation";
@@ -50,13 +51,13 @@ export default function LocaleLayout({
 
   // Handle authentication and permissions
   useEffect(() => {
-    const onboarding = localStorage.getItem("onboarding");
-    if (!onboarding) {
-      setLoadingPage("onboarding");
-      return;
-    } else {
-      setLoadingPage("done");
-    }
+    // const onboarding = localStorage.getItem("onboarding");
+    // if (!onboarding) {
+    //   setLoadingPage("onboarding");
+    //   return;
+    // } else {
+    //   setLoadingPage("done");
+    // }
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("backend-at-token");
     if (user) {
@@ -82,6 +83,13 @@ export default function LocaleLayout({
             await fetchUsers();
           }
           setIsFetchingRole(false);
+          const onboarding = localStorage.getItem("onboarding");
+          if (!onboarding && rolePermissions.role.name.toLowerCase() === Role.SUPER_ADMIN) {
+            setLoadingPage("onboarding");
+            return;
+          } else {
+            setLoadingPage("done");
+          }
         } catch (error) {
           console.error(error);
           setIsFetchingRole(false);
