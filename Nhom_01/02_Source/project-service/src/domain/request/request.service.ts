@@ -49,6 +49,13 @@ export class RequestService {
         },
       });
 
+      await this.prisma.task.update({
+        where: { id: target?.id },
+        data: {
+          request_status: RequestStatus.PROCESSING,
+        },
+      });
+
       await this.rabbitmqService.emit(
         { cmd: 'create_notification' },
         {
