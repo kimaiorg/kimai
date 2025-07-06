@@ -17,18 +17,21 @@ import * as redisStore from 'cache-manager-ioredis';
     PrismaModule,
     ApiModule,
     DomainModule,
-    CacheModule.registerAsync({
-      useFactory: () => ({
-        store: redisStore,
-        redisOptions: {
-          cluster: true,
-          nodes: [
-            { host: 'redis-node1', port: 6379 },
-            { host: 'redis-node2', port: 6379 },
-          ],
-        },
-      }),
-    }),
+   CacheModule.registerAsync({
+  useFactory: () => ({
+    store: redisStore,
+    clusterConfig: {
+      nodes: [
+        { host: 'redis-node1', port: 6379 },
+        { host: 'redis-node2', port: 6379 },
+      ],
+      redisOptions: {
+        scaleReads: 'all', // load balancing reads
+      },
+    },
+  }),
+  isGlobal: true,
+}),
   ],
   controllers: [],
   providers: [
