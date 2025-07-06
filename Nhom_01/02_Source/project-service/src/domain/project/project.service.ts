@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ProjectRepository } from '@/infrastructure/project/project.repository';
 import { Project } from '@prisma/client';
 import { CreateProjectDto } from '@/api/project/dto/create-project.dto';
@@ -7,13 +7,20 @@ import { PaginationResponse } from '@/libs/response/pagination';
 import { ListProjectDto } from '@/api/project/dto/list-project.dto';
 import { UpdateProjectDto } from '@/api/project/dto/update-project.dto';
 import { buildListQuery } from './builder';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProjectService {
-  constructor(private readonly projectRepository: ProjectRepository) {}
+  constructor(
+    private readonly projectRepository: ProjectRepository,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async createProject(dto: CreateProjectDto): Promise<ProjectEntity | null> {
-    return await this.projectRepository.createProject(dto);
+    const project = await this.projectRepository.createProject(dto);
+    await this.cacheManager.set(`post:${project.id}`, project, 60);
+    return project;
   }
 
   async getProject(id: number): Promise<Project | null> {
@@ -65,12 +72,31 @@ export class ProjectService {
     id: number,
     dto: UpdateProjectDto,
   ): Promise<Project | null> {
-    return await this.projectRepository.update({
+    const project = await this.projectRepository.update({
       where: {
         id: id,
         deleted_at: null,
       },
       data: dto,
     });
+
+    await this.cacheManager.set(`post:${id}`, project, 60);
+
+    return project;
+  }
+
+  async deleteProject(id: number): Promise<boolean | null> {
+    const project = await this.projectRepository.delete(id);
+
+    if (project) {
+      await this.cacheManager.del(`post:${id}`);
+    }
+
+    return project;
+  }
+
+  getFilePath(userId: string, fileName: string): string {
+    const shard = userId.slice(0, 2);
+    return `/data/files/${shard}/${userId}/${fileName}`;
   }
 }

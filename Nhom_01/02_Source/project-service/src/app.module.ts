@@ -7,6 +7,8 @@ import { InfrastructureModule } from '@/infrastructure/infrastructure.module';
 import { AuthMiddleware } from '@/libs/middlewares';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from '@/libs/guards/permission.guard';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-ioredis';
 
 @Module({
   imports: [
@@ -15,6 +17,18 @@ import { PermissionsGuard } from '@/libs/guards/permission.guard';
     PrismaModule,
     ApiModule,
     DomainModule,
+    CacheModule.registerAsync({
+      useFactory: () => ({
+        store: redisStore,
+        redisOptions: {
+          cluster: true,
+          nodes: [
+            { host: 'redis-node1', port: 6379 },
+            { host: 'redis-node2', port: 6379 },
+          ],
+        },
+      }),
+    }),
   ],
   controllers: [],
   providers: [
