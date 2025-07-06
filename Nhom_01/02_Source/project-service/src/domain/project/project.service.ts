@@ -103,15 +103,14 @@ export class ProjectService {
     return `/data/files/${shard}/${userId}/${fileName}`;
   }
 
-  function getShardedPath(userId: string, fileName: string): string {
-  const shard = userId.slice(0, 2); // Lấy 2 ký tự đầu: ví dụ "ab"
-  const dirPath = join(__dirname, '..', 'uploads', shard, userId);
+  getShardedPath(userId: string, fileName: string): string {
+    const shard = userId.slice(0, 2);
+    const dirPath = join(__dirname, '..', 'uploads', shard, userId);
 
-  // Tạo thư mục nếu chưa tồn tại
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+  
+    return join(dirPath, fileName);
   }
-
-  return join(dirPath, fileName);
-}
 }
