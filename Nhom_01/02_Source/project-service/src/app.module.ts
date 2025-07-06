@@ -18,19 +18,23 @@ import * as redisStore from 'cache-manager-ioredis';
     ApiModule,
     DomainModule,
     CacheModule.registerAsync({
-      useFactory: () => ({
-        store: redisStore,
-        clusterConfig: {
-          nodes: [
-            { host: 'redis-node1', port: 6379 },
-            { host: 'redis-node2', port: 6379 },
-          ],
-          redisOptions: {
-            scaleReads: 'all', // load balancing reads
-          },
-        },
-      }),
       isGlobal: true,
+      useFactory: async () => {
+        const cluster = createCluster([
+          { host: '127.0.0.1', port: 7000 },
+          { host: '127.0.0.1', port: 7001 },
+          { host: '127.0.0.1', port: 7002 },
+        ]);
+
+        cluster.on('connect', () => console.log('Redis Cluster connected!'));
+        cluster.on('error', (err) => console.error('Redis Cluster error', err));
+
+        return {
+          store: redisStore,
+          cluster,
+          ttl: 60, // seconds
+        };
+      },
     }),
   ],
   controllers: [],
