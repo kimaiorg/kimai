@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from '@/libs/guards/permission.guard';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-ioredis';
+import { Cluster } from 'ioredis';
 
 @Module({
   imports: [
@@ -19,8 +20,8 @@ import * as redisStore from 'cache-manager-ioredis';
     DomainModule,
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => {
-        const cluster = createCluster([
+      useFactory: () => {
+        const cluster = new Cluster([
           { host: '127.0.0.1', port: 7000 },
           { host: '127.0.0.1', port: 7001 },
           { host: '127.0.0.1', port: 7002 },
