@@ -9,6 +9,9 @@ import { UpdateProjectDto } from '@/api/project/dto/update-project.dto';
 import { buildListQuery } from './builder';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { join } from 'path';
+import * as fs from 'fs';
+
 
 @Injectable()
 export class ProjectService {
@@ -99,4 +102,16 @@ export class ProjectService {
     const shard = userId.slice(0, 2);
     return `/data/files/${shard}/${userId}/${fileName}`;
   }
+
+  function getShardedPath(userId: string, fileName: string): string {
+  const shard = userId.slice(0, 2); // Lấy 2 ký tự đầu: ví dụ "ab"
+  const dirPath = join(__dirname, '..', 'uploads', shard, userId);
+
+  // Tạo thư mục nếu chưa tồn tại
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
+  return join(dirPath, fileName);
+}
 }
